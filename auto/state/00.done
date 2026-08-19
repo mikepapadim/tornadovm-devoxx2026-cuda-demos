@@ -1,0 +1,1 @@
+2026-08-19: TornadoVM develop pinned at 99549c9862eda8d584e35e99924f9c865501eb3a; make BACKEND=cuda builds; tornado --devices shows RTX 4090; VectorAddInt smoke example passes 10/10 on CUDA.

@@ -1,0 +1,229 @@
+WARNING: Using incubator modules: jdk.incubator.vector
+{
+    "s0": {
+        "TOTAL_BYTE_CODE_GENERATION": "5209228",
+        "TOTAL_TASK_GRAPH_TIME": "126489484",
+        "TOTAL_KERNEL_TIME": "25439",
+        "COPY_IN_TIME": "23837",
+        "TOTAL_DRIVER_COMPILE_TIME": "21748823",
+        "TOTAL_GRAAL_COMPILE_TIME": "37483505",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_CODE_GENERATION_TIME": "2960584",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_COPY_IN_SIZE_BYTES": "2080",
+        "ALLOCATION_BYTES": "3120",
+        "s0.t0": {
+            "BACKEND": "CUDA",
+            "METHOD": "VectorAddInt.vectorAdd",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_COMPILE_GRAAL_TIME": "37483505",
+            "TASK_COMPILE_DRIVER_TIME": "21748823",
+            "TASK_KERNEL_TIME": "25439",
+            "TASK_CODE_GENERATION_TIME": "2960584"
+        }
+    }
+}
+
+Result is correct. Total time: 126489484 (ns)
+{
+    "s0": {
+        "TOTAL_TASK_GRAPH_TIME": "485704",
+        "TOTAL_KERNEL_TIME": "5696",
+        "COPY_IN_TIME": "11647",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_COPY_IN_SIZE_BYTES": "2080",
+        "ALLOCATION_BYTES": "3120",
+        "s0.t0": {
+            "BACKEND": "CUDA",
+            "METHOD": "VectorAddInt.vectorAdd",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "5696"
+        }
+    }
+}
+
+Result is correct. Total time: 485704 (ns)
+{
+    "s0": {
+        "TOTAL_TASK_GRAPH_TIME": "376354",
+        "TOTAL_KERNEL_TIME": "5024",
+        "COPY_IN_TIME": "8189",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_COPY_IN_SIZE_BYTES": "2080",
+        "ALLOCATION_BYTES": "3120",
+        "s0.t0": {
+            "BACKEND": "CUDA",
+            "METHOD": "VectorAddInt.vectorAdd",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "5024"
+        }
+    }
+}
+
+Result is correct. Total time: 376354 (ns)
+{
+    "s0": {
+        "TOTAL_TASK_GRAPH_TIME": "343535",
+        "TOTAL_KERNEL_TIME": "3359",
+        "COPY_IN_TIME": "15901",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_COPY_IN_SIZE_BYTES": "2080",
+        "ALLOCATION_BYTES": "3120",
+        "s0.t0": {
+            "BACKEND": "CUDA",
+            "METHOD": "VectorAddInt.vectorAdd",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "3359"
+        }
+    }
+}
+
+Result is correct. Total time: 343535 (ns)
+{
+    "s0": {
+        "TOTAL_TASK_GRAPH_TIME": "388658",
+        "TOTAL_KERNEL_TIME": "2976",
+        "COPY_IN_TIME": "7869",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_COPY_IN_SIZE_BYTES": "2080",
+        "ALLOCATION_BYTES": "3120",
+        "s0.t0": {
+            "BACKEND": "CUDA",
+            "METHOD": "VectorAddInt.vectorAdd",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "2976"
+        }
+    }
+}
+
+Result is correct. Total time: 388658 (ns)
+{
+    "s0": {
+        "TOTAL_TASK_GRAPH_TIME": "257994",
+        "TOTAL_KERNEL_TIME": "2591",
+        "COPY_IN_TIME": "16189",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_COPY_IN_SIZE_BYTES": "2080",
+        "ALLOCATION_BYTES": "3120",
+        "s0.t0": {
+            "BACKEND": "CUDA",
+            "METHOD": "VectorAddInt.vectorAdd",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "2591"
+        }
+    }
+}
+
+Result is correct. Total time: 257994 (ns)
+{
+    "s0": {
+        "TOTAL_TASK_GRAPH_TIME": "223679",
+        "TOTAL_KERNEL_TIME": "3488",
+        "COPY_IN_TIME": "15774",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_COPY_IN_SIZE_BYTES": "2080",
+        "ALLOCATION_BYTES": "3120",
+        "s0.t0": {
+            "BACKEND": "CUDA",
+            "METHOD": "VectorAddInt.vectorAdd",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "3488"
+        }
+    }
+}
+
+Result is correct. Total time: 223679 (ns)
+{
+    "s0": {
+        "TOTAL_TASK_GRAPH_TIME": "246751",
+        "TOTAL_KERNEL_TIME": "3167",
+        "COPY_IN_TIME": "15870",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_COPY_IN_SIZE_BYTES": "2080",
+        "ALLOCATION_BYTES": "3120",
+        "s0.t0": {
+            "BACKEND": "CUDA",
+            "METHOD": "VectorAddInt.vectorAdd",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "3167"
+        }
+    }
+}
+
+Result is correct. Total time: 246751 (ns)
+{
+    "s0": {
+        "TOTAL_TASK_GRAPH_TIME": "397373",
+        "TOTAL_KERNEL_TIME": "3839",
+        "COPY_IN_TIME": "15966",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_COPY_IN_SIZE_BYTES": "2080",
+        "ALLOCATION_BYTES": "3120",
+        "s0.t0": {
+            "BACKEND": "CUDA",
+            "METHOD": "VectorAddInt.vectorAdd",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "3839"
+        }
+    }
+}
+
+Result is correct. Total time: 397373 (ns)
+{
+    "s0": {
+        "TOTAL_TASK_GRAPH_TIME": "255192",
+        "TOTAL_KERNEL_TIME": "4416",
+        "COPY_IN_TIME": "8253",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_COPY_IN_SIZE_BYTES": "2080",
+        "ALLOCATION_BYTES": "3120",
+        "s0.t0": {
+            "BACKEND": "CUDA",
+            "METHOD": "VectorAddInt.vectorAdd",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "4416"
+        }
+    }
+}
+
+Result is correct. Total time: 255192 (ns)
+
