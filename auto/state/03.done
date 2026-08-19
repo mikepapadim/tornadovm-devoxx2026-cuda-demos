@@ -1,0 +1,1 @@
+03: CUDA runtime API demo (demos/02-cuda-runtime-api/CudaGraphReplay.java, withCUDAGraph capture/replay) — 8/8 replays correct on CUDA, java @arg-file verified, JBang unverified (not installed).

@@ -1,0 +1,74 @@
+{
+    "cudaGraphDemo": {
+        "TOTAL_CODE_GENERATION_TIME": "3089910",
+        "TOTAL_GRAAL_COMPILE_TIME": "42511296",
+        "TOTAL_DRIVER_COMPILE_TIME": "35140657",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "COPY_IN_TIME": "15744",
+        "TOTAL_TASK_GRAPH_TIME": "94935250",
+        "TOTAL_BYTE_CODE_GENERATION": "5231881",
+        "TOTAL_COPY_IN_SIZE_BYTES": "32784",
+        "ALLOCATION_BYTES": "98352",
+        "cudaGraphDemo.axpy": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphReplay.axpy",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_COMPILE_GRAAL_TIME": "42511296",
+            "TASK_CODE_GENERATION_TIME": "3089910",
+            "TASK_COMPILE_DRIVER_TIME": "35140657"
+        }
+    }
+}
+
+replay 0 (x=1.0, y=2.0): correct, result[0]=2.5 expected=2.5
+{
+    "cudaGraphDemo": {
+        "TOTAL_TASK_GRAPH_TIME": "92749",
+    }
+}
+
+replay 1 (x=2.0, y=3.0): correct, result[0]=4.0 expected=4.0
+{
+    "cudaGraphDemo": {
+        "TOTAL_TASK_GRAPH_TIME": "67655",
+    }
+}
+
+replay 2 (x=3.0, y=4.0): correct, result[0]=5.5 expected=5.5
+{
+    "cudaGraphDemo": {
+        "TOTAL_TASK_GRAPH_TIME": "55316",
+    }
+}
+
+replay 3 (x=4.0, y=5.0): correct, result[0]=7.0 expected=7.0
+{
+    "cudaGraphDemo": {
+        "TOTAL_TASK_GRAPH_TIME": "58474",
+    }
+}
+
+replay 4 (x=5.0, y=6.0): correct, result[0]=8.5 expected=8.5
+{
+    "cudaGraphDemo": {
+        "TOTAL_TASK_GRAPH_TIME": "57350",
+    }
+}
+
+replay 5 (x=6.0, y=7.0): correct, result[0]=10.0 expected=10.0
+{
+    "cudaGraphDemo": {
+        "TOTAL_TASK_GRAPH_TIME": "78903",
+    }
+}
+
+replay 6 (x=7.0, y=8.0): correct, result[0]=11.5 expected=11.5
+{
+    "cudaGraphDemo": {
+        "TOTAL_TASK_GRAPH_TIME": "379649",
+    }
+}
+
+replay 7 (x=8.0, y=9.0): correct, result[0]=13.0 expected=13.0
+All replays correct
