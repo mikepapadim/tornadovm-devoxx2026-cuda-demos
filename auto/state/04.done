@@ -1,0 +1,1 @@
+04 done: demos/04-cublas-hybrid/CuBlasSgemvHybrid.java — JIT scale + cuBLAS sgemv + JIT bias in one TaskGraph, 5/5 iterations correct on CUDA, both tornado and java @arg-file paths verified, JBang explicitly unverified. Evidence: results/raw/04-cublas-hybrid/.

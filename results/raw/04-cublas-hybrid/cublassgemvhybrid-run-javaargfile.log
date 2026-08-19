@@ -1,0 +1,16 @@
+iteration 0: correct output[0]=157.0 expected[0]=157.0
+Enable the profiler with: -Dtornado.profiler=True
+  total task-graph time: 0 ns
+iteration 1: correct output[0]=157.0 expected[0]=157.0
+Enable the profiler with: -Dtornado.profiler=True
+  total task-graph time: 0 ns
+iteration 2: correct output[0]=157.0 expected[0]=157.0
+Enable the profiler with: -Dtornado.profiler=True
+  total task-graph time: 0 ns
+iteration 3: correct output[0]=157.0 expected[0]=157.0
+Enable the profiler with: -Dtornado.profiler=True
+  total task-graph time: 0 ns
+iteration 4: correct output[0]=157.0 expected[0]=157.0
+Enable the profiler with: -Dtornado.profiler=True
+  total task-graph time: 0 ns
+All iterations correct

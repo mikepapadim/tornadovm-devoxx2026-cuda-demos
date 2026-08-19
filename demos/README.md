@@ -9,6 +9,7 @@ Each demo directory has its own `README.md` with build/run commands, a
 | [00-hello-gpu](00-hello-gpu/) | `Hello.java` | Smallest TornadoVM program: one `@Parallel` task, one `TaskGraph`. |
 | [01-first-cuda-kernel](01-first-cuda-kernel/) | `VectorAddKernel.java` | Vector add + `--printKernel` to show the actual generated CUDA source. |
 | [02-cuda-runtime-api](02-cuda-runtime-api/) | `CudaGraphReplay.java` | `TornadoExecutionPlan#withCUDAGraph()` — CUDA graph capture/replay from Java, CUDA-only runtime API (not a vendor-library task). |
+| [04-cublas-hybrid](04-cublas-hybrid/) | `CuBlasSgemvHybrid.java` | One `TaskGraph`, three stages: JIT `scale` task → cuBLAS `sgemv` library task → JIT `bias` task, all on shared device buffers. |
 
 `tornado.args` is a `tornado --generate-argfile` output, generated against
 the pinned build in `env/versions.env` and committed for the `java @arg-file`
@@ -18,4 +19,5 @@ if the JDK or TornadoVM build changes.
 All demos were run and captured on the pinned CUDA backend
 (`vendor/tornadovm` @ `99549c9862eda8d584e35e99924f9c865501eb3a`, RTX 4090).
 Raw logs: `results/raw/02-hello-kernel/` (00, 01),
-`results/raw/03-cuda-runtime-api/` (02).
+`results/raw/03-cuda-runtime-api/` (02),
+`results/raw/04-cublas-hybrid/` (04).

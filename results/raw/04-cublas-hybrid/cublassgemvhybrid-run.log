@@ -1,0 +1,206 @@
+{
+    "cublasHybrid": {
+        "TOTAL_BYTE_CODE_GENERATION": "4790504",
+        "TOTAL_CODE_GENERATION_TIME": "3736749",
+        "COPY_IN_TIME": "31453",
+        "TOTAL_KERNEL_TIME": "25327163",
+        "TOTAL_GRAAL_COMPILE_TIME": "47507886",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_DRIVER_COMPILE_TIME": "49259038",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_TASK_GRAPH_TIME": "171519337",
+        "TOTAL_COPY_IN_SIZE_BYTES": "320",
+        "ALLOCATION_BYTES": "368",
+        "cublasHybrid.bias": {
+            "BACKEND": "CUDA",
+            "METHOD": "CuBlasSgemvHybrid.bias",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_CODE_GENERATION_TIME": "1046810",
+            "TASK_KERNEL_TIME": "9216",
+            "TASK_COMPILE_DRIVER_TIME": "18363775",
+            "TASK_COMPILE_GRAAL_TIME": "6910243"
+        }, 
+        "cublasHybrid.sgemv": {
+            "BACKEND": "CUDA",
+            "METHOD": "cublasSgemv",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "25299515"
+        }, 
+        "cublasHybrid.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CuBlasSgemvHybrid.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_CODE_GENERATION_TIME": "2689939",
+            "TASK_KERNEL_TIME": "18432",
+            "TASK_COMPILE_DRIVER_TIME": "30895263",
+            "TASK_COMPILE_GRAAL_TIME": "40597643"
+        }
+    }
+}
+
+iteration 0: correct output[0]=157.0 expected[0]=157.0
+  total task-graph time: 171519337 ns
+{
+    "cublasHybrid": {
+        "COPY_IN_TIME": "16030",
+        "TOTAL_KERNEL_TIME": "61014",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_TASK_GRAPH_TIME": "496022",
+        "TOTAL_COPY_IN_SIZE_BYTES": "320",
+        "ALLOCATION_BYTES": "368",
+        "cublasHybrid.bias": {
+            "BACKEND": "CUDA",
+            "METHOD": "CuBlasSgemvHybrid.bias",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "3776"
+        }, 
+        "cublasHybrid.sgemv": {
+            "BACKEND": "CUDA",
+            "METHOD": "cublasSgemv",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "50422"
+        }, 
+        "cublasHybrid.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CuBlasSgemvHybrid.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "6816"
+        }
+    }
+}
+
+iteration 1: correct output[0]=157.0 expected[0]=157.0
+  total task-graph time: 496022 ns
+{
+    "cublasHybrid": {
+        "COPY_IN_TIME": "11775",
+        "TOTAL_KERNEL_TIME": "38188",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_TASK_GRAPH_TIME": "364037",
+        "TOTAL_COPY_IN_SIZE_BYTES": "320",
+        "ALLOCATION_BYTES": "368",
+        "cublasHybrid.bias": {
+            "BACKEND": "CUDA",
+            "METHOD": "CuBlasSgemvHybrid.bias",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "11040"
+        }, 
+        "cublasHybrid.sgemv": {
+            "BACKEND": "CUDA",
+            "METHOD": "cublasSgemv",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "23500"
+        }, 
+        "cublasHybrid.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CuBlasSgemvHybrid.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "3648"
+        }
+    }
+}
+
+iteration 2: correct output[0]=157.0 expected[0]=157.0
+  total task-graph time: 364037 ns
+{
+    "cublasHybrid": {
+        "COPY_IN_TIME": "10334",
+        "TOTAL_KERNEL_TIME": "35043",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_TASK_GRAPH_TIME": "358558",
+        "TOTAL_COPY_IN_SIZE_BYTES": "320",
+        "ALLOCATION_BYTES": "368",
+        "cublasHybrid.bias": {
+            "BACKEND": "CUDA",
+            "METHOD": "CuBlasSgemvHybrid.bias",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "10656"
+        }, 
+        "cublasHybrid.sgemv": {
+            "BACKEND": "CUDA",
+            "METHOD": "cublasSgemv",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "20803"
+        }, 
+        "cublasHybrid.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CuBlasSgemvHybrid.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "3584"
+        }
+    }
+}
+
+iteration 3: correct output[0]=157.0 expected[0]=157.0
+  total task-graph time: 358558 ns
+{
+    "cublasHybrid": {
+        "COPY_IN_TIME": "9630",
+        "TOTAL_KERNEL_TIME": "26797",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_TASK_GRAPH_TIME": "348779",
+        "TOTAL_COPY_IN_SIZE_BYTES": "320",
+        "ALLOCATION_BYTES": "368",
+        "cublasHybrid.bias": {
+            "BACKEND": "CUDA",
+            "METHOD": "CuBlasSgemvHybrid.bias",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "2816"
+        }, 
+        "cublasHybrid.sgemv": {
+            "BACKEND": "CUDA",
+            "METHOD": "cublasSgemv",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "20461"
+        }, 
+        "cublasHybrid.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CuBlasSgemvHybrid.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "3520"
+        }
+    }
+}
+
+iteration 4: correct output[0]=157.0 expected[0]=157.0
+  total task-graph time: 348779 ns
+All iterations correct
