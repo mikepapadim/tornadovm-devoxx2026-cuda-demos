@@ -1,0 +1,1 @@
+Task 02 done 2026-08-19: demos/00-hello-gpu (Hello.java) and demos/01-first-cuda-kernel (VectorAddKernel.java) built and run on pinned TornadoVM CUDA (99549c9, RTX 4090), READMEs + java @arg-file path verified, JBang path documented-unverified. Logs in results/raw/02-hello-kernel/.

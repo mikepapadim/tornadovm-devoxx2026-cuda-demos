@@ -1,0 +1,65 @@
+extern "C" __global__ void vectorAdd(long long *_kernel_context, unsigned char *_constant_region, unsigned char *_local_region, int *_atomics, unsigned char *arg0, unsigned char *arg1, unsigned char *arg2)
+{
+  unsigned long long ul_0, ul_1, ul_2, ul_9, ul_11, ul_13; 
+  int i_3, i_4, i_5, i_15; 
+  long long l_6, l_7, l_8; 
+  float f_10, f_12, f_14; 
+
+  // BLOCK 0
+  ul_0  =  (unsigned long long) arg0;
+  ul_1  =  (unsigned long long) arg1;
+  ul_2  =  (unsigned long long) arg2;
+  i_3  =  (gridDim.x*blockDim.x);
+  i_4  =  (blockIdx.x*blockDim.x+threadIdx.x);
+  // BLOCK 1 MERGES [0 2 ]
+  i_5  =  i_4;
+  for(;i_5 < 1024;)
+  {
+    // BLOCK 2
+    l_6  =  (long long) i_5;
+    l_7  =  l_6 + 4L;
+    l_8  =  l_7 << 2;
+    ul_9  =  ul_0 + l_8;
+    f_10  =  *(( float *) ul_9);
+    ul_11  =  ul_1 + l_8;
+    f_12  =  *(( float *) ul_11);
+    ul_13  =  ul_2 + l_8;
+    f_14  =  f_10 + f_12;
+    *(( float *) ul_13)  =  f_14;
+    i_15  =  i_3 + i_5;
+    i_5  =  i_15;
+  }  // B1
+  // BLOCK 3
+  return;
+}  //  kernel
+
+{
+    "vadd": {
+        "TOTAL_KERNEL_TIME": "16160",
+        "TOTAL_GRAAL_COMPILE_TIME": "40977186",
+        "TOTAL_DRIVER_COMPILE_TIME": "33104708",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_BYTE_CODE_GENERATION": "4924744",
+        "TOTAL_TASK_GRAPH_TIME": "91214431",
+        "COPY_IN_TIME": "27486",
+        "TOTAL_CODE_GENERATION_TIME": "3012399",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "12336",
+        "TOTAL_COPY_IN_SIZE_BYTES": "12336",
+        "vadd.add": {
+            "BACKEND": "CUDA",
+            "METHOD": "VectorAddKernel.vectorAdd",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_CODE_GENERATION_TIME": "3012399",
+            "TASK_COMPILE_DRIVER_TIME": "33104708",
+            "TASK_KERNEL_TIME": "16160",
+            "TASK_COMPILE_GRAAL_TIME": "40977186"
+        }
+    }
+}
+
+Result is correct
+Total time: 91214431 ns

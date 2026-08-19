@@ -1,0 +1,3 @@
+Result is correct
+Enable the profiler with: -Dtornado.profiler=True
+Total time: 0 ns
