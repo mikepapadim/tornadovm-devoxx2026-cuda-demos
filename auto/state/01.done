@@ -1,0 +1,1 @@
+Task 01 done: docs/hybrid-api-inventory.md verifies Hybrid API (providers, factories, SPI, composition) against pinned source with 71/71 provider unit tests passing on CUDA; doc/source gaps and cuTENSOR-branch claim flagged.
