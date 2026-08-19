@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -uo pipefail
+remote_url="${2:-}"
+allowed='^(git@github\.com:|(https://)([^@/]+@)?github\.com/)mikepapadim/tornadovm-devoxx2026-cuda-demos(\.git)?/?$'
+if [[ ! "$remote_url" =~ $allowed ]]; then
+  echo 'PUSH BLOCKED: autonomous agent may publish only to mikepapadim/tornadovm-devoxx2026-cuda-demos.git' >&2
+  exit 1
+fi
+exit 0
