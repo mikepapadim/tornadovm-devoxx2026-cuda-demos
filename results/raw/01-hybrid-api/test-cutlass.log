@@ -1,0 +1,33 @@
+/home/michalis/tornadovm-devoxx2026-cuda-demos/vendor/tornadovm/dist/tornadovm-5.2.1-jdk21-dev-cuda-linux-amd64/tornadovm-5.2.1-jdk21-dev-cuda/bin/tornado --jvm "-Xmx6g -Dtornado.recover.bailout=False -Dtornado.unittests.verbose=True "  -m  tornado.unittests/uk.ac.manchester.tornado.unittests.tools.TornadoTestRunner  --params "uk.ac.manchester.tornado.unittests.cutlass.TestCutlass"
+WARNING: Using incubator modules: jdk.incubator.vector
+
+Test: class uk.ac.manchester.tornado.unittests.cutlass.TestCutlass
+	Running test: [34mtestSharedBufferAcrossTaskGraphs[0m ................ [32m [PASS] [0m
+	Running test: [34mtestSgemm[0m                  ................ [32m [PASS] [0m
+	Running test: [34mtestSgemmBeta[0m              ................ [32m [PASS] [0m
+	Running test: [34mtestSgemmWithJitPreAndPost[0m ................ [32m [PASS] [0m
+	Running test: [34mtestHgemm[0m                  ................ [32m [PASS] [0m
+	Running test: [34mtestBgemm[0m                  ................ [32m [PASS] [0m
+	Running test: [34mtestGemmBiasRelu[0m           ................ [32m [PASS] [0m
+	Running test: [34mtestGemmBiasGelu[0m           ................ [32m [PASS] [0m
+	Running test: [34mtestGemmBiasSilu[0m           ................ [32m [PASS] [0m
+	Running test: [34mtestGemmBiasSigmoid[0m        ................ [32m [PASS] [0m
+	Running test: [34mtestSwiGluFeedForward[0m      ................ [32m [PASS] [0m
+	Running test: [34mtestGemmBiasTanh[0m           ................ [32m [PASS] [0m
+	Running test: [34mtestGemmBiasHardSwish[0m      ................ [32m [PASS] [0m
+	Running test: [34mtestHgemmBatched[0m           ................ [32m [PASS] [0m
+	Running test: [34mtestHgemmBadAlignmentShape[0m ................ [32m [PASS] [0m
+	Running test: [34mtestGemmWithCudaGraph[0m      ................ [32m [PASS] [0m
+	Running test: [34mtestRectangularSgemm[0m       ................ [32m [PASS] [0m
+	Running test: [34mtestRectangularHgemm[0m       ................ [32m [PASS] [0m
+	Running test: [34mtestChainedSgemm[0m           ................ [32m [PASS] [0m
+	Running test: [34mtestTwoLayerFusedMlp[0m       ................ [32m [PASS] [0m
+	Running test: [34mtestDeepMixedPipeline[0m      ................ [32m [PASS] [0m
+	Running test: [34mtestMultipleShapesOneContext[0m ................ [32m [PASS] [0m
+	Running test: [34mtestMixedPrecisionGraph[0m    ................ [32m [PASS] [0m
+	Running test: [34mtestRepeatedExecutionStability[0m ................ [32m [PASS] [0m
+	Running test: [34mtestFusedMlpWithCudaGraph[0m  ................ [32m [PASS] [0m
+Test ran: 25, Failed: 0, Unsupported: 0
+
+
+Total Time (s): 0.9312477111816406

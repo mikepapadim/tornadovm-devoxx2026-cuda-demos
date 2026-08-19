@@ -1,0 +1,20 @@
+/home/michalis/tornadovm-devoxx2026-cuda-demos/vendor/tornadovm/dist/tornadovm-5.2.1-jdk21-dev-cuda-linux-amd64/tornadovm-5.2.1-jdk21-dev-cuda/bin/tornado --jvm "-Xmx6g -Dtornado.recover.bailout=False -Dtornado.unittests.verbose=True "  -m  tornado.unittests/uk.ac.manchester.tornado.unittests.tools.TornadoTestRunner  --params "uk.ac.manchester.tornado.unittests.cublas.TestCuBlas"
+WARNING: Using incubator modules: jdk.incubator.vector
+
+Test: class uk.ac.manchester.tornado.unittests.cublas.TestCuBlas
+	Running test: [34mtestSgemv[0m                  ................ [32m [PASS] [0m
+	Running test: [34mtestSgemvBeta[0m              ................ [32m [PASS] [0m
+	Running test: [34mtestSgemm[0m                  ................ [32m [PASS] [0m
+	Running test: [34mtestSgemmTF32[0m              ................ [32m [PASS] [0m
+	Running test: [34mtestSgemmWorkspace[0m         ................ [32m [PASS] [0m
+	Running test: [34mtestGemmExFP16[0m             ................ [32m [PASS] [0m
+	Running test: [34mtestGemmExBF16[0m             ................ [32m [PASS] [0m
+	Running test: [34mtestGemmExFP16FP32[0m         ................ [32m [PASS] [0m
+	Running test: [34mtestSgemmStridedBatched[0m    ................ [32m [PASS] [0m
+	Running test: [34mtestMixedPrePostTasks[0m      ................ [32m [PASS] [0m
+	Running test: [34mtestSharedBufferAcrossTaskGraphs[0m ................ [32m [PASS] [0m
+	Running test: [34mtestMixedTasksWithCudaGraph[0m ................ [32m [PASS] [0m
+Test ran: 12, Failed: 0, Unsupported: 0
+
+
+Total Time (s): 1.119211196899414

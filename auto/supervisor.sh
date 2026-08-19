@@ -93,7 +93,11 @@ while (( iter < MAX_ITER )); do
   logfile="$LOG_DIR/iter-$(printf '%04d' "$iter")-${task}.log"
   before="$(git rev-parse --short HEAD 2>/dev/null || echo none)"
 
-  git pull --rebase -q origin "$BRANCH" 2>>"$LOG_DIR/supervisor.log" || true
+  if git diff --quiet && git diff --cached --quiet && [ -z "$(git ls-files --others --exclude-standard)" ]; then
+    git pull --rebase -q origin "$BRANCH" 2>>"$LOG_DIR/supervisor.log" || log 'git pull failed; continuing'
+  else
+    log "working tree dirty; skipping git pull so local research artifacts are preserved"
+  fi
   timeout --signal=TERM --kill-after=60 "$ITER_TIMEOUT" \
     "$CLAUDE_BIN" -p "$(cat "$PROMPT_FILE")" \
       "${MODEL_ARG[@]}" --output-format stream-json --verbose \

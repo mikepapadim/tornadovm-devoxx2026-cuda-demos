@@ -1,0 +1,31 @@
+Matrix-Vector Multiplication: TornadoVM kernels vs cuBLAS SGEMV library task
+=============================================================================
+Configuration:
+- Input dimension (columns): 512
+- Output dimension (rows): 128
+- Local work group size: 32
+- Warmup iterations: 140
+- Benchmark iterations: 120
+
+Initializing data...
+Warming up sequential implementation...
+Benchmarking sequential implementation...
+Warming up TornadoVM implementations...
+Warming up cuBLAS library task...
+Benchmarking @Parallel kernel...
+Benchmarking KernelContext kernel...
+Benchmarking cuBLAS SGEMV library task...
+
+Validation (vs sequential Java):
+@Parallel kernel             : max error = 0.000000 -> OK
+KernelContext kernel         : max error = 0.000001 -> OK
+cuBLAS SGEMV library task    : max error = 0.000001 -> OK
+
+Results (average over 120 iterations, end-to-end execute):
+Sequential Java              :      0.033 ms |     3.94 GFLOP/s |     7.96 GB/s | speedup vs seq:     1.00x
+@Parallel kernel             :      0.068 ms |     1.94 GFLOP/s |     3.91 GB/s | speedup vs seq:     0.49x
+KernelContext kernel         :      0.031 ms |     4.24 GFLOP/s |     8.56 GB/s | speedup vs seq:     1.08x
+cuBLAS SGEMV library task    :      0.026 ms |     5.04 GFLOP/s |    10.18 GB/s | speedup vs seq:     1.28x
+
+cuBLAS vs best TornadoVM kernel (KernelContext): 1.19x
+Result is correct

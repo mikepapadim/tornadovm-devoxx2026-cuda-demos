@@ -1,0 +1,61 @@
+Testing TornadoVM Hybrid API - cublasSgemv with pre/post tasks
+Result is correct
+MATRIX : [1.0, 2.0, 3.0, 4.0]
+VECTOR : [5.0, 6.0]
+OUTPUT : [40.0, 62.0]
+SEQ OUT: [40.0, 62.0]
+---
+Result is correct
+MATRIX : [1.0, 2.0, 3.0, 4.0]
+VECTOR : [5.0, 6.0]
+OUTPUT : [40.0, 62.0]
+SEQ OUT: [40.0, 62.0]
+---
+Result is correct
+MATRIX : [1.0, 2.0, 3.0, 4.0]
+VECTOR : [5.0, 6.0]
+OUTPUT : [40.0, 62.0]
+SEQ OUT: [40.0, 62.0]
+---
+Result is correct
+MATRIX : [1.0, 2.0, 3.0, 4.0]
+VECTOR : [5.0, 6.0]
+OUTPUT : [40.0, 62.0]
+SEQ OUT: [40.0, 62.0]
+---
+Result is correct
+MATRIX : [1.0, 2.0, 3.0, 4.0]
+VECTOR : [5.0, 6.0]
+OUTPUT : [40.0, 62.0]
+SEQ OUT: [40.0, 62.0]
+---
+Result is correct
+MATRIX : [1.0, 2.0, 3.0, 4.0]
+VECTOR : [5.0, 6.0]
+OUTPUT : [40.0, 62.0]
+SEQ OUT: [40.0, 62.0]
+---
+Result is correct
+MATRIX : [1.0, 2.0, 3.0, 4.0]
+VECTOR : [5.0, 6.0]
+OUTPUT : [40.0, 62.0]
+SEQ OUT: [40.0, 62.0]
+---
+Result is correct
+MATRIX : [1.0, 2.0, 3.0, 4.0]
+VECTOR : [5.0, 6.0]
+OUTPUT : [40.0, 62.0]
+SEQ OUT: [40.0, 62.0]
+---
+Result is correct
+MATRIX : [1.0, 2.0, 3.0, 4.0]
+VECTOR : [5.0, 6.0]
+OUTPUT : [40.0, 62.0]
+SEQ OUT: [40.0, 62.0]
+---
+Result is correct
+MATRIX : [1.0, 2.0, 3.0, 4.0]
+VECTOR : [5.0, 6.0]
+OUTPUT : [40.0, 62.0]
+SEQ OUT: [40.0, 62.0]
+---

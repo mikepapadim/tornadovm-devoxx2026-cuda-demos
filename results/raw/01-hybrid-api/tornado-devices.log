@@ -1,0 +1,14 @@
+
+Number of Tornado drivers: 1
+Driver: [32mCUDADriver[0m
+  Total number of CUDADriver devices  : 1
+  Tornado device=0:0  (DEFAULT)
+	[32mCUDA[0m --  [NVIDIA CUDA] -- NVIDIA GeForce RTX 4090
+		Global Memory Size: 23.5 GB
+		Local Memory Size: 48.0 KB
+		Workgroup Dimensions: 3
+		Total Number of Block Threads: [1024]
+		Max WorkGroup Configuration: [1024, 1024, 64]
+		Device OpenCL C version: CUDA C 1.0
+
+

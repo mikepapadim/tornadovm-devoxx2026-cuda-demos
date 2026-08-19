@@ -1,0 +1,19 @@
+/home/michalis/tornadovm-devoxx2026-cuda-demos/vendor/tornadovm/dist/tornadovm-5.2.1-jdk21-dev-cuda-linux-amd64/tornadovm-5.2.1-jdk21-dev-cuda/bin/tornado --jvm "-Xmx6g -Dtornado.recover.bailout=False -Dtornado.unittests.verbose=True "  -m  tornado.unittests/uk.ac.manchester.tornado.unittests.tools.TornadoTestRunner  --params "uk.ac.manchester.tornado.unittests.cusparse.TestCusparse"
+WARNING: Using incubator modules: jdk.incubator.vector
+
+Test: class uk.ac.manchester.tornado.unittests.cusparse.TestCusparse
+	Running test: [34mtestMultipleShapesOneContext[0m ................ [32m [PASS] [0m
+	Running test: [34mtestSpMVGeneral[0m            ................ [32m [PASS] [0m
+	Running test: [34mtestSpMVIdentity[0m           ................ [32m [PASS] [0m
+	Running test: [34mtestSpMVDiagonal[0m           ................ [32m [PASS] [0m
+	Running test: [34mtestSpMVRectangular[0m        ................ [32m [PASS] [0m
+	Running test: [34mtestSpMVWithEmptyRows[0m      ................ [32m [PASS] [0m
+	Running test: [34mtestSpMVDenseIsh[0m           ................ [32m [PASS] [0m
+	Running test: [34mtestSpMM[0m                   ................ [32m [PASS] [0m
+	Running test: [34mtestSpMVWithJitPreAndPost[0m  ................ [32m [PASS] [0m
+	Running test: [34mtestSpMVWithCudaGraph[0m      ................ [32m [PASS] [0m
+	Running test: [34mtestSpMVRepeatedStability[0m  ................ [32m [PASS] [0m
+Test ran: 11, Failed: 0, Unsupported: 0
+
+
+Total Time (s): 0.7829995155334473
