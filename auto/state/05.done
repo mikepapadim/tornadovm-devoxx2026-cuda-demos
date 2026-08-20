@@ -1,0 +1,1 @@
+Task 05 done: demos/05-cufft-hybrid/CuFftLowPassHybrid.java — cuFFT R2C/C2R + JIT low-pass filter in one TaskGraph, 5/5 iterations correct on CUDA, java @arg-file verified, JBang unverified (not installed).

@@ -1,0 +1,242 @@
+Low-pass filter via hybrid cuFFT pipeline: n=4096, cutoff bin=16, iterations=5
+{
+    "cufftHybrid": {
+        "TOTAL_DRIVER_COMPILE_TIME": "11042186",
+        "TOTAL_KERNEL_TIME": "178582",
+        "TOTAL_BYTE_CODE_GENERATION": "4741804",
+        "COPY_IN_TIME": "26688",
+        "TOTAL_TASK_GRAPH_TIME": "86065183",
+        "TOTAL_GRAAL_COMPILE_TIME": "48377293",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_CODE_GENERATION_TIME": "4102304",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_COPY_IN_SIZE_BYTES": "16400",
+        "ALLOCATION_BYTES": "49208",
+        "cufftHybrid.forward": {
+            "BACKEND": "CUDA",
+            "METHOD": "cufftForwardR2C",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "124563"
+        }, 
+        "cufftHybrid.inverse": {
+            "BACKEND": "CUDA",
+            "METHOD": "cufftInverseC2R",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "38820"
+        }, 
+        "cufftHybrid.normalize": {
+            "BACKEND": "CUDA",
+            "METHOD": "CuFftLowPassHybrid.scaleBy",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_CODE_GENERATION_TIME": "929541",
+            "TASK_COMPILE_DRIVER_TIME": "411642",
+            "TASK_COMPILE_GRAAL_TIME": "7105133",
+            "TASK_KERNEL_TIME": "5983"
+        }, 
+        "cufftHybrid.lowPass": {
+            "BACKEND": "CUDA",
+            "METHOD": "CuFftLowPassHybrid.lowPass",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_CODE_GENERATION_TIME": "3172763",
+            "TASK_COMPILE_DRIVER_TIME": "10630544",
+            "TASK_COMPILE_GRAAL_TIME": "41272160",
+            "TASK_KERNEL_TIME": "9216"
+        }
+    }
+}
+
+iteration 0: correct maxError=4.7683716E-7 filtered[0]=0.49999997
+  total task-graph time: 86065183 ns
+{
+    "cufftHybrid": {
+        "TOTAL_KERNEL_TIME": "55874",
+        "COPY_IN_TIME": "12157",
+        "TOTAL_TASK_GRAPH_TIME": "462627",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_COPY_IN_SIZE_BYTES": "16400",
+        "ALLOCATION_BYTES": "49208",
+        "cufftHybrid.forward": {
+            "BACKEND": "CUDA",
+            "METHOD": "cufftForwardR2C",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "32786"
+        }, 
+        "cufftHybrid.inverse": {
+            "BACKEND": "CUDA",
+            "METHOD": "cufftInverseC2R",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "16849"
+        }, 
+        "cufftHybrid.normalize": {
+            "BACKEND": "CUDA",
+            "METHOD": "CuFftLowPassHybrid.scaleBy",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "2848"
+        }, 
+        "cufftHybrid.lowPass": {
+            "BACKEND": "CUDA",
+            "METHOD": "CuFftLowPassHybrid.lowPass",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "3391"
+        }
+    }
+}
+
+iteration 1: correct maxError=4.7683716E-7 filtered[0]=0.49999997
+  total task-graph time: 462627 ns
+{
+    "cufftHybrid": {
+        "TOTAL_KERNEL_TIME": "54213",
+        "COPY_IN_TIME": "9055",
+        "TOTAL_TASK_GRAPH_TIME": "384857",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_COPY_IN_SIZE_BYTES": "16400",
+        "ALLOCATION_BYTES": "49208",
+        "cufftHybrid.forward": {
+            "BACKEND": "CUDA",
+            "METHOD": "cufftForwardR2C",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "16141"
+        }, 
+        "cufftHybrid.inverse": {
+            "BACKEND": "CUDA",
+            "METHOD": "cufftInverseC2R",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "16025"
+        }, 
+        "cufftHybrid.normalize": {
+            "BACKEND": "CUDA",
+            "METHOD": "CuFftLowPassHybrid.scaleBy",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "10688"
+        }, 
+        "cufftHybrid.lowPass": {
+            "BACKEND": "CUDA",
+            "METHOD": "CuFftLowPassHybrid.lowPass",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "11359"
+        }
+    }
+}
+
+iteration 2: correct maxError=4.7683716E-7 filtered[0]=0.49999997
+  total task-graph time: 384857 ns
+{
+    "cufftHybrid": {
+        "TOTAL_KERNEL_TIME": "52265",
+        "COPY_IN_TIME": "8703",
+        "TOTAL_TASK_GRAPH_TIME": "383403",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_COPY_IN_SIZE_BYTES": "16400",
+        "ALLOCATION_BYTES": "49208",
+        "cufftHybrid.forward": {
+            "BACKEND": "CUDA",
+            "METHOD": "cufftForwardR2C",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "15944"
+        }, 
+        "cufftHybrid.inverse": {
+            "BACKEND": "CUDA",
+            "METHOD": "cufftInverseC2R",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "14275"
+        }, 
+        "cufftHybrid.normalize": {
+            "BACKEND": "CUDA",
+            "METHOD": "CuFftLowPassHybrid.scaleBy",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "10975"
+        }, 
+        "cufftHybrid.lowPass": {
+            "BACKEND": "CUDA",
+            "METHOD": "CuFftLowPassHybrid.lowPass",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "11071"
+        }
+    }
+}
+
+iteration 3: correct maxError=4.7683716E-7 filtered[0]=0.49999997
+  total task-graph time: 383403 ns
+{
+    "cufftHybrid": {
+        "TOTAL_KERNEL_TIME": "55452",
+        "COPY_IN_TIME": "17021",
+        "TOTAL_TASK_GRAPH_TIME": "398072",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_COPY_IN_SIZE_BYTES": "16400",
+        "ALLOCATION_BYTES": "49208",
+        "cufftHybrid.forward": {
+            "BACKEND": "CUDA",
+            "METHOD": "cufftForwardR2C",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "14261"
+        }, 
+        "cufftHybrid.inverse": {
+            "BACKEND": "CUDA",
+            "METHOD": "cufftInverseC2R",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "18824"
+        }, 
+        "cufftHybrid.normalize": {
+            "BACKEND": "CUDA",
+            "METHOD": "CuFftLowPassHybrid.scaleBy",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "11168"
+        }, 
+        "cufftHybrid.lowPass": {
+            "BACKEND": "CUDA",
+            "METHOD": "CuFftLowPassHybrid.lowPass",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "11199"
+        }
+    }
+}
+
+iteration 4: correct maxError=4.7683716E-7 filtered[0]=0.49999997
+  total task-graph time: 398072 ns
+All iterations correct
