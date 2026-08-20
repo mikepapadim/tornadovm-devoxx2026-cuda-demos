@@ -1,0 +1,60 @@
+Single-tile Tensor Core (MMA) demo: C[16x8] = A[16x16] * B[16x8], fp16 -> f32
+{
+    "s_scalar": {
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_GRAAL_COMPILE_TIME": "56702241",
+        "TOTAL_CODE_GENERATION_TIME": "6972753",
+        "COPY_IN_TIME": "26015",
+        "TOTAL_DRIVER_COMPILE_TIME": "56461456",
+        "TOTAL_KERNEL_TIME": "17087",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_TASK_GRAPH_TIME": "132605022",
+        "TOTAL_BYTE_CODE_GENERATION": "4835244",
+        "TOTAL_COPY_IN_SIZE_BYTES": "1328",
+        "ALLOCATION_BYTES": "1640",
+        "s_scalar.gemm": {
+            "BACKEND": "CUDA",
+            "METHOD": "TensorCoreMMA.gemmScalarFp16",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_COMPILE_DRIVER_TIME": "56461456",
+            "TASK_COMPILE_GRAAL_TIME": "56702241",
+            "TASK_KERNEL_TIME": "17087",
+            "TASK_CODE_GENERATION_TIME": "6972753"
+        }
+    }
+}
+
+{
+    "s_mma": {
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_GRAAL_COMPILE_TIME": "17529571",
+        "TOTAL_CODE_GENERATION_TIME": "5520379",
+        "COPY_IN_TIME": "18686",
+        "TOTAL_DRIVER_COMPILE_TIME": "34859887",
+        "TOTAL_KERNEL_TIME": "9983",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_TASK_GRAPH_TIME": "56197064",
+        "TOTAL_BYTE_CODE_GENERATION": "294099",
+        "TOTAL_COPY_IN_SIZE_BYTES": "1328",
+        "ALLOCATION_BYTES": "1640",
+        "s_mma.gemm": {
+            "BACKEND": "CUDA",
+            "METHOD": "TensorCoreMMA.gemmMMASingleTile",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_COMPILE_DRIVER_TIME": "34859887",
+            "TASK_COMPILE_GRAAL_TIME": "17529571",
+            "TASK_KERNEL_TIME": "9983",
+            "TASK_CODE_GENERATION_TIME": "5520379"
+        }
+    }
+}
+
+  [scalar (no MMA)] validation PASSED (max abs err 0.00000, 0/128 cells out of tol)
+  [mma.sync (Tensor Core)] validation PASSED (max abs err 0.00000, 0/128 cells out of tol)
+Result is correct

@@ -1,0 +1,1 @@
+Tensor Core/MMA demo (demos/08-tensor-core-mma/) built and validated; mma.sync generated-code evidence captured; Nsight Compute counter evidence blocked (permission, documented in results/failures/).

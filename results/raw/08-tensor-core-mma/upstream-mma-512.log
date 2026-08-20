@@ -1,0 +1,37 @@
+WARNING: Using incubator modules: jdk.incubator.vector
+Multi-warp MMA GEMM Benchmark
+=============================
+Shape: M=512 N=512 K=512   Warmup: 20   Iters: 30
+Computing CPU reference...
+Warming up...
+Validating...
+  [baseline] validation PASSED (max rel err 0.0000, 0/262144 cells out of tol 0.020)
+  [mma (B=KN)] validation PASSED (max rel err 0.0000, 0/262144 cells out of tol 0.020)
+  [mma+cp.async] validation PASSED (max rel err 0.0000, 0/262144 cells out of tol 0.020)
+  [mma bf16] validation PASSED (max rel err 0.0627, 0/262144 cells out of tol 0.088)
+  [mma (B=NK)] validation PASSED (max rel err 0.0000, 0/262144 cells out of tol 0.020)
+  [mma+swizzle] validation PASSED (max rel err 0.0000, 0/262144 cells out of tol 0.020)
+Benchmarking...
+
+Performance Results:
+====================
+Baseline fp16 (tiled, no MMA):
+  Avg: 0.182 ms  Min: 0.156 ms  Max: 0.318 ms  Perf: 1473.5 GFLOP/s
+MMA fp16 (B=KN row-major):
+  Avg: 0.188 ms  Min: 0.150 ms  Max: 0.724 ms  Perf: 1429.9 GFLOP/s
+MMA fp16 (cp.async, B=KN):
+  Avg: 0.148 ms  Min: 0.123 ms  Max: 0.232 ms  Perf: 1817.1 GFLOP/s
+MMA bf16 (B=KN row-major):
+  Avg: 0.182 ms  Min: 0.149 ms  Max: 0.434 ms  Perf: 1476.0 GFLOP/s
+MMA fp16 (B=NK row-major):
+  Avg: 0.171 ms  Min: 0.149 ms  Max: 0.211 ms  Perf: 1571.6 GFLOP/s
+MMA fp16 (swizzled, B=KN):
+  Avg: 0.185 ms  Min: 0.163 ms  Max: 0.286 ms  Perf: 1448.7 GFLOP/s
+
+Speedups:
+  MMA(KN) vs baseline:          0.97x
+  MMA(NK) vs baseline:          1.07x
+  MMA+cp.async vs MMA(KN):      1.27x  (async tile loads)
+  MMA bf16 vs MMA fp16 (KN):    1.03x
+  MMA(NK) vs MMA(KN):           1.10x  (cost of NK layout)
+  MMA+swizzle vs baseline:      0.98x

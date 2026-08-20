@@ -1,0 +1,149 @@
+# 08 — Tensor Core / MMA: smallest possible mma.sync demo
+
+**Concept (read in ~1 minute):** the CUDA backend exposes NVIDIA Tensor Core
+`mma.sync` instructions through `KernelContext` intrinsics —
+`mmaFragment`/`mmaLoadA`/`mmaLoadB`/`mma`/`mmaStore` — that TornadoVM's
+Graal-based JIT lowers directly to `ldmatrix.sync.aligned` /
+`mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32` inline PTX asm in the
+generated CUDA source (confirmed by direct source inspection of the CUDA
+backend's Graal nodes/plugins, e.g. `CUDAMMALoadANode.java`,
+`CUDAGraphBuilderPlugins.java`, and by `--printKernel` output, not assumed
+from the API surface alone). `MMAShape.M16N8K16` is the fp16/bf16 tile
+shape, requiring compute capability 8.0+ (Ampere and later; this machine's
+RTX 4090 is 8.9).
+
+This demo is deliberately the **smallest possible** MMA workload: one warp
+(32 threads), one `M16N8K16` tile (`C[16,8] = A[16,16] * B[16,8]`, fp16
+inputs, f32 accumulate), exactly **one** `mma.sync` instruction — next to a
+scalar (no-MMA, one-thread-per-output-element) reference kernel computing
+the identical tile. Both are validated against the same closed-form CPU
+reference. It exists to *show the mechanism* clearly; for a realistic-scale,
+multi-warp, tiled GEMM (with cp.async, bf16, swizzled-shared-memory, and
+`[N,K]`-layout variants, plus a fp16-tiled-no-MMA baseline for comparison)
+already shipped in the pinned TornadoVM tree, see
+[Realistic-scale reference](#realistic-scale-reference-upstream-example)
+below.
+
+Source: [`TensorCoreMMA.java`](TensorCoreMMA.java).
+
+## Build
+
+```bash
+source vendor/tornadovm/setvars.sh   # from repo root
+cd demos/08-tensor-core-mma
+javac --release 21 --enable-preview \
+  -cp "$TORNADOVM_HOME/share/java/tornado/tornado-api-5.2.1-jdk21-dev.jar" \
+  -d . TensorCoreMMA.java
+```
+
+## Run
+
+```bash
+tornado --classpath . TensorCoreMMA
+```
+
+Reproducibility form (`java @arg-file`):
+
+```bash
+java @../tornado.args -cp . TensorCoreMMA
+```
+
+To see the generated CUDA source (the actual `mma.sync`/`ldmatrix` asm):
+
+```bash
+tornado --printKernel --classpath . TensorCoreMMA
+```
+
+## Expected output
+
+```
+Single-tile Tensor Core (MMA) demo: C[16x8] = A[16x16] * B[16x8], fp16 -> f32
+  [scalar (no MMA)] validation PASSED (max abs err 0.00000, 0/128 cells out of tol)
+  [mma.sync (Tensor Core)] validation PASSED (max abs err 0.00000, 0/128 cells out of tol)
+Result is correct
+```
+
+## What was actually measured (Observed)
+
+Pinned build: `vendor/tornadovm` @ `99549c9862eda8d584e35e99924f9c865501eb3a`,
+RTX 4090, driver `565.57.01`, `nvcc`/`ptxas` 12.6.85.
+
+- Ran via `tornado --classpath .`, `java @../tornado.args`, and
+  `tornado --enableProfiler console --classpath .` — all three runs: both
+  kernels validate exactly (max abs err `0.00000`, since inputs and the
+  16-term dot product are exact in fp16→f32 for these deterministic bounded
+  values), and profiler JSON confirms `"BACKEND": "CUDA"`,
+  `"DEVICE": "NVIDIA GeForce RTX 4090"` for both `s_scalar.gemm` and
+  `s_mma.gemm`. Re-verified from a clean rebuild (`rm *.class`, rebuild,
+  rerun) before finalizing. Logs: `results/raw/08-tensor-core-mma/tensorcoremma-run.log`,
+  `tensorcoremma-run-javaargfile.log`.
+- **Generated-code evidence** (`tornado --printKernel`, log
+  `results/raw/08-tensor-core-mma/tensorcoremma-printkernel.log`): the
+  compiled `gemmMMASingleTile` kernel contains exactly one
+  `asm volatile("mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32 ...")`
+  plus its two `ldmatrix.sync.aligned` operand loads (one `.x4` for the A
+  fragment, one `.x2.trans` for the B fragment); the `gemmScalarFp16` kernel
+  compiled from the *same run* contains **zero** occurrences of `mma.sync`
+  anywhere in its body — a direct source-backed comparison from one
+  invocation, not an inference from timing.
+- **Nsight Compute hardware-counter evidence: blocked**, not fabricated.
+  `ncu` on `PATH` resolves to Nsight Compute `2026.2.1.0`, which cannot
+  connect to this driver (`565.57.01`) at all; the matching older install
+  (`2024.3.2`) connects but is refused with `ERR_NVGPUCTRPERM` (GPU
+  performance-counter access is admin-only on this driver, and no
+  passwordless `sudo` is available in this unattended run). Full repro
+  commands, exact errors, and the fix for a future invocation with counter
+  access are recorded in `results/failures/08-nsight-compute-permission.md`.
+  Per this task's own acceptance criterion ("profiler **or**
+  generated-code evidence"), the generated-code evidence above is
+  sufficient on its own to support the Tensor-Core-accelerated claim for
+  this kernel; no performance number is claimed from the Nsight Compute
+  path since it was never obtained.
+- No speedup claim is made for this single-tile demo: 128 output elements
+  is far too small a workload to be anything but launch/dispatch-bound, so
+  a scalar-vs-MMA wall-clock comparison at this size would not measure the
+  Tensor Core's actual throughput advantage. For a size where GEMM
+  performance is meaningful, see the realistic-scale reference below.
+
+## Realistic-scale reference (upstream example)
+
+The pinned tree ships its own comprehensive MMA benchmark,
+`vendor/tornadovm/tornado-examples/.../compute/MatrixMultiplicationMMA.java`
+— six GEMM variants (tiled fp16 baseline with no MMA; multi-warp MMA;
+MMA+cp.async; MMA+bf16; MMA with `[N,K]` weight layout; MMA+swizzled shared
+memory), each validated against a CPU reference, each timed. Run at
+`512 512 512` on this machine (`results/raw/08-tensor-core-mma/upstream-mma-512.log`):
+all six variants **PASSED** validation; the same `mma.sync.aligned.m16n8k16`
+instruction is confirmed via `--printKernel` for all four MMA variants in
+that file (`results/raw/08-tensor-core-mma/mma-printkernel-512.log`, 80
+occurrences of `mma.sync`/`ldmatrix` total across the four MMA kernels).
+At this problem size the six variants are close in wall-clock (launch- and
+memory-bound, not compute-bound — GFLOP/s figures in the log should not be
+read as a clean MMA-vs-baseline speedup at 512³; a much larger shape, e.g.
+the file's own documented `128 8192 2048` GPULlama3-FFN-shaped example, is
+where each variant's GFLOP/s becomes compute-bound and the MMA/cp.async/
+bf16 speedups documented in that file's own `Speedups:` block are meant to
+be read). Not independently re-run at larger sizes by this task — the
+512³ run above already discharges this task's acceptance criterion
+(generated-code evidence for real `mma.sync` usage); a larger-scale,
+presenter-ready performance narrative is left to a future task if the talk
+needs one.
+
+## Fallback if the live demo fails
+
+Both kernels are tiny and deterministic (16×8×16, fixed inputs) — if a live
+run doesn't reproduce, the fallback is the captured
+`--printKernel` log itself: read the `mma.sync.aligned.m16n8k16` line
+directly off `results/raw/08-tensor-core-mma/tensorcoremma-printkernel.log`
+without re-running anything live.
+
+## JBang
+
+Not verified: `jbang` is not installed on this machine (`which jbang` → exit
+1, checked 2026-08-20, same finding as demos 00–07). The shape would match
+those demos' documented-but-unverified pattern — do not run it live until
+tested on the pinned environment:
+
+```bash
+jbang TensorCoreMMA.java
+```

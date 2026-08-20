@@ -1,0 +1,2 @@
+==ERROR== Nsight Compute failed to connect to the CUDA driver (stub libcuda.so[.1] on path?).
+==ERROR== The application returned an error code (1).
