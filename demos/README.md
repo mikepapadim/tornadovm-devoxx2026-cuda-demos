@@ -11,6 +11,7 @@ Each demo directory has its own `README.md` with build/run commands, a
 | [02-cuda-runtime-api](02-cuda-runtime-api/) | `CudaGraphReplay.java` | `TornadoExecutionPlan#withCUDAGraph()` — CUDA graph capture/replay from Java, CUDA-only runtime API (not a vendor-library task). |
 | [04-cublas-hybrid](04-cublas-hybrid/) | `CuBlasSgemvHybrid.java` | One `TaskGraph`, three stages: JIT `scale` task → cuBLAS `sgemv` library task → JIT `bias` task, all on shared device buffers. |
 | [05-cufft-hybrid](05-cufft-hybrid/) | `CuFftLowPassHybrid.java` | One `TaskGraph`, four stages: cuFFT `forward` (R2C) → JIT `lowPass` task → cuFFT `inverse` (C2R) → JIT `normalize` task, a GPU-resident low-pass filter. |
+| [06-cuda-streams](06-cuda-streams/) | `CudaStreamsOverlap.java` | `TornadoExecutionPlan#withIntraPlanConcurrency()` — 8 independent pipelines, sequential (1 stream) vs. concurrent (4-stream pool) with Nsight Systems timeline evidence of genuine kernel overlap. |
 
 `tornado.args` is a `tornado --generate-argfile` output, generated against
 the pinned build in `env/versions.env` and committed for the `java @arg-file`
@@ -22,4 +23,5 @@ All demos were run and captured on the pinned CUDA backend
 Raw logs: `results/raw/02-hello-kernel/` (00, 01),
 `results/raw/03-cuda-runtime-api/` (02),
 `results/raw/04-cublas-hybrid/` (04),
-`results/raw/05-cufft-hybrid/` (05).
+`results/raw/05-cufft-hybrid/` (05),
+`results/raw/06-cuda-streams/` (06, incl. Nsight Systems `.nsys-rep` traces).

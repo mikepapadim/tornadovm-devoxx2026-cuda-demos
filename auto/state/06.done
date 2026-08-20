@@ -1,0 +1,1 @@
+CUDA streams demo (demos/06-cuda-streams) built and verified: sequential (1 CUDA stream, no overlap) vs withIntraPlanConcurrency (4-stream pool, genuine overlap), validated against CPU reference, Nsight Systems cuda_gpu_trace evidence captured in results/raw/06-cuda-streams/.

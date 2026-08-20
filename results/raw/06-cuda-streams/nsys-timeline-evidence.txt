@@ -1,0 +1,30 @@
+=== SEQUENTIAL: distinct CUDA streams used by computeSmall kernel launches ===
+14
+kernel launch count: 64
+
+=== SEQUENTIAL: last 8 kernel launches (steady state), start/dur/end/stream (ns) ===
+start=885444708       dur=215746     end=885660454       stream=14
+start=885685862       dur=215682     end=885901544       stream=14
+start=885931624       dur=215714     end=886147338       stream=14
+start=886171242       dur=215714     end=886386956       stream=14
+start=886417004       dur=215682     end=886632686       stream=14
+start=886662766       dur=215650     end=886878416       stream=14
+start=886908496       dur=215714     end=887124210       stream=14
+start=887146098       dur=215682     end=887361780       stream=14
+
+=== CONCURRENT: distinct CUDA streams used by computeSmall kernel launches ===
+16
+17
+18
+19
+kernel launch count: 64
+
+=== CONCURRENT: last 8 kernel launches (steady state), start/dur/end/stream (ns) ===
+start=879531703       dur=216130     end=879747833       stream=16
+start=879597239       dur=215970     end=879813209       stream=17
+start=879693016       dur=215970     end=879908986       stream=18
+start=879756280       dur=215714     end=879971994       stream=19
+start=879817689       dur=215746     end=880033435       stream=16
+start=879880250       dur=215778     end=880096028       stream=17
+start=879940954       dur=215650     end=880156604       stream=18
+start=880034107       dur=215714     end=880249821       stream=19
