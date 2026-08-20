@@ -31,3 +31,10 @@ Raw logs: `results/raw/02-hello-kernel/` (00, 01),
 `results/raw/08-tensor-core-mma/` (08, incl. `--printKernel` generated-code
 evidence; Nsight Compute hardware-counter evidence blocked on this machine,
 see `results/failures/08-nsight-compute-permission.md`).
+
+Dedicated Nsight Systems profiling pass (CUDA API/kernel/memcpy timing,
+launch overhead, isolated from the timed runs above) across demos 04, 05, 07,
+08: `results/raw/09-profiling/PROFILING-SUMMARY.md` — Nsight Compute
+hardware-counter metrics (occupancy, GPU utilization %, memory throughput %,
+instruction mix, tensor-pipe activity) remain blocked on this machine, same
+root cause as task 08, re-verified 2026-08-21.

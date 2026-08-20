@@ -1,0 +1,32 @@
+WARNING: CPU IP/backtrace sampling not supported, disabling.
+Try the 'nsys status --environment' command to learn more.
+
+WARNING: CPU context switch tracing not supported, disabling.
+Try the 'nsys status --environment' command to learn more.
+
+size=4096 stages=6 executions=50 mode=both
+
+=== NOGRAPH (plain execute) ===
+execution 0: correct, wall=103856 us
+execution 1: correct, wall=849 us
+execution 2: correct, wall=432 us
+execution 49: correct, wall=150 us
+NOGRAPH (plain execute) first execution (JIT compile): 103856 us
+NOGRAPH (plain execute) steady-state median wall-clock (excl. first execution, n=49): 266 us
+NOGRAPH (plain execute): All executions correct
+
+=== GRAPH (withCUDAGraph) ===
+execution 0: correct, wall=28579 us
+execution 1: correct, wall=124 us
+execution 2: correct, wall=78 us
+execution 49: correct, wall=83 us
+GRAPH (withCUDAGraph) first execution (JIT compile + graph capture): 28579 us
+GRAPH (withCUDAGraph) steady-state median wall-clock (excl. first execution, n=49): 77 us
+GRAPH (withCUDAGraph): All executions correct
+
+steady-state median: nograph=266.3 us, graph=77.8 us, speedup=3.42x
+Collecting data...
+Generating '/tmp/nsys-report-902b.qdstrm'
+[1/1] [0%                          ] nsys-07-graph.nsys-rep[1/1] [0%                          ] nsys-07-graph.nsys-rep[1/1] [0%                          ] nsys-07-graph.nsys-rep[1/1] [==============61%           ] nsys-07-graph.nsys-rep[1/1] [=======================94%  ] nsys-07-graph.nsys-rep[1/1] [=======================95%  ] nsys-07-graph.nsys-rep[1/1] [========================100%] nsys-07-graph.nsys-rep[1/1] [========================100%] nsys-07-graph.nsys-rep
+Generated:
+    /tmp/nsys-07-graph.nsys-rep

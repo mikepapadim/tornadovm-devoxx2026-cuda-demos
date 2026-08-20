@@ -1,0 +1,1 @@
+Profiled demos 04/05/07/08 with Nsight Systems (raw .nsys-rep + parsed CSV summaries in results/raw/09-profiling/PROFILING-SUMMARY.md); Nsight Compute hardware-counter metrics re-verified blocked (same permission/version issue as task 08), documented with exact commands/errors.

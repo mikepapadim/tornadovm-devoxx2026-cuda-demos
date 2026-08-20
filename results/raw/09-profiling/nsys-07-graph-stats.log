@@ -1,0 +1,9 @@
+Generating SQLite file /tmp/nsys-07-graph.sqlite from /tmp/nsys-07-graph.nsys-rep
+Processing [/tmp/nsys-07-graph.sqlite] with [/opt/nvidia/nsight-systems/2024.5.1/host-linux-x64/reports/cuda_api_sum.py] to [results/raw/09-profiling/nsys-07-graph_cuda_api_sum.csv]... PROCESSED
+
+Processing [/tmp/nsys-07-graph.sqlite] with [/opt/nvidia/nsight-systems/2024.5.1/host-linux-x64/reports/cuda_gpu_kern_sum.py] to [results/raw/09-profiling/nsys-07-graph_cuda_gpu_kern_sum.csv]... PROCESSED
+
+Processing [/tmp/nsys-07-graph.sqlite] with [/opt/nvidia/nsight-systems/2024.5.1/host-linux-x64/reports/cuda_gpu_mem_time_sum.py] to [results/raw/09-profiling/nsys-07-graph_cuda_gpu_mem_time_sum.csv]... PROCESSED
+
+Processing [/tmp/nsys-07-graph.sqlite] with [/opt/nvidia/nsight-systems/2024.5.1/host-linux-x64/reports/cuda_kern_exec_sum.py] to [results/raw/09-profiling/nsys-07-graph_cuda_kern_exec_sum.csv]... PROCESSED
+

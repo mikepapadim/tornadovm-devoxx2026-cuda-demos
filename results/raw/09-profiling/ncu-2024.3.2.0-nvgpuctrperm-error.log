@@ -1,0 +1,7 @@
+==PROF== Connected to process 658867 (/home/michalis/.sdkman/candidates/java/21.0.2-open/bin/java)
+Single-tile Tensor Core (MMA) demo: C[16x8] = A[16x16] * B[16x8], fp16 -> f32
+==ERROR== ERR_NVGPUCTRPERM - The user does not have permission to access NVIDIA GPU Performance Counters on the target device 0. For instructions on enabling permissions and to get more information see https://developer.nvidia.com/ERR_NVGPUCTRPERM
+  [scalar (no MMA)] validation PASSED (max abs err 0.00000, 0/128 cells out of tol)
+  [mma.sync (Tensor Core)] validation PASSED (max abs err 0.00000, 0/128 cells out of tol)
+Result is correct
+==PROF== Disconnected from process 658867

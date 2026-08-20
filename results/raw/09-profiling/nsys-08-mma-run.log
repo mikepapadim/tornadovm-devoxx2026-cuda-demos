@@ -1,0 +1,15 @@
+WARNING: CPU IP/backtrace sampling not supported, disabling.
+Try the 'nsys status --environment' command to learn more.
+
+WARNING: CPU context switch tracing not supported, disabling.
+Try the 'nsys status --environment' command to learn more.
+
+Single-tile Tensor Core (MMA) demo: C[16x8] = A[16x16] * B[16x8], fp16 -> f32
+  [scalar (no MMA)] validation PASSED (max abs err 0.00000, 0/128 cells out of tol)
+  [mma.sync (Tensor Core)] validation PASSED (max abs err 0.00000, 0/128 cells out of tol)
+Result is correct
+Collecting data...
+Generating '/tmp/nsys-report-2bf5.qdstrm'
+[1/1] [0%                          ] nsys-08-mma.nsys-rep[1/1] [0%                          ] nsys-08-mma.nsys-rep[1/1] [6%                          ] nsys-08-mma.nsys-rep[1/1] [===================82%      ] nsys-08-mma.nsys-rep[1/1] [========================98% ] nsys-08-mma.nsys-rep[1/1] [========================100%] nsys-08-mma.nsys-rep[1/1] [========================100%] nsys-08-mma.nsys-rep
+Generated:
+    /tmp/nsys-08-mma.nsys-rep
