@@ -1,0 +1,465 @@
+size=4096 stages=6 executions=5 mode=both
+
+=== NOGRAPH (plain execute) ===
+{
+    "chainNoGraph": {
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_BYTE_CODE_GENERATION": "5034620",
+        "TOTAL_CODE_GENERATION_TIME": "6750975",
+        "TOTAL_GRAAL_COMPILE_TIME": "66559208",
+        "TOTAL_DRIVER_COMPILE_TIME": "12518094",
+        "TOTAL_TASK_GRAPH_TIME": "101434706",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "46204",
+        "COPY_IN_TIME": "78938",
+        "TOTAL_COPY_IN_SIZE_BYTES": "114800",
+        "ALLOCATION_BYTES": "114800",
+        "chainNoGraph.stage5": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "4896",
+            "TASK_COMPILE_GRAAL_TIME": "3849977",
+            "TASK_COMPILE_DRIVER_TIME": "304097",
+            "TASK_CODE_GENERATION_TIME": "573462"
+        }, 
+        "chainNoGraph.stage4": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "5791",
+            "TASK_COMPILE_GRAAL_TIME": "4249964",
+            "TASK_COMPILE_DRIVER_TIME": "317054",
+            "TASK_CODE_GENERATION_TIME": "461462"
+        }, 
+        "chainNoGraph.stage3": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "5855",
+            "TASK_COMPILE_GRAAL_TIME": "4336199",
+            "TASK_COMPILE_DRIVER_TIME": "369581",
+            "TASK_CODE_GENERATION_TIME": "522037"
+        }, 
+        "chainNoGraph.stage2": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "5599",
+            "TASK_COMPILE_GRAAL_TIME": "5885386",
+            "TASK_COMPILE_DRIVER_TIME": "404329",
+            "TASK_CODE_GENERATION_TIME": "1071056"
+        }, 
+        "chainNoGraph.stage1": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "6655",
+            "TASK_COMPILE_GRAAL_TIME": "6465919",
+            "TASK_COMPILE_DRIVER_TIME": "442410",
+            "TASK_CODE_GENERATION_TIME": "1219621"
+        }, 
+        "chainNoGraph.stage0": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "17408",
+            "TASK_COMPILE_GRAAL_TIME": "41771763",
+            "TASK_COMPILE_DRIVER_TIME": "10680623",
+            "TASK_CODE_GENERATION_TIME": "2903337"
+        }
+    }
+}
+
+execution 0: correct, wall=103124 us
+{
+    "chainNoGraph": {
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_TASK_GRAPH_TIME": "866338",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "43132",
+        "COPY_IN_TIME": "40923",
+        "TOTAL_COPY_IN_SIZE_BYTES": "16400",
+        "ALLOCATION_BYTES": "114800",
+        "chainNoGraph.stage5": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "5535"
+        }, 
+        "chainNoGraph.stage4": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "10623"
+        }, 
+        "chainNoGraph.stage3": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "10847"
+        }, 
+        "chainNoGraph.stage2": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "4095"
+        }, 
+        "chainNoGraph.stage1": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "5344"
+        }, 
+        "chainNoGraph.stage0": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "6688"
+        }
+    }
+}
+
+execution 1: correct, wall=1008 us
+{
+    "chainNoGraph": {
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_TASK_GRAPH_TIME": "620610",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "50046",
+        "COPY_IN_TIME": "49626",
+        "TOTAL_COPY_IN_SIZE_BYTES": "16400",
+        "ALLOCATION_BYTES": "114800",
+        "chainNoGraph.stage5": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "10847"
+        }, 
+        "chainNoGraph.stage4": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "10944"
+        }, 
+        "chainNoGraph.stage3": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "3231"
+        }, 
+        "chainNoGraph.stage2": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "10432"
+        }, 
+        "chainNoGraph.stage1": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "10656"
+        }, 
+        "chainNoGraph.stage0": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "3936"
+        }
+    }
+}
+
+execution 2: correct, wall=743 us
+{
+    "chainNoGraph": {
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_TASK_GRAPH_TIME": "571592",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "28926",
+        "COPY_IN_TIME": "44154",
+        "TOTAL_COPY_IN_SIZE_BYTES": "16400",
+        "ALLOCATION_BYTES": "114800",
+        "chainNoGraph.stage5": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "3231"
+        }, 
+        "chainNoGraph.stage4": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "3520"
+        }, 
+        "chainNoGraph.stage3": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "4224"
+        }, 
+        "chainNoGraph.stage2": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "11008"
+        }, 
+        "chainNoGraph.stage1": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "3423"
+        }, 
+        "chainNoGraph.stage0": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "3520"
+        }
+    }
+}
+
+{
+    "chainNoGraph": {
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_TASK_GRAPH_TIME": "593848",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "45180",
+        "COPY_IN_TIME": "26715",
+        "TOTAL_COPY_IN_SIZE_BYTES": "16400",
+        "ALLOCATION_BYTES": "114800",
+        "chainNoGraph.stage5": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "11199"
+        }, 
+        "chainNoGraph.stage4": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "3744"
+        }, 
+        "chainNoGraph.stage3": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "11455"
+        }, 
+        "chainNoGraph.stage2": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "11327"
+        }, 
+        "chainNoGraph.stage1": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "4352"
+        }, 
+        "chainNoGraph.stage0": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_KERNEL_TIME": "3103"
+        }
+    }
+}
+
+execution 4: correct, wall=714 us
+NOGRAPH (plain execute) first execution (JIT compile): 103124 us
+NOGRAPH (plain execute) steady-state median wall-clock (excl. first execution, n=4): 1008 us
+NOGRAPH (plain execute): All executions correct
+
+=== GRAPH (withCUDAGraph) ===
+{
+    "chainGraph": {
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_BYTE_CODE_GENERATION": "548356",
+        "TOTAL_CODE_GENERATION_TIME": "2235714",
+        "TOTAL_GRAAL_COMPILE_TIME": "19046311",
+        "TOTAL_DRIVER_COMPILE_TIME": "1485467",
+        "TOTAL_TASK_GRAPH_TIME": "25050096",
+        "COPY_IN_TIME": "25373",
+        "TOTAL_COPY_IN_SIZE_BYTES": "98400",
+        "ALLOCATION_BYTES": "114800",
+        "chainGraph.stage0": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_COMPILE_GRAAL_TIME": "3837103",
+            "TASK_COMPILE_DRIVER_TIME": "354204",
+            "TASK_CODE_GENERATION_TIME": "494430"
+        }, 
+        "chainGraph.stage3": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_COMPILE_GRAAL_TIME": "2994530",
+            "TASK_COMPILE_DRIVER_TIME": "222618",
+            "TASK_CODE_GENERATION_TIME": "343021"
+        }, 
+        "chainGraph.stage4": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_COMPILE_GRAAL_TIME": "3164953",
+            "TASK_COMPILE_DRIVER_TIME": "229199",
+            "TASK_CODE_GENERATION_TIME": "324818"
+        }, 
+        "chainGraph.stage1": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_COMPILE_GRAAL_TIME": "3196980",
+            "TASK_COMPILE_DRIVER_TIME": "247807",
+            "TASK_CODE_GENERATION_TIME": "341151"
+        }, 
+        "chainGraph.stage2": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_COMPILE_GRAAL_TIME": "3007959",
+            "TASK_COMPILE_DRIVER_TIME": "206520",
+            "TASK_CODE_GENERATION_TIME": "412724"
+        }, 
+        "chainGraph.stage5": {
+            "BACKEND": "CUDA",
+            "METHOD": "CudaGraphBenefit.stage",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_COMPILE_GRAAL_TIME": "2844786",
+            "TASK_COMPILE_DRIVER_TIME": "225119",
+            "TASK_CODE_GENERATION_TIME": "319570"
+        }
+    }
+}
+
+execution 0: correct, wall=25224 us
+{
+    "chainGraph": {
+        "TOTAL_TASK_GRAPH_TIME": "85627",
+    }
+}
+
+execution 1: correct, wall=143 us
+{
+    "chainGraph": {
+        "TOTAL_TASK_GRAPH_TIME": "49607",
+    }
+}
+
+execution 2: correct, wall=80 us
+{
+    "chainGraph": {
+        "TOTAL_TASK_GRAPH_TIME": "40881",
+    }
+}
+
+{
+    "chainGraph": {
+        "TOTAL_TASK_GRAPH_TIME": "42365",
+    }
+}
+
+execution 4: correct, wall=67 us
+GRAPH (withCUDAGraph) first execution (JIT compile + graph capture): 25224 us
+GRAPH (withCUDAGraph) steady-state median wall-clock (excl. first execution, n=4): 143 us
+GRAPH (withCUDAGraph): All executions correct
+
+steady-state median: nograph=1008.8 us, graph=143.7 us, speedup=7.02x

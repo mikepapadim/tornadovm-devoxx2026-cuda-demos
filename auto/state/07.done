@@ -1,0 +1,1 @@
+Task 07 done: demos/07-cuda-graph-benefit quantifies withCUDAGraph() steady-state replay speedup (6.5-8.6x across 3 runs) vs plain repeated execute(), CPU-reference-validated every execution; see STATE.md batch 07.

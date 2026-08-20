@@ -1,0 +1,21 @@
+size=4096 stages=6 executions=50 mode=both
+
+=== NOGRAPH (plain execute) ===
+execution 0: correct, wall=217655 us
+execution 1: correct, wall=774 us
+execution 2: correct, wall=416 us
+execution 49: correct, wall=135 us
+NOGRAPH (plain execute) first execution (JIT compile): 217655 us
+NOGRAPH (plain execute) steady-state median wall-clock (excl. first execution, n=49): 233 us
+NOGRAPH (plain execute): All executions correct
+
+=== GRAPH (withCUDAGraph) ===
+execution 0: correct, wall=28745 us
+execution 1: correct, wall=66 us
+execution 2: correct, wall=41 us
+execution 49: correct, wall=41 us
+GRAPH (withCUDAGraph) first execution (JIT compile + graph capture): 28745 us
+GRAPH (withCUDAGraph) steady-state median wall-clock (excl. first execution, n=49): 36 us
+GRAPH (withCUDAGraph): All executions correct
+
+steady-state median: nograph=233.6 us, graph=36.1 us, speedup=6.47x
