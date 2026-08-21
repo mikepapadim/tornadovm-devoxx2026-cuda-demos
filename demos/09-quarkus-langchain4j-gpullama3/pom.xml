@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>study.tornadovm.devoxx2026</groupId>
+    <artifactId>demo-09-quarkus-langchain4j-gpullama3</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <maven.compiler.release>21</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Real Maven Central release, current at probe time (2026-08-21). -->
+        <quarkus.version>3.33.2</quarkus.version>
+        <quarkus-langchain4j.version>1.13.0</quarkus-langchain4j.version>
+        <!--
+          quarkus-langchain4j-gpu-llama3:1.13.0 pins io.github.beehive-lab:gpu-llama3:1.0.0-jdk21
+          (the Maven Central release, built against TornadoVM 5.0.0-jdk21).
+          This repo's pinned GPULlama3.java SHA (env/versions.env: GPULLAMA3_SHA) was rebuilt
+          locally as gpu-llama3-1.0.0-jdk21-dev, linked against this repo's pinned TornadoVM
+          CUDA SHA (TORNADO_SHA, 5.2.1-jdk21-dev); see docs/gpullama3-reproduction.md. The
+          direct dependency below overrides the transitive 1.0.0-jdk21 (Maven "nearest wins":
+          a directly declared dependency always beats a transitively declared one, regardless
+          of version, per Maven dependency mediation rules) so this demo actually exercises the
+          pinned CUDA build, not a stock Maven Central artifact linked against a different
+          TornadoVM release.
+        -->
+        <gpu-llama3.version>1.0.0-jdk21-dev</gpu-llama3.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-bom</artifactId>
+                <version>${quarkus.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.quarkiverse.langchain4j</groupId>
+                <artifactId>quarkus-langchain4j-bom</artifactId>
+                <version>${quarkus-langchain4j.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.quarkiverse.langchain4j</groupId>
+            <artifactId>quarkus-langchain4j-gpu-llama3</artifactId>
+            <version>${quarkus-langchain4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.beehive-lab</groupId>
+            <artifactId>gpu-llama3</artifactId>
+            <version>${gpu-llama3.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-maven-plugin</artifactId>
+                <version>${quarkus.version}</version>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <release>21</release>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,30 @@
++ java -version
+openjdk version "25.0.2" 2026-01-20
+OpenJDK Runtime Environment (build 25.0.2+10-69)
+OpenJDK 64-Bit Server VM (build 25.0.2+10-69, mixed mode, sharing)
++ mvn -q clean package -DskipTests
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by com.google.common.util.concurrent.AbstractFuture$UnsafeAtomicHelper (file:/usr/share/maven/lib/guava.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.common.util.concurrent.AbstractFuture$UnsafeAtomicHelper
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+BUILD_EXIT:0
++ ls target/lib | grep gpu-llama3
+gpu-llama3-1.0.0-jdk21-dev.jar
+langchain4j-gpu-llama3-1.19.0-beta29.jar
++ java -cp target/classes:target/lib/* study.langchain4jdemo.Main
+Building GPULlama3ChatModel from /home/michalis/test_install/GPULlama3.java/beehive-llama-3.2-1b-instruct-fp16.gguf
+Exception in thread "main" java.lang.UnsupportedClassVersionError: org/beehive/gpullama3/model/loader/ModelLoader (class file version 65.65535) was compiled with preview features that are unsupported. This version of the Java Runtime only recognizes preview features for class file version 69.65535
+	at java.base/java.lang.ClassLoader.defineClass1(Native Method)
+	at java.base/java.lang.ClassLoader.defineClass(ClassLoader.java:962)
+	at java.base/java.security.SecureClassLoader.defineClass(SecureClassLoader.java:144)
+	at java.base/jdk.internal.loader.BuiltinClassLoader.defineClass(BuiltinClassLoader.java:776)
+	at java.base/jdk.internal.loader.BuiltinClassLoader.findClassOnClassPathOrNull(BuiltinClassLoader.java:691)
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClassOrNull(BuiltinClassLoader.java:620)
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:578)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:490)
+	at dev.langchain4j.model.gpullama3.GPULlama3BaseModel.init(GPULlama3BaseModel.java:69)
+	at dev.langchain4j.model.gpullama3.GPULlama3ChatModel.init(GPULlama3ChatModel.java:32)
+	at dev.langchain4j.model.gpullama3.GPULlama3ChatModel.<init>(GPULlama3ChatModel.java:36)
+	at dev.langchain4j.model.gpullama3.GPULlama3ChatModel$Builder.build(GPULlama3ChatModel.java:120)
+	at study.langchain4jdemo.Main.main(Main.java:24)
+RUN_EXIT:1

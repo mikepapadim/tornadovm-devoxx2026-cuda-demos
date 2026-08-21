@@ -1,3 +1,6 @@
 # Upstream checkouts — pinned by SHA in env/versions.env, never committed in place.
 vendor/
 auto/logs/
+
+# Maven build output for demos with their own pom.xml.
+target/

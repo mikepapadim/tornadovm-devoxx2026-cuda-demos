@@ -1,0 +1,13 @@
++ java -version
+openjdk version "25.0.2" 2026-01-20
+OpenJDK Runtime Environment (build 25.0.2+10-69)
+OpenJDK 64-Bit Server VM (build 25.0.2+10-69, mixed mode, sharing)
++ mvn -q clean package -DskipTests
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by com.google.common.util.concurrent.AbstractFuture$UnsafeAtomicHelper (file:/usr/share/maven/lib/guava.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.common.util.concurrent.AbstractFuture$UnsafeAtomicHelper
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+BUILD_EXIT:0
++ ls target/quarkus-app/lib/*/*.jar | grep gpu-llama3
+target/quarkus-app/lib/boot/io.github.beehive-lab.gpu-llama3-1.0.0-jdk21-dev.jar
+target/quarkus-app/lib/main/io.quarkiverse.langchain4j.quarkus-langchain4j-gpu-llama3-1.13.0.jar

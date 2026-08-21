@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>study.tornadovm.devoxx2026</groupId>
+    <artifactId>demo-10-langchain4j-gpullama3</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <maven.compiler.release>25</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Real Maven Central artifact, current at probe time (2026-08-21); langchain4j-gpu-llama3
+             has never published a non-beta version (see maven-metadata.xml), despite the README's
+             "official since v1.7.1" framing; verified by inspecting Maven Central directly. -->
+        <langchain4j-gpu-llama3.version>1.19.0-beta29</langchain4j-gpu-llama3.version>
+        <!-- Same pinned-CUDA override rationale as demos/09-quarkus-langchain4j-gpullama3/pom.xml:
+             overrides the transitive io.github.beehive-lab:gpu-llama3:0.4.0-jdk25 with this repo's
+             locally built, pinned-SHA, CUDA-linked artifact (direct dependency wins Maven mediation). -->
+        <gpu-llama3.version>1.0.0-jdk21-dev</gpu-llama3.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-gpu-llama3</artifactId>
+            <version>${langchain4j-gpu-llama3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.beehive-lab</groupId>
+            <artifactId>gpu-llama3</artifactId>
+            <version>${gpu-llama3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>2.0.17</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <release>25</release>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.8.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-deps</id>
+                        <phase>package</phase>
+                        <goals><goal>copy-dependencies</goal></goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

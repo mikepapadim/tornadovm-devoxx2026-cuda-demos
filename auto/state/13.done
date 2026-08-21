@@ -1,0 +1,1 @@
+task 13: probed Quarkus (quarkus-langchain4j-gpu-llama3:1.13.0) and LangChain4j (langchain4j-gpu-llama3:1.19.0-beta29) integration; both build against pinned CUDA gpu-llama3 but are blocked at runtime by a JDK21-preview-vs-JDK23+ version split, root cause verified from class file bytes

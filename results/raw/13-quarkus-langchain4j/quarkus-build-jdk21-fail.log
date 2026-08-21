@@ -1,0 +1,155 @@
++ java -version
+openjdk version "21.0.2" 2024-01-16
+OpenJDK Runtime Environment (build 21.0.2+13-58)
+OpenJDK 64-Bit Server VM (build 21.0.2+13-58, mixed mode, sharing)
++ mvn -q clean package -DskipTests
+[[1;31mERROR[m] Failed to execute goal [32mio.quarkus:quarkus-maven-plugin:3.33.2:build[m [1m(default)[m on project [36mdemo-09-quarkus-langchain4j-gpullama3[m: [1;31mExecution default of goal io.quarkus:quarkus-maven-plugin:3.33.2:build failed: An API incompatibility was encountered while executing io.quarkus:quarkus-maven-plugin:3.33.2:build: java.lang.UnsupportedClassVersionError: io/quarkiverse/langchain4j/gpullama3/runtime/config/LangChain4jGPULlama3FixedRuntimeConfig has been compiled by a more recent version of the Java Runtime (class file version 67.0), this version of the Java Runtime only recognizes class file versions up to 65.0[m
+[[1;31mERROR[m] [1;31m-----------------------------------------------------[m
+[[1;31mERROR[m] [1;31mrealm =    extension>io.quarkus:quarkus-maven-plugin:3.33.2[m
+[[1;31mERROR[m] [1;31mstrategy = org.codehaus.plexus.classworlds.strategy.SelfFirstStrategy[m
+[[1;31mERROR[m] [1;31murls[0] = file:/home/michalis/.m2/repository/io/quarkus/quarkus-maven-plugin/3.33.2/quarkus-maven-plugin-3.33.2.jar[m
+[[1;31mERROR[m] [1;31murls[1] = file:/home/michalis/.m2/repository/io/quarkus/quarkus-bootstrap-core/3.33.2/quarkus-bootstrap-core-3.33.2.jar[m
+[[1;31mERROR[m] [1;31murls[2] = file:/home/michalis/.m2/repository/io/quarkus/quarkus-classloader-commons/3.33.2/quarkus-classloader-commons-3.33.2.jar[m
+[[1;31mERROR[m] [1;31murls[3] = file:/home/michalis/.m2/repository/io/quarkus/quarkus-value-registry/3.33.2/quarkus-value-registry-3.33.2.jar[m
+[[1;31mERROR[m] [1;31murls[4] = file:/home/michalis/.m2/repository/io/quarkus/quarkus-bootstrap-app-model/3.33.2/quarkus-bootstrap-app-model-3.33.2.jar[m
+[[1;31mERROR[m] [1;31murls[5] = file:/home/michalis/.m2/repository/org/jboss/logging/commons-logging-jboss-logging/2.0.0.Final/commons-logging-jboss-logging-2.0.0.Final.jar[m
+[[1;31mERROR[m] [1;31murls[6] = file:/home/michalis/.m2/repository/io/quarkus/quarkus-bootstrap-json/3.33.2/quarkus-bootstrap-json-3.33.2.jar[m
+[[1;31mERROR[m] [1;31murls[7] = file:/home/michalis/.m2/repository/io/smallrye/common/smallrye-common-io/2.16.0/smallrye-common-io-2.16.0.jar[m
+[[1;31mERROR[m] [1;31murls[8] = file:/home/michalis/.m2/repository/io/smallrye/common/smallrye-common-constraint/2.16.0/smallrye-common-constraint-2.16.0.jar[m
+[[1;31mERROR[m] [1;31murls[9] = file:/home/michalis/.m2/repository/io/quarkus/quarkus-bootstrap-maven-resolver/3.33.2/quarkus-bootstrap-maven-resolver-3.33.2.jar[m
+[[1;31mERROR[m] [1;31murls[10] = file:/home/michalis/.m2/repository/io/smallrye/beanbag/smallrye-beanbag-maven/1.6.1/smallrye-beanbag-maven-1.6.1.jar[m
+[[1;31mERROR[m] [1;31murls[11] = file:/home/michalis/.m2/repository/io/smallrye/beanbag/smallrye-beanbag-sisu/1.6.1/smallrye-beanbag-sisu-1.6.1.jar[m
+[[1;31mERROR[m] [1;31murls[12] = file:/home/michalis/.m2/repository/io/smallrye/beanbag/smallrye-beanbag/1.6.1/smallrye-beanbag-1.6.1.jar[m
+[[1;31mERROR[m] [1;31murls[13] = file:/home/michalis/.m2/repository/commons-codec/commons-codec/1.21.0/commons-codec-1.21.0.jar[m
+[[1;31mERROR[m] [1;31murls[14] = file:/home/michalis/.m2/repository/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.jar[m
+[[1;31mERROR[m] [1;31murls[15] = file:/home/michalis/.m2/repository/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar[m
+[[1;31mERROR[m] [1;31murls[16] = file:/home/michalis/.m2/repository/org/apache/maven/maven-builder-support/3.9.12/maven-builder-support-3.9.12.jar[m
+[[1;31mERROR[m] [1;31murls[17] = file:/home/michalis/.m2/repository/org/codehaus/plexus/plexus-interpolation/1.26/plexus-interpolation-1.26.jar[m
+[[1;31mERROR[m] [1;31murls[18] = file:/home/michalis/.m2/repository/org/codehaus/plexus/plexus-xml/4.0.2/plexus-xml-4.0.2.jar[m
+[[1;31mERROR[m] [1;31murls[19] = file:/home/michalis/.m2/repository/org/apache/maven/maven-xml-impl/4.0.0-alpha-7/maven-xml-impl-4.0.0-alpha-7.jar[m
+[[1;31mERROR[m] [1;31murls[20] = file:/home/michalis/.m2/repository/org/apache/maven/maven-api-xml/4.0.0-alpha-7/maven-api-xml-4.0.0-alpha-7.jar[m
+[[1;31mERROR[m] [1;31murls[21] = file:/home/michalis/.m2/repository/org/apache/maven/maven-api-meta/4.0.0-alpha-7/maven-api-meta-4.0.0-alpha-7.jar[m
+[[1;31mERROR[m] [1;31murls[22] = file:/home/michalis/.m2/repository/org/codehaus/plexus/plexus-cipher/2.0/plexus-cipher-2.0.jar[m
+[[1;31mERROR[m] [1;31murls[23] = file:/home/michalis/.m2/repository/org/codehaus/plexus/plexus-sec-dispatcher/2.0/plexus-sec-dispatcher-2.0.jar[m
+[[1;31mERROR[m] [1;31murls[24] = file:/home/michalis/.m2/repository/io/quarkus/quarkus-fs-util/1.3.0/quarkus-fs-util-1.3.0.jar[m
+[[1;31mERROR[m] [1;31murls[25] = file:/home/michalis/.m2/repository/org/jboss/logmanager/jboss-logmanager/3.2.1.Final/jboss-logmanager-3.2.1.Final.jar[m
+[[1;31mERROR[m] [1;31murls[26] = file:/home/michalis/.m2/repository/io/smallrye/common/smallrye-common-cpu/2.16.0/smallrye-common-cpu-2.16.0.jar[m
+[[1;31mERROR[m] [1;31murls[27] = file:/home/michalis/.m2/repository/io/smallrye/common/smallrye-common-expression/2.16.0/smallrye-common-expression-2.16.0.jar[m
+[[1;31mERROR[m] [1;31murls[28] = file:/home/michalis/.m2/repository/io/smallrye/common/smallrye-common-net/2.16.0/smallrye-common-net-2.16.0.jar[m
+[[1;31mERROR[m] [1;31murls[29] = file:/home/michalis/.m2/repository/io/smallrye/common/smallrye-common-ref/2.16.0/smallrye-common-ref-2.16.0.jar[m
+[[1;31mERROR[m] [1;31murls[30] = file:/home/michalis/.m2/repository/org/jboss/logging/jboss-logging/3.6.2.Final/jboss-logging-3.6.2.Final.jar[m
+[[1;31mERROR[m] [1;31murls[31] = file:/home/michalis/.m2/repository/io/quarkus/quarkus-bootstrap-maven4-resolver/3.33.2/quarkus-bootstrap-maven4-resolver-3.33.2.jar[m
+[[1;31mERROR[m] [1;31murls[32] = file:/home/michalis/.m2/repository/org/apache/maven/maven-embedder/3.9.12/maven-embedder-3.9.12.jar[m
+[[1;31mERROR[m] [1;31murls[33] = file:/home/michalis/.m2/repository/org/apache/maven/shared/maven-shared-utils/3.4.2/maven-shared-utils-3.4.2.jar[m
+[[1;31mERROR[m] [1;31murls[34] = file:/home/michalis/.m2/repository/com/google/inject/guice/5.1.0/guice-5.1.0-classes.jar[m
+[[1;31mERROR[m] [1;31murls[35] = file:/home/michalis/.m2/repository/aopalliance/aopalliance/1.0/aopalliance-1.0.jar[m
+[[1;31mERROR[m] [1;31murls[36] = file:/home/michalis/.m2/repository/com/google/guava/guava/33.5.0-jre/guava-33.5.0-jre.jar[m
+[[1;31mERROR[m] [1;31murls[37] = file:/home/michalis/.m2/repository/com/google/guava/failureaccess/1.0.1/failureaccess-1.0.1.jar[m
+[[1;31mERROR[m] [1;31murls[38] = file:/home/michalis/.m2/repository/javax/annotation/javax.annotation-api/1.3.2/javax.annotation-api-1.3.2.jar[m
+[[1;31mERROR[m] [1;31murls[39] = file:/home/michalis/.m2/repository/commons-cli/commons-cli/1.11.0/commons-cli-1.11.0.jar[m
+[[1;31mERROR[m] [1;31murls[40] = file:/home/michalis/.m2/repository/io/quarkus/quarkus-core-deployment/3.33.2/quarkus-core-deployment-3.33.2.jar[m
+[[1;31mERROR[m] [1;31murls[41] = file:/home/michalis/.m2/repository/org/aesh/readline/2.6/readline-2.6.jar[m
+[[1;31mERROR[m] [1;31murls[42] = file:/home/michalis/.m2/repository/org/aesh/aesh/2.8.2/aesh-2.8.2.jar[m
+[[1;31mERROR[m] [1;31murls[43] = file:/home/michalis/.m2/repository/org/apache/commons/commons-lang3/3.20.0/commons-lang3-3.20.0.jar[m
+[[1;31mERROR[m] [1;31murls[44] = file:/home/michalis/.m2/repository/org/apache/commons/commons-compress/1.28.0/commons-compress-1.28.0.jar[m
+[[1;31mERROR[m] [1;31murls[45] = file:/home/michalis/.m2/repository/commons-io/commons-io/2.21.0/commons-io-2.21.0.jar[m
+[[1;31mERROR[m] [1;31murls[46] = file:/home/michalis/.m2/repository/org/wildfly/common/wildfly-common/2.0.1/wildfly-common-2.0.1.jar[m
+[[1;31mERROR[m] [1;31murls[47] = file:/home/michalis/.m2/repository/io/quarkus/gizmo/gizmo/1.10.1/gizmo-1.10.1.jar[m
+[[1;31mERROR[m] [1;31murls[48] = file:/home/michalis/.m2/repository/org/ow2/asm/asm-util/9.9.1/asm-util-9.9.1.jar[m
+[[1;31mERROR[m] [1;31murls[49] = file:/home/michalis/.m2/repository/org/ow2/asm/asm-analysis/9.9.1/asm-analysis-9.9.1.jar[m
+[[1;31mERROR[m] [1;31murls[50] = file:/home/michalis/.m2/repository/io/quarkus/gizmo/gizmo2/2.1.1/gizmo2-2.1.1.jar[m
+[[1;31mERROR[m] [1;31murls[51] = file:/home/michalis/.m2/repository/io/smallrye/classfile/jdk-classfile-backport/26/jdk-classfile-backport-26.jar[m
+[[1;31mERROR[m] [1;31murls[52] = file:/home/michalis/.m2/repository/io/smallrye/common/smallrye-common-resource/2.16.0/smallrye-common-resource-2.16.0.jar[m
+[[1;31mERROR[m] [1;31murls[53] = file:/home/michalis/.m2/repository/io/smallrye/jandex/3.5.3/jandex-3.5.3.jar[m
+[[1;31mERROR[m] [1;31murls[54] = file:/home/michalis/.m2/repository/io/smallrye/jandex-gizmo2/3.5.3/jandex-gizmo2-3.5.3.jar[m
+[[1;31mERROR[m] [1;31murls[55] = file:/home/michalis/.m2/repository/io/smallrye/common/smallrye-common-os/2.16.0/smallrye-common-os-2.16.0.jar[m
+[[1;31mERROR[m] [1;31murls[56] = file:/home/michalis/.m2/repository/io/smallrye/common/smallrye-common-process/2.16.0/smallrye-common-process-2.16.0.jar[m
+[[1;31mERROR[m] [1;31murls[57] = file:/home/michalis/.m2/repository/io/smallrye/common/smallrye-common-function/2.16.0/smallrye-common-function-2.16.0.jar[m
+[[1;31mERROR[m] [1;31murls[58] = file:/home/michalis/.m2/repository/org/ow2/asm/asm/9.9.1/asm-9.9.1.jar[m
+[[1;31mERROR[m] [1;31murls[59] = file:/home/michalis/.m2/repository/org/ow2/asm/asm-commons/9.9.1/asm-commons-9.9.1.jar[m
+[[1;31mERROR[m] [1;31murls[60] = file:/home/michalis/.m2/repository/org/ow2/asm/asm-tree/9.9.1/asm-tree-9.9.1.jar[m
+[[1;31mERROR[m] [1;31murls[61] = file:/home/michalis/.m2/repository/io/quarkus/quarkus-development-mode-spi/3.33.2/quarkus-development-mode-spi-3.33.2.jar[m
+[[1;31mERROR[m] [1;31murls[62] = file:/home/michalis/.m2/repository/io/quarkus/quarkus-hibernate-validator-spi/3.33.2/quarkus-hibernate-validator-spi-3.33.2.jar[m
+[[1;31mERROR[m] [1;31murls[63] = file:/home/michalis/.m2/repository/io/quarkus/quarkus-class-change-agent/3.33.2/quarkus-class-change-agent-3.33.2.jar[m
+[[1;31mERROR[m] [1;31murls[64] = file:/home/michalis/.m2/repository/org/eclipse/sisu/org.eclipse.sisu.inject/0.9.0.M4/org.eclipse.sisu.inject-0.9.0.M4.jar[m
+[[1;31mERROR[m] [1;31murls[65] = file:/home/michalis/.m2/repository/io/quarkus/quarkus-core/3.33.2/quarkus-core-3.33.2.jar[m
+[[1;31mERROR[m] [1;31murls[66] = file:/home/michalis/.m2/repository/jakarta/annotation/jakarta.annotation-api/3.0.0/jakarta.annotation-api-3.0.0.jar[m
+[[1;31mERROR[m] [1;31murls[67] = file:/home/michalis/.m2/repository/jakarta/inject/jakarta.inject-api/2.0.1/jakarta.inject-api-2.0.1.jar[m
+[[1;31mERROR[m] [1;31murls[68] = file:/home/michalis/.m2/repository/io/smallrye/config/smallrye-config/3.16.0/smallrye-config-3.16.0.jar[m
+[[1;31mERROR[m] [1;31murls[69] = file:/home/michalis/.m2/repository/io/smallrye/config/smallrye-config-core/3.16.0/smallrye-config-core-3.16.0.jar[m
+[[1;31mERROR[m] [1;31murls[70] = file:/home/michalis/.m2/repository/org/eclipse/microprofile/config/microprofile-config-api/3.1/microprofile-config-api-3.1.jar[m
+[[1;31mERROR[m] [1;31murls[71] = file:/home/michalis/.m2/repository/io/smallrye/common/smallrye-common-classloader/2.16.0/smallrye-common-classloader-2.16.0.jar[m
+[[1;31mERROR[m] [1;31murls[72] = file:/home/michalis/.m2/repository/io/smallrye/config/smallrye-config-common/3.16.0/smallrye-config-common-3.16.0.jar[m
+[[1;31mERROR[m] [1;31murls[73] = file:/home/michalis/.m2/repository/org/jboss/threads/jboss-threads/3.9.2/jboss-threads-3.9.2.jar[m
+[[1;31mERROR[m] [1;31murls[74] = file:/home/michalis/.m2/repository/io/smallrye/common/smallrye-common-annotation/2.16.0/smallrye-common-annotation-2.16.0.jar[m
+[[1;31mERROR[m] [1;31murls[75] = file:/home/michalis/.m2/repository/io/quarkus/quarkus-bootstrap-runner/3.33.2/quarkus-bootstrap-runner-3.33.2.jar[m
+[[1;31mERROR[m] [1;31murls[76] = file:/home/michalis/.m2/repository/org/crac/crac/1.5.0/crac-1.5.0.jar[m
+[[1;31mERROR[m] [1;31murls[77] = file:/home/michalis/.m2/repository/io/quarkus/quarkus-builder/3.33.2/quarkus-builder-3.33.2.jar[m
+[[1;31mERROR[m] [1;31murls[78] = file:/home/michalis/.m2/repository/org/graalvm/sdk/nativeimage/23.1.2/nativeimage-23.1.2.jar[m
+[[1;31mERROR[m] [1;31murls[79] = file:/home/michalis/.m2/repository/org/graalvm/sdk/word/23.1.2/word-23.1.2.jar[m
+[[1;31mERROR[m] [1;31murls[80] = file:/home/michalis/.m2/repository/net/bytebuddy/byte-buddy-agent/1.17.8/byte-buddy-agent-1.17.8.jar[m
+[[1;31mERROR[m] [1;31murls[81] = file:/home/michalis/.m2/repository/org/junit/platform/junit-platform-launcher/6.0.3/junit-platform-launcher-6.0.3.jar[m
+[[1;31mERROR[m] [1;31murls[82] = file:/home/michalis/.m2/repository/org/junit/platform/junit-platform-engine/6.0.3/junit-platform-engine-6.0.3.jar[m
+[[1;31mERROR[m] [1;31murls[83] = file:/home/michalis/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar[m
+[[1;31mERROR[m] [1;31murls[84] = file:/home/michalis/.m2/repository/org/junit/platform/junit-platform-commons/6.0.3/junit-platform-commons-6.0.3.jar[m
+[[1;31mERROR[m] [1;31murls[85] = file:/home/michalis/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar[m
+[[1;31mERROR[m] [1;31murls[86] = file:/home/michalis/.m2/repository/org/jspecify/jspecify/1.0.0/jspecify-1.0.0.jar[m
+[[1;31mERROR[m] [1;31murls[87] = file:/home/michalis/.m2/repository/org/junit/jupiter/junit-jupiter/6.0.3/junit-jupiter-6.0.3.jar[m
+[[1;31mERROR[m] [1;31murls[88] = file:/home/michalis/.m2/repository/org/junit/jupiter/junit-jupiter-api/6.0.3/junit-jupiter-api-6.0.3.jar[m
+[[1;31mERROR[m] [1;31murls[89] = file:/home/michalis/.m2/repository/org/junit/jupiter/junit-jupiter-params/6.0.3/junit-jupiter-params-6.0.3.jar[m
+[[1;31mERROR[m] [1;31murls[90] = file:/home/michalis/.m2/repository/org/junit/jupiter/junit-jupiter-engine/6.0.3/junit-jupiter-engine-6.0.3.jar[m
+[[1;31mERROR[m] [1;31murls[91] = file:/home/michalis/.m2/repository/io/quarkus/quarkus-project-core-extension-codestarts/3.33.2/quarkus-project-core-extension-codestarts-3.33.2.jar[m
+[[1;31mERROR[m] [1;31murls[92] = file:/home/michalis/.m2/repository/io/quarkus/quarkus-devtools-common/3.33.2/quarkus-devtools-common-3.33.2.jar[m
+[[1;31mERROR[m] [1;31murls[93] = file:/home/michalis/.m2/repository/io/quarkus/quarkus-devtools-registry-client/3.33.2/quarkus-devtools-registry-client-3.33.2.jar[m
+[[1;31mERROR[m] [1;31murls[94] = file:/home/michalis/.m2/repository/io/quarkus/quarkus-devtools-base-codestarts/3.33.2/quarkus-devtools-base-codestarts-3.33.2.jar[m
+[[1;31mERROR[m] [1;31murls[95] = file:/home/michalis/.m2/repository/io/quarkus/quarkus-devtools-codestarts/3.33.2/quarkus-devtools-codestarts-3.33.2.jar[m
+[[1;31mERROR[m] [1;31murls[96] = file:/home/michalis/.m2/repository/io/quarkus/qute/qute-core/3.33.2/qute-core-3.33.2.jar[m
+[[1;31mERROR[m] [1;31murls[97] = file:/home/michalis/.m2/repository/io/smallrye/reactive/mutiny/3.1.1/mutiny-3.1.1.jar[m
+[[1;31mERROR[m] [1;31murls[98] = file:/home/michalis/.m2/repository/org/jctools/jctools-core/4.0.5/jctools-core-4.0.5.jar[m
+[[1;31mERROR[m] [1;31murls[99] = file:/home/michalis/.m2/repository/io/smallrye/common/smallrye-common-version/2.16.0/smallrye-common-version-2.16.0.jar[m
+[[1;31mERROR[m] [1;31murls[100] = file:/home/michalis/.m2/repository/io/fabric8/maven-model-helper/41/maven-model-helper-41.jar[m
+[[1;31mERROR[m] [1;31murls[101] = file:/home/michalis/.m2/repository/org/jdom/jdom2/2.0.6.1/jdom2-2.0.6.1.jar[m
+[[1;31mERROR[m] [1;31murls[102] = file:/home/michalis/.m2/repository/com/fasterxml/jackson/dataformat/jackson-dataformat-yaml/2.21.2/jackson-dataformat-yaml-2.21.2.jar[m
+[[1;31mERROR[m] [1;31murls[103] = file:/home/michalis/.m2/repository/org/yaml/snakeyaml/2.5/snakeyaml-2.5.jar[m
+[[1;31mERROR[m] [1;31murls[104] = file:/home/michalis/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jdk8/2.21.2/jackson-datatype-jdk8-2.21.2.jar[m
+[[1;31mERROR[m] [1;31murls[105] = file:/home/michalis/.m2/repository/org/apache/maven/resolver/maven-resolver-named-locks/1.9.25/maven-resolver-named-locks-1.9.25.jar[m
+[[1;31mERROR[m] [1;31murls[106] = file:/home/michalis/.m2/repository/org/apache/maven/resolver/maven-resolver-util/1.9.25/maven-resolver-util-1.9.25.jar[m
+[[1;31mERROR[m] [1;31murls[107] = file:/home/michalis/.m2/repository/org/codehaus/plexus/plexus-component-annotations/2.1.0/plexus-component-annotations-2.1.0.jar[m
+[[1;31mERROR[m] [1;31murls[108] = file:/home/michalis/.m2/repository/jakarta/enterprise/jakarta.enterprise.cdi-api/4.1.0/jakarta.enterprise.cdi-api-4.1.0.jar[m
+[[1;31mERROR[m] [1;31murls[109] = file:/home/michalis/.m2/repository/jakarta/enterprise/jakarta.enterprise.lang-model/4.1.0/jakarta.enterprise.lang-model-4.1.0.jar[m
+[[1;31mERROR[m] [1;31murls[110] = file:/home/michalis/.m2/repository/jakarta/el/jakarta.el-api/6.0.1/jakarta.el-api-6.0.1.jar[m
+[[1;31mERROR[m] [1;31murls[111] = file:/home/michalis/.m2/repository/jakarta/interceptor/jakarta.interceptor-api/2.2.0/jakarta.interceptor-api-2.2.0.jar[m
+[[1;31mERROR[m] [1;31murls[112] = file:/home/michalis/.m2/repository/org/codejive/java-properties/0.0.7/java-properties-0.0.7.jar[m
+[[1;31mERROR[m] [1;31murls[113] = file:/home/michalis/.m2/repository/io/quarkus/quarkus-analytics-common/3.33.2/quarkus-analytics-common-3.33.2.jar[m
+[[1;31mERROR[m] [1;31murls[114] = file:/home/michalis/.m2/repository/io/quarkus/quarkus-devtools-message-writer/3.33.2/quarkus-devtools-message-writer-3.33.2.jar[m
+[[1;31mERROR[m] [1;31murls[115] = file:/home/michalis/.m2/repository/io/quarkus/quarkus-cyclonedx-generator/3.33.2/quarkus-cyclonedx-generator-3.33.2.jar[m
+[[1;31mERROR[m] [1;31murls[116] = file:/home/michalis/.m2/repository/org/cyclonedx/cyclonedx-core-java/12.1.0/cyclonedx-core-java-12.1.0.jar[m
+[[1;31mERROR[m] [1;31murls[117] = file:/home/michalis/.m2/repository/org/apache/commons/commons-collections4/4.5.0/commons-collections4-4.5.0.jar[m
+[[1;31mERROR[m] [1;31murls[118] = file:/home/michalis/.m2/repository/com/github/package-url/packageurl-java/1.5.0/packageurl-java-1.5.0.jar[m
+[[1;31mERROR[m] [1;31murls[119] = file:/home/michalis/.m2/repository/com/fasterxml/jackson/dataformat/jackson-dataformat-xml/2.21.2/jackson-dataformat-xml-2.21.2.jar[m
+[[1;31mERROR[m] [1;31murls[120] = file:/home/michalis/.m2/repository/org/codehaus/woodstox/stax2-api/4.2.2/stax2-api-4.2.2.jar[m
+[[1;31mERROR[m] [1;31murls[121] = file:/home/michalis/.m2/repository/com/fasterxml/woodstox/woodstox-core/7.1.1/woodstox-core-7.1.1.jar[m
+[[1;31mERROR[m] [1;31murls[122] = file:/home/michalis/.m2/repository/com/networknt/json-schema-validator/1.5.9/json-schema-validator-1.5.9.jar[m
+[[1;31mERROR[m] [1;31murls[123] = file:/home/michalis/.m2/repository/com/ethlo/time/itu/1.14.0/itu-1.14.0.jar[m
+[[1;31mERROR[m] [1;31murls[124] = file:/home/michalis/.m2/repository/org/freemarker/freemarker/2.3.34/freemarker-2.3.34.jar[m
+[[1;31mERROR[m] [1;31murls[125] = file:/home/michalis/.m2/repository/org/eclipse/parsson/parsson/1.1.7/parsson-1.1.7.jar[m
+[[1;31mERROR[m] [1;31murls[126] = file:/home/michalis/.m2/repository/jakarta/json/jakarta.json-api/2.1.3/jakarta.json-api-2.1.3.jar[m
+[[1;31mERROR[m] [1;31murls[127] = file:/home/michalis/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.21.2/jackson-databind-2.21.2.jar[m
+[[1;31mERROR[m] [1;31murls[128] = file:/home/michalis/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.21/jackson-annotations-2.21.jar[m
+[[1;31mERROR[m] [1;31murls[129] = file:/home/michalis/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.21.2/jackson-core-2.21.2.jar[m
+[[1;31mERROR[m] [1;31murls[130] = file:/home/michalis/.m2/repository/org/twdata/maven/mojo-executor/2.4.0/mojo-executor-2.4.0.jar[m
+[[1;31mERROR[m] [1;31murls[131] = file:/home/michalis/.m2/repository/org/codehaus/plexus/plexus-utils/3.6.1/plexus-utils-3.6.1.jar[m
+[[1;31mERROR[m] [1;31murls[132] = file:/home/michalis/.m2/repository/org/jboss/slf4j/slf4j-jboss-logmanager/2.0.2.Final/slf4j-jboss-logmanager-2.0.2.Final.jar[m
+[[1;31mERROR[m] [1;31mNumber of foreign imports: 1[m
+[[1;31mERROR[m] [1;31mimport: Entry[import  from realm ClassRealm[maven.api, parent: null]][m
+[[1;31mERROR[m] [1;31m[m
+[[1;31mERROR[m] [1;31m-----------------------------------------------------[m
+[[1;31mERROR[m] [1;31m[m
+[[1;31mERROR[m] -> [1m[Help 1][m
+[[1;31mERROR[m] 
+[[1;31mERROR[m] To see the full stack trace of the errors, re-run Maven with the [1m-e[m switch.
+[[1;31mERROR[m] Re-run Maven using the [1m-X[m switch to enable full debug logging.
+[[1;31mERROR[m] 
+[[1;31mERROR[m] For more information about the errors and possible solutions, please read the following articles:
+[[1;31mERROR[m] [1m[Help 1][m http://cwiki.apache.org/confluence/display/MAVEN/PluginContainerException
+EXIT:1

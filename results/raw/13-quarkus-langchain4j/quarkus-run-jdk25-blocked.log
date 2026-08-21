@@ -1,0 +1,45 @@
++ java -jar quarkus-run.jar
+__  ____  __  _____   ___  __ ____  ______ 
+ --/ __ \/ / / / _ | / _ \/ //_/ / / / __/ 
+ -/ /_/ / /_/ / __ |/ , _/ ,< / /_/ /\ \   
+--\___\_\____/_/ |_/_/|_/_/|_|\____/___/   
+2026-08-21 20:55:02,871 INFO  [io.quarkus] (main) demo-09-quarkus-langchain4j-gpullama3 1.0.0 on JVM (powered by Quarkus 3.33.2) started in 0.226s. 
+2026-08-21 20:55:02,874 INFO  [io.quarkus] (main) Profile prod activated. 
+2026-08-21 20:55:02,874 INFO  [io.quarkus] (main) Installed features: [cdi, langchain4j, langchain4j-gpu-llama3, qute, smallrye-context-propagation, vertx]
+Prompt: In exactly one sentence, explain what a GPU kernel is.
+2026-08-21 20:55:02,956 INFO  [io.quarkiverse.langchain4j.gpullama3.GPULlama3ModelHolder] (main) GPULlama3 model initialization {modelPath=/home/michalis/.langchain4j/models/unsloth_Llama-3.2-1B-Instruct-GGUF/Llama-3.2-1B-Instruct-F16.gguf, temperature=0.0, topP=0.95, seed=-853292766, maxTokens=64, onGPU=true, withPrefillDecode=true, prefillBatchSize=32, enableThinking=false, deviceMemory=4GB}...
+2026-08-21 20:55:02,957 ERROR [io.quarkus.runtime.Application] (main) Failed to start application: java.lang.UnsupportedClassVersionError: org/beehive/gpullama3/model/loader/ModelLoader (class file version 65.65535) was compiled with preview features that are unsupported. This version of the Java Runtime only recognizes preview features for class file version 69.65535
+	at java.base/java.lang.ClassLoader.defineClass1(Native Method)
+	at java.base/java.lang.ClassLoader.defineClass(ClassLoader.java:962)
+	at java.base/java.security.SecureClassLoader.defineClass(SecureClassLoader.java:144)
+	at java.base/jdk.internal.loader.BuiltinClassLoader.defineClass(BuiltinClassLoader.java:776)
+	at java.base/jdk.internal.loader.BuiltinClassLoader.findClassOnClassPathOrNull(BuiltinClassLoader.java:691)
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClassOrNull(BuiltinClassLoader.java:620)
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:578)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:490)
+	at io.quarkus.bootstrap.runner.RunnerClassLoader.loadClass(RunnerClassLoader.java:100)
+	at io.quarkus.bootstrap.runner.RunnerClassLoader.loadClass(RunnerClassLoader.java:86)
+	at io.quarkiverse.langchain4j.gpullama3.GPULlama3ModelHolder.ensureInitialized(GPULlama3ModelHolder.java:118)
+	at io.quarkiverse.langchain4j.gpullama3.GPULlama3ChatModel.doChat(GPULlama3ChatModel.java:36)
+	at dev.langchain4j.model.chat.ChatModel.chat(ChatModel.java:61)
+	at dev.langchain4j.model.chat.ChatModel.chat(ChatModel.java:36)
+	at dev.langchain4j.model.chat.ChatModel_0i3Izj-7gPyQP_1JpxrszvVf9iA_Synthetic_ClientProxy.chat(Unknown Source)
+	at dev.langchain4j.guardrail.SynchronousChatExecutor.execute(SynchronousChatExecutor.java:32)
+	at dev.langchain4j.guardrail.AbstractChatExecutor.executeInternal(AbstractChatExecutor.java:66)
+	at dev.langchain4j.guardrail.AbstractChatExecutor.execute(AbstractChatExecutor.java:52)
+	at io.quarkiverse.langchain4j.runtime.aiservice.AiServiceMethodImplementationSupport.doImplement0(AiServiceMethodImplementationSupport.java:474)
+	at io.quarkiverse.langchain4j.runtime.aiservice.AiServiceMethodImplementationSupport.doImplement(AiServiceMethodImplementationSupport.java:226)
+	at io.quarkiverse.langchain4j.runtime.aiservice.AiServiceMethodImplementationSupport.implement(AiServiceMethodImplementationSupport.java:201)
+	at study.quarkusdemo.GpuExplainerService$$QuarkusImpl.explainGpuKernel(Unknown Source)
+	at study.quarkusdemo.GpuExplainerService$$QuarkusImpl_ClientProxy.explainGpuKernel(Unknown Source)
+	at study.quarkusdemo.Main.run(Main.java:17)
+	at study.quarkusdemo.Main_ClientProxy.run(Unknown Source)
+	at io.quarkus.runtime.ApplicationLifecycleManager.run(ApplicationLifecycleManager.java:149)
+	at io.quarkus.runtime.Quarkus.run(Quarkus.java:79)
+	at io.quarkus.runtime.Quarkus.run(Quarkus.java:50)
+	at study.quarkusdemo.Main.main(Main.java:23)
+	at io.quarkus.bootstrap.runner.QuarkusEntryPoint.doRun(QuarkusEntryPoint.java:86)
+	at io.quarkus.bootstrap.runner.QuarkusEntryPoint.main(QuarkusEntryPoint.java:37)
+
+2026-08-21 20:55:02,972 INFO  [io.quarkus] (main) demo-09-quarkus-langchain4j-gpullama3 stopped in 0.015s
+RUN_EXIT:1
