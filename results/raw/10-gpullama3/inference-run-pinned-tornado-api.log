@@ -1,0 +1,25 @@
+WARNING: Using incubator modules: jdk.incubator.vector
+Loading model weights in TornadoVM format (F16 -> F16)
+
+Starting TornadoVM initialization...
+Exception in thread "main" uk.ac.manchester.tornado.api.exceptions.TornadoInternalError: Kernel entry org.beehive.gpullama3.tornadovm.layers.Activation$$Lambda/0x00000007c0288000 has no writeReplace(): this task lambda was compiled against a tornado-api release whose TornadoFunctions.TaskN interfaces were not Serializable. Recompile the application against this TornadoVM's tornado-api.
+	at tornado.runtime@5.2.1-jdk21-dev/uk.ac.manchester.tornado.runtime.analyzer.TaskUtils.resolveViaSerializedLambda(TaskUtils.java:111)
+	at tornado.runtime@5.2.1-jdk21-dev/uk.ac.manchester.tornado.runtime.analyzer.TaskUtils.resolveMethodHandle(TaskUtils.java:89)
+	at tornado.runtime@5.2.1-jdk21-dev/uk.ac.manchester.tornado.runtime.tasks.TornadoTaskGraph.addTask(TornadoTaskGraph.java:1946)
+	at tornado.api@5.2.1-jdk21-dev/uk.ac.manchester.tornado.api.TaskGraph.task(TaskGraph.java:188)
+	at org.beehive.gpullama3.tornadovm.layers.Activation.setupActivationTaskGraph(Activation.java:29)
+	at org.beehive.gpullama3.tornadovm.layers.Activation.<init>(Activation.java:21)
+	at org.beehive.gpullama3.tornadovm.plan.components.fp16.LlamaFP16PlanComponents.singleTokenActivation(LlamaFP16PlanComponents.java:49)
+	at org.beehive.gpullama3.tornadovm.plan.SingleTokenForwardPlan.<init>(SingleTokenForwardPlan.java:38)
+	at org.beehive.gpullama3.tornadovm.plan.ForwardPlanFactory.createLlamaFP16Plan(ForwardPlanFactory.java:128)
+	at org.beehive.gpullama3.tornadovm.plan.ForwardPlanFactory.createFP16Plan(ForwardPlanFactory.java:94)
+	at org.beehive.gpullama3.tornadovm.plan.ForwardPlanFactory.create(ForwardPlanFactory.java:82)
+	at org.beehive.gpullama3.tornadovm.plan.ForwardPlanFactory.createSingleToken(ForwardPlanFactory.java:58)
+	at org.beehive.gpullama3.tornadovm.TornadoVMMasterPlanSingleToken.createExecutionPlan(TornadoVMMasterPlanSingleToken.java:60)
+	at org.beehive.gpullama3.tornadovm.TornadoVMMasterPlanSingleToken.<init>(TornadoVMMasterPlanSingleToken.java:42)
+	at org.beehive.gpullama3.tornadovm.TornadoVMMasterPlan.initializeTornadoVMPlan(TornadoVMMasterPlan.java:66)
+	at org.beehive.gpullama3.model.Model.runInstructOnce(Model.java:205)
+	at org.beehive.gpullama3.LlamaApp.runSingleInstruction(LlamaApp.java:41)
+	at org.beehive.gpullama3.LlamaApp.main(LlamaApp.java:68)
+Detected TornadoVM backend: cuda (from /home/michalis/tornadovm-devoxx2026-cuda-demos/vendor/tornadovm/dist/tornadovm-5.2.1-jdk21-dev-cuda-linux-amd64/tornadovm-5.2.1-jdk21-dev-cuda/etc/tornado.backend)
+Error: Command failed with return code 1

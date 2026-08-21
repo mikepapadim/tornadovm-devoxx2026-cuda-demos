@@ -1,0 +1,13 @@
+WARNING: Using incubator modules: jdk.incubator.vector
+Loading model weights in TornadoVM format (F16 -> F16)
+
+Starting TornadoVM initialization...
+GPU acceleration enables faster processing of complex computations, allowing for improved performance, increased productivity, and faster rendering of graphics and simulations in various fields such as gaming, scientific simulations, and data analysis.
+
+==== Performance Metrics ====
+achieved tok/s: 154.64. Tokens: 60, seconds: 0.39
+GGUF Model Load: 454.17 ms
+Compilation & CodeGen: 416.85 ms
+Warmup: 3667.91 ms
+Read-only weights Copy-in: 3655.95 ms
+Detected TornadoVM backend: cuda (from /home/michalis/tornadovm-devoxx2026-cuda-demos/vendor/tornadovm/dist/tornadovm-5.2.1-jdk21-dev-cuda-linux-amd64/tornadovm-5.2.1-jdk21-dev-cuda/etc/tornado.backend)

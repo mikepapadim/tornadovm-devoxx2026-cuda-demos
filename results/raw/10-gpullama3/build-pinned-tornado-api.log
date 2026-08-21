@@ -1,0 +1,84 @@
+[INFO] Scanning for projects...
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for io.github.beehive-lab:gpu-llama3:jar:1.0.0-jdk21-dev
+[WARNING] 'version' contains an expression but should be a constant. @ io.github.beehive-lab:gpu-llama3:${revision}${jdk.version.suffix}, /home/michalis/tornadovm-devoxx2026-cuda-demos/vendor/GPULlama3.java/pom.xml, line 10, column 18
+[WARNING] 
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING] 
+[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
+[WARNING] 
+[INFO] 
+[INFO] ------------------< io.github.beehive-lab:gpu-llama3 >------------------
+[INFO] Building GPU Llama3 1.0.0-jdk21-dev
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ gpu-llama3 ---
+[INFO] skip non existing resourceDirectory /home/michalis/tornadovm-devoxx2026-cuda-demos/vendor/GPULlama3.java/src/main/resources
+[INFO] 
+[INFO] --- flatten:1.6.0:flatten (flatten) @ gpu-llama3 ---
+[INFO] Generating flattened POM of project io.github.beehive-lab:gpu-llama3:jar:1.0.0-jdk21-dev...
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ gpu-llama3 ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ gpu-llama3 ---
+[INFO] skip non existing resourceDirectory /home/michalis/tornadovm-devoxx2026-cuda-demos/vendor/GPULlama3.java/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ gpu-llama3 ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- surefire:3.2.2:test (default-test) @ gpu-llama3 ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.3.0:jar (default-jar) @ gpu-llama3 ---
+[INFO] Building jar: /home/michalis/tornadovm-devoxx2026-cuda-demos/vendor/GPULlama3.java/target/gpu-llama3-1.0.0-jdk21-dev.jar
+[INFO] 
+[INFO] --- shade:3.5.0:shade (default) @ gpu-llama3 ---
+[INFO] Including io.github.beehive-lab:tornado-api:jar:5.2.1-jdk21-dev in the shaded jar.
+[INFO] Including org.openjdk.jmh:jmh-core:jar:1.29 in the shaded jar.
+[INFO] Including net.sf.jopt-simple:jopt-simple:jar:4.6 in the shaded jar.
+[INFO] Including org.apache.commons:commons-math3:jar:3.2 in the shaded jar.
+[INFO] Including org.apache.logging.log4j:log4j-api:jar:2.17.1 in the shaded jar.
+[INFO] Including org.apache.logging.log4j:log4j-core:jar:2.25.4 in the shaded jar.
+[INFO] Including org.graalvm.sdk:word:jar:23.1.0 in the shaded jar.
+[INFO] Including org.graalvm.sdk:collections:jar:23.1.0 in the shaded jar.
+[INFO] Including org.graalvm.truffle:truffle-compiler:jar:23.1.0 in the shaded jar.
+[INFO] Including io.github.beehive-lab:tornado-runtime:jar:5.2.1-jdk21-dev in the shaded jar.
+[INFO] Including org.snmp4j:snmp4j:jar:2.8.6 in the shaded jar.
+[INFO] Including org.ow2.asm:asm:jar:9.7 in the shaded jar.
+[INFO] Dependency-reduced POM written at: /home/michalis/tornadovm-devoxx2026-cuda-demos/vendor/GPULlama3.java/dependency-reduced-pom.xml
+[WARNING] Discovered module-info.class. Shading will break its strong encapsulation.
+[WARNING] Discovered module-info.class. Shading will break its strong encapsulation.
+[WARNING] Discovered module-info.class. Shading will break its strong encapsulation.
+[WARNING] Discovered module-info.class. Shading will break its strong encapsulation.
+[WARNING] Discovered module-info.class. Shading will break its strong encapsulation.
+[WARNING] Discovered module-info.class. Shading will break its strong encapsulation.
+[WARNING] Discovered module-info.class. Shading will break its strong encapsulation.
+[WARNING] log4j-api-2.17.1.jar, log4j-core-2.25.4.jar define 3 overlapping resources: 
+[WARNING]   - META-INF/DEPENDENCIES
+[WARNING]   - META-INF/LICENSE
+[WARNING]   - META-INF/NOTICE
+[WARNING] gpu-llama3-1.0.0-jdk21-dev.jar, tornado-api-5.2.1-jdk21-dev.jar, tornado-runtime-5.2.1-jdk21-dev.jar define 1 overlapping resource: 
+[WARNING]   - META-INF/jpms.args
+[WARNING] asm-9.7.jar, commons-math3-3.2.jar, gpu-llama3-1.0.0-jdk21-dev.jar, jmh-core-1.29.jar, jopt-simple-4.6.jar, log4j-api-2.17.1.jar, log4j-core-2.25.4.jar, snmp4j-2.8.6.jar, tornado-api-5.2.1-jdk21-dev.jar, tornado-runtime-5.2.1-jdk21-dev.jar define 1 overlapping resource: 
+[WARNING]   - META-INF/MANIFEST.MF
+[WARNING] maven-shade-plugin has detected that some files are
+[WARNING] present in two or more JARs. When this happens, only one
+[WARNING] single version of the file is copied to the uber jar.
+[WARNING] Usually this is not harmful and you can skip these warnings,
+[WARNING] otherwise try to manually exclude artifacts based on
+[WARNING] mvn dependency:tree -Ddetail=true and the above output.
+[WARNING] See https://maven.apache.org/plugins/maven-shade-plugin/
+[INFO] Replacing original artifact with shaded artifact.
+[INFO] Replacing /home/michalis/tornadovm-devoxx2026-cuda-demos/vendor/GPULlama3.java/target/gpu-llama3-1.0.0-jdk21-dev.jar with /home/michalis/tornadovm-devoxx2026-cuda-demos/vendor/GPULlama3.java/target/gpu-llama3-1.0.0-jdk21-dev-shaded.jar
+[INFO] 
+[INFO] --- install:3.1.1:install (default-install) @ gpu-llama3 ---
+[INFO] Installing /home/michalis/tornadovm-devoxx2026-cuda-demos/vendor/GPULlama3.java/dependency-reduced-pom.xml to /home/michalis/.m2/repository/io/github/beehive-lab/gpu-llama3/1.0.0-jdk21-dev/gpu-llama3-1.0.0-jdk21-dev.pom
+[INFO] Installing /home/michalis/tornadovm-devoxx2026-cuda-demos/vendor/GPULlama3.java/target/gpu-llama3-1.0.0-jdk21-dev.jar to /home/michalis/.m2/repository/io/github/beehive-lab/gpu-llama3/1.0.0-jdk21-dev/gpu-llama3-1.0.0-jdk21-dev.jar
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.798 s
+[INFO] Finished at: 2026-08-21T05:42:36+01:00
+[INFO] ------------------------------------------------------------------------

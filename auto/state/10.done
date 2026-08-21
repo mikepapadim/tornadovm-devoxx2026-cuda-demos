@@ -1,0 +1,1 @@
+GPULlama3.java (SHA bbe42fdc) cloned, built, and run on the pinned CUDA TornadoVM SDK; a real cross-repo TornadoVM-version blocker found and worked around (documented in docs/gpullama3-reproduction.md); minimal inference verified working with CUDA-profiler evidence across 3 runs.
