@@ -96,3 +96,13 @@ README states "GCC/G++ 13+ — to build TornadoVM's native components" as a GPUL
 ## Acceptance
 
 Current build/run instructions are captured (§2-3, with the real cross-repo version-pin blocker and its exact workaround documented rather than silently sidestepped), and minimal inference works: `./llama-tornado --gpu --cuda` produces correct, coherent, CUDA-profiler-confirmed output against this repo's pinned TornadoVM build, reproduced across three separate runs.
+
+## 7. Quantized paths (FP16 / Q8_0 / Q4_0) — see `docs/quantization-paths.md`
+
+Task 11 probes which weight-quantization formats TornadoVM execution actually supports on this
+pinned SHA: FP16 and Q8_0 are both working (source-backed dispatch in `ForwardPlanFactory.java` plus
+independently reproduced inference runs); legacy Q4_0 is blocked with a deterministic
+`UnsupportedOperationException` at model-load time, matching the source-level prediction exactly;
+K-quants (Q4_K/Q5_K/Q6_K, dequantized to Q8_0 at load) are documented from source but not
+independently reproduced (no test file available on this machine). Full detail, exact commands, and
+evidence log paths in `docs/quantization-paths.md`.

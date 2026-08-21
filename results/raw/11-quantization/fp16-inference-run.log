@@ -1,0 +1,6 @@
+WARNING: Using incubator modules: jdk.incubator.vector
+A GPU kernel is a small, self-contained piece of code that is executed by a Graphics Processing Unit (GPU) to perform a specific task, such as matrix multiplication or convolution.
+
+==== Performance Metrics ====
+achieved tok/s: 164.20. Tokens: 58, seconds: 0.35
+Detected TornadoVM backend: cuda (from /home/michalis/tornadovm-devoxx2026-cuda-demos/vendor/tornadovm/dist/tornadovm-5.2.1-jdk21-dev-cuda-linux-amd64/tornadovm-5.2.1-jdk21-dev-cuda/etc/tornado.backend)

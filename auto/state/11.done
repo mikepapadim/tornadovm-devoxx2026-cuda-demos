@@ -1,0 +1,1 @@
+FP16 and Q8_0 working (reproduced, profiler-confirmed CUDA); Q4_0 blocked (UnsupportedOperationException, matches source prediction); K-quants documented (no test file available).

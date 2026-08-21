@@ -1,0 +1,11 @@
+WARNING: Using incubator modules: jdk.incubator.vector
+Exception in thread "main" java.lang.UnsupportedOperationException: Unsupported quantization format: 2 (as int).
+	at org.beehive.gpullama3.model.loader.AbstractModelLoader.getModelQuantization(AbstractModelLoader.java:48)
+	at org.beehive.gpullama3.model.loader.LlamaModelLoader.createConfiguration(LlamaModelLoader.java:51)
+	at org.beehive.gpullama3.model.loader.LlamaModelLoader.createConfiguration(LlamaModelLoader.java:29)
+	at org.beehive.gpullama3.model.loader.AbstractModelLoader.loadModel(AbstractModelLoader.java:94)
+	at org.beehive.gpullama3.model.ModelType$1.loadModel(ModelType.java:31)
+	at org.beehive.gpullama3.model.loader.ModelLoader.loadModel(ModelLoader.java:105)
+	at org.beehive.gpullama3.LlamaApp.main(LlamaApp.java:61)
+Detected TornadoVM backend: cuda (from /home/michalis/tornadovm-devoxx2026-cuda-demos/vendor/tornadovm/dist/tornadovm-5.2.1-jdk21-dev-cuda-linux-amd64/tornadovm-5.2.1-jdk21-dev-cuda/etc/tornado.backend)
+Error: Command failed with return code 1
