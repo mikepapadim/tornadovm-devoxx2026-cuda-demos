@@ -1,0 +1,18 @@
+WARNING: CPU IP/backtrace sampling not supported, disabling.
+Try the 'nsys status --environment' command to learn more.
+
+WARNING: CPU context switch tracing not supported, disabling.
+Try the 'nsys status --environment' command to learn more.
+
+WARNING: Using incubator modules: jdk.incubator.vector
+<|begin_of_text|><|start_header_id|>user<|end_header_id|>
+Explain what a GPU kernel is in one paragraph.<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+A GPU kernel is a small, self-contained piece of code that is executed by a Graphics Processing Unit (GPU). It is a small program that is designed to perform a specific task, such as matrix multiplication, convolution
+
+==== Performance Metrics ====
+achieved tok/s: 153.54. Tokens: 64, seconds: 0.42
+Collecting data...
+Generating '/tmp/nsys-report-fc43.qdstrm'
+[1/1] [0%                          ] nsys-12-llm-fp16.nsys-rep[1/1] [0%                          ] nsys-12-llm-fp16.nsys-rep[1/1] [0%                          ] nsys-12-llm-fp16.nsys-rep[1/1] [6%                          ] nsys-12-llm-fp16.nsys-rep[1/1] [12%                         ] nsys-12-llm-fp16.nsys-rep[1/1] [=17%                        ] nsys-12-llm-fp16.nsys-rep[1/1] [===22%                      ] nsys-12-llm-fp16.nsys-rep[1/1] [====25%                     ] nsys-12-llm-fp16.nsys-rep[1/1] [=====29%                    ] nsys-12-llm-fp16.nsys-rep[1/1] [======35%                   ] nsys-12-llm-fp16.nsys-rep[1/1] [========42%                 ] nsys-12-llm-fp16.nsys-rep[1/1] [==========49%               ] nsys-12-llm-fp16.nsys-rep[1/1] [============55%             ] nsys-12-llm-fp16.nsys-rep[1/1] [==============62%           ] nsys-12-llm-fp16.nsys-rep[1/1] [================69%         ] nsys-12-llm-fp16.nsys-rep[1/1] [==================76%       ] nsys-12-llm-fp16.nsys-rep[1/1] [===================82%      ] nsys-12-llm-fp16.nsys-rep[1/1] [=====================87%    ] nsys-12-llm-fp16.nsys-rep[1/1] [======================91%   ] nsys-12-llm-fp16.nsys-rep[1/1] [========================100%] nsys-12-llm-fp16.nsys-rep[1/1] [========================100%] nsys-12-llm-fp16.nsys-rep
+Generated:
+    /home/michalis/tornadovm-devoxx2026-cuda-demos/results/raw/12-llm-profiling/nsys-12-llm-fp16.nsys-rep

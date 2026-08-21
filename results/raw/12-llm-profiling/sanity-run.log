@@ -1,0 +1,7 @@
+WARNING: Using incubator modules: jdk.incubator.vector
+<|begin_of_text|><|start_header_id|>user<|end_header_id|>
+Explain what a GPU kernel is in one paragraph.<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+A GPU (Graphics Processing Unit) kernel is a small program that runs on a Graphics Processing Unit (GPU). It is a self-contained block of code that performs a specific task, such as matrix multiplication, convolution,
+
+==== Performance Metrics ====
+achieved tok/s: 162.62. Tokens: 64, seconds: 0.39

@@ -1,0 +1,1 @@
+Task 12 done: Nsight Systems profiling of GPULlama3.java FP16 inference on TornadoVM CUDA — dominant kernel, memory behavior, warm-up-vs-steady-state all measured; Nsight Compute occupancy/tensor-core metrics re-verified blocked (ERR_NVGPUCTRPERM) against the actual LLM binary.

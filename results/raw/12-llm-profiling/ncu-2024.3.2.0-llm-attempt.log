@@ -1,0 +1,10 @@
+WARNING: Using incubator modules: jdk.incubator.vector
+==PROF== Connected to process 683680 (/home/michalis/.sdkman/candidates/java/21.0.2-open/bin/java)
+==ERROR== ERR_NVGPUCTRPERM - The user does not have permission to access NVIDIA GPU Performance Counters on the target device 0. For instructions on enabling permissions and to get more information see https://developer.nvidia.com/ERR_NVGPUCTRPERM
+<|begin_of_text|><|start_header_id|>user<|end_header_id|>
+Explain what a GPU kernel is in one paragraph.<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+A GPU (Graphics Processing Unit) kernel is a small program that runs on a Graphics Processing Unit (GPU). It is a self-contained block of code that performs a specific task, such as matrix multiplication, convolution,
+
+==== Performance Metrics ====
+achieved tok/s: 111.73. Tokens: 64, seconds: 0.57
+==PROF== Disconnected from process 683680

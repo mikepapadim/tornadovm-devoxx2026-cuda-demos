@@ -1,0 +1,9 @@
+Generating SQLite file nsys-12-llm-fp16.sqlite from nsys-12-llm-fp16.nsys-rep
+Processing [nsys-12-llm-fp16.sqlite] with [/opt/nvidia/nsight-systems/2024.5.1/host-linux-x64/reports/cuda_api_sum.py] to [nsys-12-llm-fp16_cuda_api_sum.csv]... PROCESSED
+
+Processing [nsys-12-llm-fp16.sqlite] with [/opt/nvidia/nsight-systems/2024.5.1/host-linux-x64/reports/cuda_gpu_kern_sum.py] to [nsys-12-llm-fp16_cuda_gpu_kern_sum.csv]... PROCESSED
+
+Processing [nsys-12-llm-fp16.sqlite] with [/opt/nvidia/nsight-systems/2024.5.1/host-linux-x64/reports/cuda_gpu_mem_time_sum.py] to [nsys-12-llm-fp16_cuda_gpu_mem_time_sum.csv]... PROCESSED
+
+Processing [nsys-12-llm-fp16.sqlite] with [/opt/nvidia/nsight-systems/2024.5.1/host-linux-x64/reports/cuda_kern_exec_sum.py] to [nsys-12-llm-fp16_cuda_kern_exec_sum.csv]... PROCESSED
+

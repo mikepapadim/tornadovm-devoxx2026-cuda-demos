@@ -1,0 +1,7 @@
+
+NOTICE: Existing SQLite export found: nsys-12-llm-fp16.sqlite
+        It is assumed file was previously exported from: nsys-12-llm-fp16.nsys-rep
+        Consider using --force-export=true if needed.
+
+Processing [nsys-12-llm-fp16.sqlite] with [/opt/nvidia/nsight-systems/2024.5.1/host-linux-x64/reports/cuda_gpu_trace.py] to [nsys-12-llm-fp16_cuda_gpu_trace.csv]... PROCESSED
+

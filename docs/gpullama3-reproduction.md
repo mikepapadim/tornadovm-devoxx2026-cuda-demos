@@ -106,3 +106,14 @@ independently reproduced inference runs); legacy Q4_0 is blocked with a determin
 K-quants (Q4_K/Q5_K/Q6_K, dequantized to Q8_0 at load) are documented from source but not
 independently reproduced (no test file available on this machine). Full detail, exact commands, and
 evidence log paths in `docs/quantization-paths.md`.
+
+## 8. Nsight Systems profiling (FP16 inference) — see `results/raw/12-llm-profiling/PROFILING-SUMMARY.md`
+
+Task 12 profiles the FP16 inference path from §3 with Nsight Systems: dominant GPU kernel is the
+FFN gate/up projection (`fusedRmsNormFFNGateUp`, 39.0% of GPU time), H2D memcpy dominates memory
+traffic (99.1%, consistent with per-token small transfers rather than bulk weight movement), and
+time-to-first-token (~756 ms, dominated by one-time JIT compilation of ~148 task-graph variants) is
+explicitly separated from steady-state decode (~6.45 ms/token, cross-checked against the run's own
+reported tok/s within ~1%). Nsight Compute occupancy/utilization/tensor-core metrics remain blocked
+on this machine (`ERR_NVGPUCTRPERM`, re-verified against the actual LLM binary, same root cause as
+`results/failures/08-nsight-compute-permission.md`).
