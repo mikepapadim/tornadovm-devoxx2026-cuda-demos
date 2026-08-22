@@ -1,0 +1,1 @@
+Task 15 done: demos/11-integrated-showcase/ combines JIT kernel + cuBLAS Hybrid API + intra-plan concurrency + CUDA graph replay (+ experimental combined mode, works) + Tensor Core MMA, with Nsight Systems evidence and a short canonical run command.

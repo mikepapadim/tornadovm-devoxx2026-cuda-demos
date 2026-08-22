@@ -14,6 +14,7 @@ Each demo directory has its own `README.md` with build/run commands, a
 | [06-cuda-streams](06-cuda-streams/) | `CudaStreamsOverlap.java` | `TornadoExecutionPlan#withIntraPlanConcurrency()` — 8 independent pipelines, sequential (1 stream) vs. concurrent (4-stream pool) with Nsight Systems timeline evidence of genuine kernel overlap. |
 | [07-cuda-graph-benefit](07-cuda-graph-benefit/) | `CudaGraphBenefit.java` | Same 6-stage JIT task-graph run `nograph` vs. `graph` (`withCUDAGraph()`) for 50 executions each — isolates and quantifies the steady-state replay speedup that demo 02's capture/replay correctness demo didn't measure on its own. |
 | [08-tensor-core-mma](08-tensor-core-mma/) | `TensorCoreMMA.java` | Smallest possible Tensor Core demo: one warp, one `M16N8K16` fp16 tile, exactly one `mma.sync.aligned` instruction (confirmed via `--printKernel`), next to a scalar no-MMA reference kernel with zero `mma.sync` instructions. |
+| [11-integrated-showcase](11-integrated-showcase/) | `IntegratedShowcase.java` | Everything at once: JIT kernel + cuBLAS library task (demo 04's shape) x 6 independent chains, run baseline / `withIntraPlanConcurrency()` (demo 06) / `withCUDAGraph()` (demo 07) / both combined (experimental — not found anywhere upstream, probed live), plus demo 08's Tensor Core `mma.sync` kernel as a bonus stage. |
 
 `tornado.args` is a `tornado --generate-argfile` output, generated against
 the pinned build in `env/versions.env` and committed for the `java @arg-file`
@@ -30,7 +31,9 @@ Raw logs: `results/raw/02-hello-kernel/` (00, 01),
 `results/raw/07-cuda-graph-benefit/` (07),
 `results/raw/08-tensor-core-mma/` (08, incl. `--printKernel` generated-code
 evidence; Nsight Compute hardware-counter evidence blocked on this machine,
-see `results/failures/08-nsight-compute-permission.md`).
+see `results/failures/08-nsight-compute-permission.md`),
+`results/raw/11-integrated-showcase/` (11, incl. Nsight Systems `.nsys-rep` +
+parsed CSVs).
 
 Dedicated Nsight Systems profiling pass (CUDA API/kernel/memcpy timing,
 launch overhead, isolated from the timed runs above) across demos 04, 05, 07,

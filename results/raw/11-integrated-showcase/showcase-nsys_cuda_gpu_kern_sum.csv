@@ -1,0 +1,5 @@
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+38.4,333203,240,1388.3,1376.0,1343,1856,58.2,"std::enable_if<!T7, void>::type internal::gemvx::kernel<int, int, float, float, float, float, (bool)0, (bool)1, (bool)1, (bool)0, (int)6, (bool)0, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<const float>, cublasGemvTensorStridedBatched<const float>, cublasGemvTensorStridedBatched<float>, float>>(T13)"
+31.3,271805,240,1132.5,1120.0,1087,1408,44.7,bias
+30.0,260542,240,1085.6,1088.0,1055,1504,53.9,scale
+0.3,2208,1,2208.0,2208.0,2208,2208,0.0,gemmMMASingleTile

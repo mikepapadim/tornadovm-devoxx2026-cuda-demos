@@ -1,0 +1,51 @@
+Integrated CUDA showcase: units=6 m=8 n=8 executions=5 mode=all
+Pipeline per unit: JIT scale -> cuBLAS sgemv -> JIT bias (demo 04's shape x 6 independent chains, one TaskGraph)
+
+=== BASELINE (single stream, no graph) ===
+execution 0: correct, wall=188456 us
+execution 1: correct, wall=1108 us
+execution 2: correct, wall=972 us
+execution 3: correct, wall=956 us
+execution 4: correct, wall=847 us
+BASELINE (single stream, no graph) first execution (JIT/capture): 188456 us
+BASELINE (single stream, no graph) steady-state median wall-clock (n=4): 1108 us
+BASELINE (single stream, no graph): All executions correct
+
+=== CONCURRENT (withIntraPlanConcurrency) ===
+execution 0: correct, wall=39062 us
+execution 1: correct, wall=1563 us
+execution 2: correct, wall=1313 us
+execution 3: correct, wall=1143 us
+execution 4: correct, wall=1071 us
+CONCURRENT (withIntraPlanConcurrency) first execution (JIT/capture): 39062 us
+CONCURRENT (withIntraPlanConcurrency) steady-state median wall-clock (n=4): 1563 us
+CONCURRENT (withIntraPlanConcurrency): All executions correct
+
+=== GRAPH (withCUDAGraph) ===
+execution 0: correct, wall=28188 us
+execution 1: correct, wall=189 us
+execution 2: correct, wall=174 us
+execution 3: correct, wall=161 us
+execution 4: correct, wall=164 us
+GRAPH (withCUDAGraph) first execution (JIT/capture): 28188 us
+GRAPH (withCUDAGraph) steady-state median wall-clock (n=4): 189 us
+GRAPH (withCUDAGraph): All executions correct
+
+=== COMBINED-EXPERIMENTAL (withCUDAGraph + withIntraPlanConcurrency) ===
+execution 0: correct, wall=24918 us
+execution 1: correct, wall=381 us
+execution 2: correct, wall=302 us
+execution 3: correct, wall=248 us
+execution 4: correct, wall=242 us
+COMBINED-EXPERIMENTAL (withCUDAGraph + withIntraPlanConcurrency) first execution (JIT/capture): 24918 us
+COMBINED-EXPERIMENTAL (withCUDAGraph + withIntraPlanConcurrency) steady-state median wall-clock (n=4): 381 us
+COMBINED-EXPERIMENTAL (withCUDAGraph + withIntraPlanConcurrency): All executions correct
+
+=== Summary (steady-state median us, this run/this GPU) ===
+baseline   : 1108.0
+concurrent : 1563.0 (0.71x vs baseline)
+graph      : 189.0 (5.86x vs baseline)
+combined   : 381.0 (2.91x vs baseline)
+
+=== BONUS: Tensor Core mma.sync single-tile GEMM (demo 08 kernel, reused) ===
+Tensor Core tile validation: PASSED (max abs err 0.00000, 0/128 cells out of tol)
