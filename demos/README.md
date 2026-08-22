@@ -42,6 +42,11 @@ hardware-counter metrics (occupancy, GPU utilization %, memory throughput %,
 instruction mix, tensor-pipe activity) remain blocked on this machine, same
 root cause as task 08, re-verified 2026-08-21.
 
+**Simplicity/consistency audit:** `docs/demo-audit-checklist.md` reviews every
+demo against a presenter-usability checklist (one concept per class,
+lightweight comments, deterministic output, simple invocation, `java
+@arg-file`, JBang status) and records what was found and fixed.
+
 **New to this repo?** `docs/profiling-quickstart.md` is a beginner-friendly,
 copy-paste runbook: how to build/run any demo three ways (`tornado`,
 `java @arg-file`, JBang), how to profile any demo with Nsight Systems and

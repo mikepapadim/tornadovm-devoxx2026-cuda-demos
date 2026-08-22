@@ -1,0 +1,27 @@
+units=8 unitSize=32768 innerIterations=65536 executions=8 mode=both
+
+=== SEQUENTIAL (single stream) ===
+execution 0: correct, wall=121934 us
+execution 1: correct, wall=2246 us
+execution 2: correct, wall=2217 us
+execution 3: correct, wall=2165 us
+execution 4: correct, wall=2257 us
+execution 5: correct, wall=2182 us
+execution 6: correct, wall=2136 us
+execution 7: correct, wall=2152 us
+SEQUENTIAL (single stream) median wall-clock (all 8 executions incl. first/JIT): 2217 us
+SEQUENTIAL (single stream) median wall-clock (excl. first execution): 2217 us
+SEQUENTIAL (single stream): All executions correct
+
+=== CONCURRENT (withIntraPlanConcurrency) ===
+execution 0: correct, wall=38004 us
+execution 1: correct, wall=1211 us
+execution 2: correct, wall=902 us
+execution 3: correct, wall=847 us
+execution 4: correct, wall=782 us
+execution 5: correct, wall=794 us
+execution 6: correct, wall=869 us
+execution 7: correct, wall=836 us
+CONCURRENT (withIntraPlanConcurrency) median wall-clock (all 8 executions incl. first/JIT): 869 us
+CONCURRENT (withIntraPlanConcurrency) median wall-clock (excl. first execution): 869 us
+CONCURRENT (withIntraPlanConcurrency): All executions correct
