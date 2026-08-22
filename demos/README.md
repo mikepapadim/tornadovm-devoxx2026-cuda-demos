@@ -38,3 +38,9 @@ launch overhead, isolated from the timed runs above) across demos 04, 05, 07,
 hardware-counter metrics (occupancy, GPU utilization %, memory throughput %,
 instruction mix, tensor-pipe activity) remain blocked on this machine, same
 root cause as task 08, re-verified 2026-08-21.
+
+**New to this repo?** `docs/profiling-quickstart.md` is a beginner-friendly,
+copy-paste runbook: how to build/run any demo three ways (`tornado`,
+`java @arg-file`, JBang), how to profile any demo with Nsight Systems and
+why Nsight Compute is currently blocked here, where every report lives, and
+a per-demo fallback/recovery table for presenting live.
