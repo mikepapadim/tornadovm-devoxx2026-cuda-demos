@@ -1,0 +1,30 @@
+{
+    "hello": {
+        "TOTAL_CODE_GENERATION_TIME": "2945278",
+        "TOTAL_KERNEL_TIME": "16383",
+        "TOTAL_TASK_GRAPH_TIME": "69144249",
+        "TOTAL_DRIVER_COMPILE_TIME": "11058824",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "COPY_IN_TIME": "14974",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_BYTE_CODE_GENERATION": "5064145",
+        "TOTAL_GRAAL_COMPILE_TIME": "41464307",
+        "TOTAL_COPY_IN_SIZE_BYTES": "48",
+        "ALLOCATION_BYTES": "96",
+        "hello.addOne": {
+            "BACKEND": "CUDA",
+            "METHOD": "Hello.addOne",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "n/a",
+            "TASK_COMPILE_GRAAL_TIME": "41464307",
+            "TASK_CODE_GENERATION_TIME": "2945278",
+            "TASK_COMPILE_DRIVER_TIME": "11058824",
+            "TASK_KERNEL_TIME": "16383"
+        }
+    }
+}
+
+in:  [0, 1, 2, 3, 4, 5, 6, 7]
+out: [1, 2, 3, 4, 5, 6, 7, 8]

@@ -1,0 +1,6 @@
+WARNING: Using incubator modules: jdk.incubator.vector
+The capital of France is Paris.
+
+==== Performance Metrics ====
+achieved tok/s: 155.40. Tokens: 25, seconds: 0.16
+Detected TornadoVM backend: cuda (from /home/michalis/tornadovm-devoxx2026-cuda-demos/vendor/tornadovm/dist/tornadovm-5.2.1-jdk21-dev-cuda-linux-amd64/tornadovm-5.2.1-jdk21-dev-cuda/etc/tornado.backend)

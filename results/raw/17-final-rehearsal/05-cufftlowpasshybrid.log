@@ -1,0 +1,17 @@
+Low-pass filter via hybrid cuFFT pipeline: n=4096, cutoff bin=16, iterations=5
+iteration 0: correct maxError=4.7683716E-7 filtered[0]=0.49999997
+Enable the profiler with: -Dtornado.profiler=True
+  total task-graph time: 0 ns
+iteration 1: correct maxError=4.7683716E-7 filtered[0]=0.49999997
+Enable the profiler with: -Dtornado.profiler=True
+  total task-graph time: 0 ns
+iteration 2: correct maxError=4.7683716E-7 filtered[0]=0.49999997
+Enable the profiler with: -Dtornado.profiler=True
+  total task-graph time: 0 ns
+iteration 3: correct maxError=4.7683716E-7 filtered[0]=0.49999997
+Enable the profiler with: -Dtornado.profiler=True
+  total task-graph time: 0 ns
+iteration 4: correct maxError=4.7683716E-7 filtered[0]=0.49999997
+Enable the profiler with: -Dtornado.profiler=True
+  total task-graph time: 0 ns
+All iterations correct
