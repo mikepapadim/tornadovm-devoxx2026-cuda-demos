@@ -63,6 +63,9 @@ done <<'DEMOS'
 07-cuda-graph-benefit:CudaGraphBenefit:4096 6 50 both
 08-tensor-core-mma:TensorCoreMMA:
 11-integrated-showcase:IntegratedShowcase:6 8 8 20 all
+12-cutlass-fused-epilogue:CutlassFusedEpilogue:512 512 512 5
+13-cudnn-jit-convblock:CuDnnConvBlockHybrid:4 16 32 32 16 5
+14-warp-async-shared:WarpAsyncSharedReduce:2048 512 5
 DEMOS
 
 echo

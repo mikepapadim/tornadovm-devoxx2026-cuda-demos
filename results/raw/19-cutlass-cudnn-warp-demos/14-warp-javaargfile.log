@@ -1,0 +1,24 @@
+WARNING: module-info.class ignored in patch: /home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda/share/java/jvmci/jvmci-21.0.2.jar
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess (file:/home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda/share/java/tornado/tornado-runtime-6.0.0.jar)
+WARNING: Please consider reporting this to the maintainers of class uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+Warp-shuffle + cp.async + shared-memory row reduction: 4096 rows x 1024 int8 values
+  block = 128 threads (4 warps), one block per row
+  20 executions per kernel, steady-state median reported (first execution excluded)
+
+=== NAIVE (one thread per row, global memory only) ===
+  first execution (JIT compile): 82312 us
+  steady-state median wall-clock (n=19): 240 us
+
+=== OPTIMISED (cp.async + shared + shuffle) ===
+  first execution (JIT compile): 29902 us
+  steady-state median wall-clock (n=19): 111 us
+
+  [naive    ] validation PASSED (max abs err 0.00000, 0/4096 rows out of tol)
+  [optimised] validation PASSED (max abs err 0.00000, 0/4096 rows out of tol)
+
+=== Summary (steady-state median us, this run/this GPU) ===
+naive     : 240
+optimised : 111 (2.16x vs naive)
+Both kernels produce the same, correct result

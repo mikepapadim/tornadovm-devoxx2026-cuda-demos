@@ -343,3 +343,70 @@ operational docs. Evidence: `results/raw/18-tornadovm-6-migration/`
 - `results/raw/00-baseline/` … `17-final-rehearsal/` are left byte-for-byte
   unmodified. Where a doc cites them it now says which pin they came from.
 - JBang still not installed on this machine (`which jbang` → exit 1).
+
+## Batch 19 — CUTLASS, cuDNN+JIT and warp/async/shared demos (2026-09-02)
+
+Three new Track A demos on the pinned TornadoVM 6.0.0 CUDA SDK, each with an
+Nsight Systems section in its README (commands + captured output). Evidence:
+`results/raw/19-cutlass-cudnn-warp-demos/` (+ `MANIFEST.md`). All Observed:
+
+- **`demos/12-cutlass-fused-epilogue`** — CUTLASS fused epilogue
+  (`cutlassGemmBiasRelu`, one kernel) vs. `cutlassHgemm` + a separate JIT
+  bias/ReLU pass, both as one TaskGraph mixing JIT and library tasks. Both
+  validate (max abs err `0.00781`). **Wall-clock cannot show the effect** —
+  fused 317 µs vs. unfused 304 µs at 1024³, dominated by the 2 MB D2H copy — so
+  the README makes the nsys kernel table the evidence: fused 16547 ns vs.
+  unfused 16106 + 2125 = 18231 ns per execution, and the fusion is visible in
+  the CUTLASS kernel's own template parameter (`LinearCombinationRelu` vs plain
+  `LinearCombination`).
+- **`demos/13-cudnn-jit-convblock`** — JIT `scale` → cuDNN `conv2d` → JIT
+  `addBias` → cuDNN `relu` in one graph. **max abs err `0.000000`** vs. the CPU
+  reference. nsys shows exactly four kernels, 10 instances each, with the two
+  JIT tasks appearing under their Java method names next to cuDNN's
+  `implicit_convolve_sgemm` (61.4%) and `op_generic_tensor_kernel` (14.6%).
+- **`demos/14-warp-async-shared`** — `cp.async` + shared memory + warp shuffle
+  in one Java kernel, vs. a naive one-thread-per-row baseline. Both exact
+  (max abs err `0.00000`). Wall-clock 2.06–2.25x; **GPU kernel time 26.6x**
+  (105668 ns → 3971 ns). The ~12x gap between the two readings is host-side
+  dispatch + D2H that neither kernel avoids; the README reports both and says
+  which question each answers. `--printKernel` confirms the generated CUDA
+  contains `cp.async.ca.shared.global`, `cp.async.commit_group`,
+  `cp.async.wait_group`, `__shfl_down_sync` and two `__shared__` arrays.
+- `scripts/run-all-demos.sh` now covers twelve demos: **36/36** checks pass
+  (12 compiles + 12 `tornado` runs + 12 `java @argfile` runs).
+
+### API behaviour established by probing
+
+`KernelContext.asyncCopyToLocal` copies **exactly 4 bytes** per call and its
+source offset is in **source-array elements** (bytes for `ByteArray`,
+half-floats for `HalfFloatArray`) — not documented in the javadoc; established
+with a dedicated probe. Demo 14's index arithmetic depends on this.
+
+### Bugs found and filed upstream
+
+Per an explicit instruction this batch, bugs were reported to
+`beehive-lab/TornadoVM`. **Note this overrides `CLAUDE.md`'s standing
+"never create public issues" publication guard** — that guard exists to stop the
+autonomous loop from publishing on its own, and was lifted here by direct
+instruction, not by the agent's own judgement.
+
+- **[#1063](https://github.com/beehive-lab/TornadoVM/issues/1063)** —
+  `CuDnn.sdpaForward` launches no kernel and silently returns an all-zero
+  result. The SDK's own `BenchmarkSdpa` prints `Results DO NOT match` with
+  `cudnn=0.0`; `nsys` shows only the JIT `attention` kernel (31 instances) and
+  zero cuDNN kernels in the whole process, and the reported `0.009 ms` yields a
+  nonsense ~1.9 PFLOP/s (about 20x an RTX 4090's peak). Deterministic.
+  Consequence: demo 13 uses `cudnnConv2d`/`cudnnRelu`, which are correct.
+- **[#1064](https://github.com/beehive-lab/TornadoVM/issues/1064)** — CUDA
+  lowering fails with `Node implementing Lowerable not handled: NewInstance`
+  when a ternary precedes an allocation (`new HalfFloat(v > 0 ? v : 0)`), while
+  `new HalfFloat(Math.max(v, 0))` compiles. Single-file deterministic
+  reproducer. Consequence: demo 12's JIT `biasRelu` uses `Math.max`.
+
+**Observed but deliberately not filed:** an `@Parallel` reduction over a
+`ByteArray` intermittently printed `[Bailout] Running the sequential
+implementation` and, on one run, produced wrong results (3855/4096 rows) rather
+than falling back cleanly. It did not reproduce under `--debug` or
+`--fullDebug`, so there is no reliable reproducer to file. Demo 14's baseline
+was rewritten to use `KernelContext` indexing, stable across every run since.
+Worth a dedicated reproduction task before reporting.

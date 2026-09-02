@@ -36,7 +36,7 @@ Driver: CUDADriver
 	CUDA --  [NVIDIA CUDA] -- NVIDIA GeForce RTX 4090
 ```
 
-Run everything — compiles each demo and runs it both via the `tornado`
+Run everything — compiles all twelve demos and runs each both via the `tornado`
 launcher and via `java @argfile`:
 
 ```bash
@@ -77,9 +77,14 @@ and JDK-specific — `-XX:+EnableJVMCI` is required on JDK ≤ 26 and fatal on J
 
 ## Track A demos — Hybrid API (`demos/`)
 
-Each demo is one self-contained Java file. Every row below was re-run on
+Each demo is one self-contained Java file. Every row below runs on
 TornadoVM 6.0.0 / JDK 25 / RTX 4090; logs in
-`results/raw/18-tornadovm-6-migration/`.
+`results/raw/18-tornadovm-6-migration/` (demos 00–11) and
+`results/raw/19-cutlass-cudnn-warp-demos/` (demos 12–14).
+
+**Demos 12, 13 and 14 each document how to profile them with Nsight Systems**,
+with the exact commands and captured output in their README. For 12 and 14 the
+profiler, not the wall clock, is what shows the effect at all.
 
 | # | Demo | Concept | Run |
 |---|------|---------|-----|
@@ -92,6 +97,9 @@ TornadoVM 6.0.0 / JDK 25 / RTX 4090; logs in
 | [07](demos/07-cuda-graph-benefit/) | `CudaGraphBenefit.java` | Same graph `nograph` vs. `graph`, 50 executions — quantifies replay speedup | `tornado --classpath . CudaGraphBenefit 4096 6 50 both` |
 | [08](demos/08-tensor-core-mma/) | `TensorCoreMMA.java` | One warp, one `M16N8K16` fp16 tile, exactly one `mma.sync.aligned` | `tornado --printKernel --classpath . TensorCoreMMA` |
 | [11](demos/11-integrated-showcase/) | `IntegratedShowcase.java` | Everything at once: JIT + cuBLAS × 6 chains, baseline/concurrent/graph/combined | `tornado --classpath . IntegratedShowcase 6 8 8 20 all` |
+| [12](demos/12-cutlass-fused-epilogue/) | `CutlassFusedEpilogue.java` | CUTLASS fused epilogue (GEMM+bias+ReLU in one kernel) vs. GEMM + a separate JIT pass | `tornado --classpath . CutlassFusedEpilogue` |
+| [13](demos/13-cudnn-jit-convblock/) | `CuDnnConvBlockHybrid.java` | CNN block alternating vendor and JIT kernels: JIT scale → cuDNN conv2d → JIT bias → cuDNN relu | `tornado --classpath . CuDnnConvBlockHybrid` |
+| [14](demos/14-warp-async-shared/) | `WarpAsyncSharedReduce.java` | `cp.async` + shared memory + `__shfl_down_sync` from Java, verified in the generated CUDA | `tornado --classpath . WarpAsyncSharedReduce` |
 
 Every demo also runs as `java @$TORNADOVM_HOME/tornado-argfile -cp . <MainClass> [args]`.
 
@@ -112,7 +120,13 @@ RTX 4090, driver 565.57.01, CUDA 12.6.85, JDK 25.0.2. Not general claims.
 | 07-cuda-graph-benefit | Graph replay speedup | nograph 292–364 µs vs. graph 36 µs → **8.1x / 10.0x** across the two run paths | `07-graphbenefit-*.log` |
 | 08-tensor-core-mma | Generated code | exactly **1** `mma.sync.aligned.m16n8k16` PTX instruction; 0 in the scalar reference | `08-mma-printkernel.log` |
 | 11-integrated-showcase | Mode comparison vs. baseline | concurrent 1.08–1.12x, graph 5.37–5.61x, combined 5.66–5.69x | `11-showcase-*.log` |
-| all 9 demos | Compile + run, both paths | **27/27 checks pass** | `run-all-demos.log` |
+| 12-cutlass-fused-epilogue | Fused vs. unfused epilogue, GPU kernel time | fused 16547 ns vs. unfused 16106 + 2125 = 18231 ns per execution (~9% less GPU time, one fewer kernel) | `19-…/12-cutlass-nsys-kernsum.csv` |
+| 13-cudnn-jit-convblock | Correctness of a 4-stage cuDNN+JIT graph | max abs err `0.000000` vs. the CPU reference | `19-…/13-cudnn-tornado.log` |
+| 13-cudnn-jit-convblock | Kernel breakdown | cuDNN conv 61.4%, cuDNN relu 14.6%, JIT `scale` 12.1%, JIT `addBias` 11.9% | `19-…/13-cudnn-nsys-kernsum.csv` |
+| 14-warp-async-shared | Optimised vs. naive, wall-clock | 2.06x–2.25x across runs | `19-…/14-warp-tornado.log` |
+| 14-warp-async-shared | Optimised vs. naive, **GPU kernel time** | 105668 ns vs. 3971 ns → **26.6x** | `19-…/14-warp-nsys-kernsum.csv` |
+| 14-warp-async-shared | Generated CUDA | `cp.async.ca.shared.global`, `cp.async.commit_group`, `cp.async.wait_group`, `__shfl_down_sync`, 2x `__shared__` all present | `19-…/14-warp-printkernel.log` |
+| all 12 demos | Compile + run, both paths | **36/36 checks pass** | `run-all-demos.log` |
 
 Compared with the previous 5.2.1 source-built pin, demo 07's replay speedup
 rose from 6.47–7.02x to 8.08–10.00x, and demo 06's concurrency benefit became
@@ -123,6 +137,25 @@ and only marginally faster (1.08–1.12x), unchanged in character from 5.2.1.
 `ERR_NVGPUCTRPERM`, `NVreg_RestrictProfilingToAdminUsers=1`, no passwordless
 sudo on this machine. Not a TornadoVM limitation.
 `results/failures/08-nsight-compute-permission.md`.
+
+## Upstream issues filed
+
+Two reproducible bugs were found in TornadoVM 6.0.0 while building demos 12–14
+and reported upstream with minimal test cases:
+
+| Issue | Summary | Effect here |
+|---|---|---|
+| [beehive-lab/TornadoVM#1063](https://github.com/beehive-lab/TornadoVM/issues/1063) | `CuDnn.sdpaForward` launches no kernel and silently returns an all-zero result — the SDK's own `BenchmarkSdpa` fails, and Nsight Systems confirms zero cuDNN kernels are launched | demo 13 uses `cudnnConv2d`/`cudnnRelu` instead of SDPA; do not demo SDPA live |
+| [beehive-lab/TornadoVM#1064](https://github.com/beehive-lab/TornadoVM/issues/1064) | CUDA lowering crashes with `Node implementing Lowerable not handled: NewInstance` when a ternary precedes an allocation; `Math.max` compiles | demo 12's JIT `biasRelu` uses `Math.max`, not `v > 0 ? v : 0` |
+
+One further problem was **observed but not filed**, because it could not be
+reduced to a reliable reproducer: an `@Parallel` reduction over a `ByteArray`
+(`sum += data.get(...)` into a local) intermittently emitted
+`[Bailout] Running the sequential implementation` and, on one run, produced
+wrong results (3855/4096 rows) rather than falling back cleanly. It did not
+reproduce under `--debug` or `--fullDebug`. Demo 14's baseline was rewritten to
+use `KernelContext` indexing instead, which is stable across every run since.
+Worth revisiting with a dedicated reproducer before reporting.
 
 ## What changed migrating 5.2.1 → 6.0.0
 
@@ -165,7 +198,7 @@ Track B on 6.0.0 is open work, not a result — nothing here claims it now works
 
 - `demos/` — Track A demos, one directory and one README each.
 - `scripts/setup-env.sh` — sets `JAVA_HOME`/`TORNADOVM_HOME`, generates the argfile.
-- `scripts/run-all-demos.sh` — compiles and runs all 9 demos both ways. Needs a GPU.
+- `scripts/run-all-demos.sh` — compiles and runs all 12 demos both ways. Needs a GPU.
 - `scripts/verify.sh` — validates deliverables and cited evidence paths. No GPU needed.
 - `docs/` — talk drafts, runbook, claims ledger, supporting evidence documents.
 - `results/raw/` — immutable raw outputs. `results/failures/` — captured failures.

@@ -1,0 +1,180 @@
+WARNING: module-info.class ignored in patch: /home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda/share/java/jvmci/jvmci-21.0.2.jar
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess (file:/home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda/share/java/tornado/tornado-runtime-6.0.0.jar)
+WARNING: Please consider reporting this to the maintainers of class uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+Warp-shuffle + cp.async + shared-memory row reduction: 64 rows x 256 int8 values
+  block = 128 threads (4 warps), one block per row
+  2 executions per kernel, steady-state median reported (first execution excluded)
+
+=== NAIVE (one thread per row, global memory only) ===
+extern "C" __global__ void rowSumNaive(long long *_kernel_context, unsigned char *_constant_region, unsigned char *_local_region, int *_atomics, unsigned char *arg1, unsigned char *arg2, int arg3)
+{
+  unsigned long long ul_0, ul_1, ul_9, ul_17; 
+  int i_2, i_3, i_4, i_5, i_6, i_11, i_12, i_13; 
+  long long l_7, l_8, l_14, l_15, l_16; 
+  char ch_10; 
+  float f_18; 
+
+  // BLOCK 0
+  ul_0  =  (unsigned long long) arg1;
+  ul_1  =  (unsigned long long) arg2;
+  i_2  =  (blockIdx.x*blockDim.x+threadIdx.x);
+  i_3  =  i_2 << 8;
+  // BLOCK 1 MERGES [0 2 ]
+  i_4  =  0;
+  i_5  =  0;
+  for(;i_5 < 256;)
+  {
+    // BLOCK 2
+    i_6  =  i_3 + i_5;
+    l_7  =  (long long) i_6;
+    l_8  =  l_7 + 16L;
+    ul_9  =  ul_0 + l_8;
+    ch_10  =  *(( char *) ul_9);
+    i_11  =  (int) ch_10;
+    i_12  =  i_4 + i_11;
+    i_13  =  i_5 + 1;
+    i_4  =  i_12;
+    i_5  =  i_13;
+  }  // B1
+  // BLOCK 3
+  l_14  =  (long long) i_2;
+  l_15  =  l_14 + 4L;
+  l_16  =  l_15 << 2;
+  ul_17  =  ul_1 + l_16;
+  f_18  =  (float) i_4;
+  *(( float *) ul_17)  =  f_18;
+  return;
+}  //  kernel
+
+  first execution (JIT compile): 76733 us
+  steady-state median wall-clock (n=1): 258 us
+
+=== OPTIMISED (cp.async + shared + shuffle) ===
+extern "C" __global__ void rowSumOptimised(long long *_kernel_context, unsigned char *_constant_region, unsigned char *_local_region, int *_atomics, unsigned char *arg1, unsigned char *arg2, int arg3)
+{
+  unsigned long long ul_0, ul_1, ul_42; 
+  int i_4, i_5, i_7, i_8, i_9, i_22, i_11, i_12, i_13, i_14, i_15, i_16, i_17, i_18, i_19, i_20, i_21, i_25, i_28, i_30, i_31, i_32, i_33; 
+  bool b_6, b_10, b_29, b_34; 
+  float f_23, f_24, f_26, f_27, f_35, f_36, f_37, f_38, f_43, f_44, f_45, f_46; 
+  long long l_39, l_40, l_41; 
+
+  // BLOCK 0
+  ul_0  =  (unsigned long long) arg1;
+  ul_1  =  (unsigned long long) arg2;
+  __shared__ int adi_2[128];
+  __shared__ float adf_3[4];
+  i_4  =  (blockIdx.x);
+  i_5  =  (threadIdx.x);
+  b_6  =  i_5 < 64;
+  if(b_6)
+  {
+    // BLOCK 1
+    i_7  =  i_4 << 8;
+    i_8  =  i_5 << 2;
+    i_9  =  i_7 + i_8;
+    {
+      unsigned __smem;
+      asm volatile("{ .reg .u64 u; cvta.to.shared.u64 u, %1; cvt.u32.u64 %0, u; }" : "=r"(__smem) : "l"((char *) adi_2 + (((unsigned) i_5) << 2)));
+      asm volatile("cp.async.ca.shared.global [%0], [%1], 4;" :: "r"(__smem), "l"((const char *) ul_0 + 16u + ((long long) i_9) * 1));
+    }
+  }  // B0
+  else
+  {
+    // BLOCK 2
+  }  // B0
+  // BLOCK 3 MERGES [2 1 ]
+  asm volatile("cp.async.commit_group;");
+  asm volatile("cp.async.wait_group 0;");
+  __syncthreads();
+  b_10  =  i_5 < 64;
+  if(b_10)
+  {
+    // BLOCK 4
+    i_11  =  adi_2[i_5];
+    i_12  =  i_11 << 24;
+    i_13  =  i_12 >> 24;
+    i_14  =  i_11 << 16;
+    i_15  =  i_14 >> 24;
+    i_16  =  i_13 + i_15;
+    i_17  =  i_11 << 8;
+    i_18  =  i_17 >> 24;
+    i_19  =  i_16 + i_18;
+    i_20  =  i_11 >> 24;
+    i_21  =  i_19 + i_20;
+    i_22  =  i_21;
+  }  // B3
+  else
+  {
+    // BLOCK 5
+    i_22  =  0;
+  }  // B3
+  // BLOCK 6 MERGES [5 4 ]
+  __syncthreads();
+  f_23  =  (float) i_22;
+  // BLOCK 7 MERGES [6 8 ]
+  f_24  =  f_23;
+  i_25  =  16;
+  for(;i_25 >= 1;)
+  {
+    // BLOCK 8
+    f_26  =  __shfl_down_sync(0xffffffff, f_24, i_25);
+    f_27  =  f_26 + f_24;
+    i_28  =  i_25 >> 1;
+    f_24  =  f_27;
+    i_25  =  i_28;
+  }  // B7
+  // BLOCK 9
+  b_29  =  (i_5 & 31) == 0;
+  if(b_29)
+  {
+    // BLOCK 10
+    i_30  =  i_5 >> 31;
+    i_31  =  i_30 >> 27;
+    i_32  =  i_31 + i_5;
+    i_33  =  i_32 >> 5;
+    adf_3[i_33]  =  f_24;
+  }  // B9
+  else
+  {
+    // BLOCK 11
+  }  // B9
+  // BLOCK 12 MERGES [11 10 ]
+  __syncthreads();
+  b_34  =  i_5 == 0;
+  if(b_34)
+  {
+    // BLOCK 13
+    f_35  =  adf_3[0];
+    f_36  =  adf_3[1];
+    f_37  =  adf_3[2];
+    f_38  =  adf_3[3];
+    l_39  =  (long long) i_4;
+    l_40  =  l_39 + 4L;
+    l_41  =  l_40 << 2;
+    ul_42  =  ul_1 + l_41;
+    f_43  =  f_35 + 0.0F;
+    f_44  =  f_43 + f_36;
+    f_45  =  f_44 + f_37;
+    f_46  =  f_45 + f_38;
+    *(( float *) ul_42)  =  f_46;
+  }  // B12
+  else
+  {
+    // BLOCK 14
+  }  // B12
+  // BLOCK 15 MERGES [14 13 ]
+  return;
+}  //  kernel
+
+  first execution (JIT compile): 27777 us
+  steady-state median wall-clock (n=1): 212 us
+
+  [naive    ] validation PASSED (max abs err 0.00000, 0/64 rows out of tol)
+  [optimised] validation PASSED (max abs err 0.00000, 0/64 rows out of tol)
+
+=== Summary (steady-state median us, this run/this GPU) ===
+naive     : 258
+optimised : 212 (1.22x vs naive)
+Both kernels produce the same, correct result

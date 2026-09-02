@@ -1,0 +1,4 @@
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+96.4,1056681,10,105668.1,105649.0,105569,105857,86.0,rowSumNaive
+3.6,39712,10,3971.2,3904.0,3872,4448,188.7,rowSumOptimised
+

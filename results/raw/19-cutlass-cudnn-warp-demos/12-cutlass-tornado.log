@@ -1,0 +1,27 @@
+WARNING: module-info.class ignored in patch: /home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda/share/java/jvmci/jvmci-21.0.2.jar
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess (file:/home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda/share/java/tornado/tornado-runtime-6.0.0.jar)
+WARNING: Please consider reporting this to the maintainers of class uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+CUTLASS fused epilogue demo: C[1024x1024] = relu(scale(A[1024x1024]) * B[1024x1024] + bias), fp16
+  20 executions per mode, steady-state median reported (first execution excluded)
+
+=== FUSED (CUTLASS gemmBiasRelu — one kernel) ===
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::loadLibrary has been called by uk.ac.manchester.tornado.cutlass.provider.CutlassNativeLib in module tornado.cutlass (file:/home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda/share/java/tornado/tornado-cutlass-6.0.0.jar)
+WARNING: Use --enable-native-access=tornado.cutlass to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+  first execution (JIT compile + CUTLASS plan setup): 82273 us
+  steady-state median wall-clock (n=19): 317 us
+  [fused  ] validation PASSED (max abs err 0.00781, 0/1048576 cells out of tol)
+
+=== UNFUSED (CUTLASS hgemm + JIT bias/ReLU — two kernels) ===
+  first execution (JIT compile + CUTLASS plan setup): 21944 us
+  steady-state median wall-clock (n=19): 304 us
+  [unfused] validation PASSED (max abs err 0.00781, 0/1048576 cells out of tol)
+
+=== Summary (steady-state median us, this run/this GPU) ===
+fused   : 317
+unfused : 304 (0.96x the fused time)
+Both modes produce the same, correct result

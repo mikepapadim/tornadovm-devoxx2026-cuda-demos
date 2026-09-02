@@ -1,0 +1,6 @@
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+61.4,63841,10,6384.1,6336.0,6336,6720,119.9,"void implicit_convolve_sgemm<float, float, (int)128, (int)5, (int)5, (int)3, (int)3, (int)3, (int)1, (bool)0, (bool)0, (bool)1>(int, int, int, const T1 *, int, T2 *, const T1 *, kernel_conv_params, unsigned long long, int, float, float, int, const T2 *, const T2 *, bool, bool, int, int)"
+14.6,15136,10,1513.6,1504.0,1472,1600,33.9,"void op_generic_tensor_kernel<(int)1, float, float, float, (int)256, (cudnnGenericOp_t)8, (cudnnNanPropagation_t)0, (int)1>(cudnnTensorStruct, T4 *, cudnnTensorStruct, const T2 *, cudnnTensorStruct, const T2 *, T3, T3, T3, cudnnActivationStruct, reducedDivisorArray, int)"
+12.1,12575,10,1257.5,1216.0,1215,1568,109.9,scale
+11.9,12352,10,1235.2,1232.0,1216,1280,22.4,addBias
+

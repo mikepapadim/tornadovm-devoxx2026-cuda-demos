@@ -1,0 +1,10 @@
+
+NOTICE: Existing SQLite export found: 13-cudnn.sqlite
+        It is assumed file was previously exported from: 13-cudnn.nsys-rep
+        Consider using --force-export=true if needed.
+
+Time (%),Total Time (ns),Count,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Operation
+70.8,544226,522,1042.6,832.0,832,13312,1394.5,[CUDA memcpy Device-to-Host]
+28.7,220547,535,412.2,384.0,351,15680,661.7,[CUDA memcpy Host-to-Device]
+0.6,4384,4,1096.0,1248.0,544,1344,370.8,[CUDA memset]
+
