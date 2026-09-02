@@ -1,0 +1,10 @@
+Kernel-time comparison: n=4194304, polynomial degree=256, 20 executions
+  block size 256 (identical to the TornadoVM version)
+  kernels: elementwise (memory-bound) -> polynomial (compute-bound) -> stencil (memory-bound)
+  NOTE: the wall-clock below includes host dispatch and transfers.
+        Compare kernel time with nsys -- see this demo's README.
+
+first execution: 1354 us
+steady-state median wall-clock (n=19): 1240 us
+validation PASSED (max abs err 0.0000001, 0/4194304 elements out of tol)
+Result is correct

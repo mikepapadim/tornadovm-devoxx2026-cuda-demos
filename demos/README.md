@@ -18,6 +18,7 @@ Each demo directory has its own `README.md` with build/run commands, a
 | [12-cutlass-fused-epilogue](12-cutlass-fused-epilogue/) | `CutlassFusedEpilogue.java` | CUTLASS fused epilogue: `gemmBiasRelu` (GEMM + bias + ReLU in one kernel) vs. `hgemm` + a separate JIT bias/ReLU pass. The fusion is visible in the CUTLASS kernel's own template name (`LinearCombinationRelu`), and the unfused mode shows a second `biasRelu` kernel in the timeline. |
 | [13-cudnn-jit-convblock](13-cudnn-jit-convblock/) | `CuDnnConvBlockHybrid.java` | A CNN block alternating vendor and JIT kernels in one graph: JIT `scale` → cuDNN `conv2d` → JIT `addBias` → cuDNN `relu`. Nsight Systems shows all four as separate kernels, the two JIT ones under their own Java method names. |
 | [14-warp-async-shared](14-warp-async-shared/) | `WarpAsyncSharedReduce.java` | Three hand-tuned CUDA optimisations written in Java in one kernel: async copy (`cp.async.ca.shared.global`), shared memory (`__shared__`) and warp shuffle (`__shfl_down_sync`) — all three confirmed in the `--printKernel` dump. 26.6x faster than the naive kernel at the kernel level. |
+| [15-kernel-time-comparison](15-kernel-time-comparison/) | `KernelTimeComparison.java` | **Kernel time only**, TornadoVM vs hand-written CUDA, measured with `nsys`: three kernels with different bottlenecks, both differences attributed to a specific cause with a standalone probe. Memory-bound gap is the `FloatArray` header offset; compute-bound win is JIT specialisation. |
 
 ## Building and running
 
@@ -41,17 +42,17 @@ distinction matters.
 the installed SDK, not to this repo. `scripts/setup-env.sh` regenerates it for
 whichever JDK is active.
 
-`bash ../scripts/run-all-demos.sh` compiles and runs all twelve demos both ways
+`bash ../scripts/run-all-demos.sh` compiles and runs all thirteen demos both ways
 and exits non-zero on any failure.
 
 ## CUDA equivalents
 
 Each demo folder also contains a hand-written CUDA C++ version of the same
 program, named after the Java file (`Hello.java` / `Hello.cu`). They exist to be
-read side by side, and all twelve compile and produce the same results:
+read side by side, and all thirteen compile and produce the same results:
 
 ```bash
-bash ../scripts/run-all-cuda.sh   # 12 compiles + 12 runs; CUDA toolkit only, no JDK
+bash ../scripts/run-all-cuda.sh   # 13 compiles + 13 runs + 2 probes; CUDA toolkit only, no JDK
 ```
 
 Demo 12 needs a CUTLASS checkout (header-only, not vendored):

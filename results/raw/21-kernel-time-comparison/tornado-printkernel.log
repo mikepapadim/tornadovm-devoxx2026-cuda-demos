@@ -1,0 +1,163 @@
+WARNING: module-info.class ignored in patch: /home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda/share/java/jvmci/jvmci-21.0.2.jar
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess (file:/home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda/share/java/tornado/tornado-runtime-6.0.0.jar)
+WARNING: Please consider reporting this to the maintainers of class uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+Kernel-time comparison: n=4096, polynomial degree=8, 2 executions
+  block size 256 (identical to the CUDA version)
+  kernels: elementwise (memory-bound) -> polynomial (compute-bound) -> stencil (memory-bound)
+  NOTE: the wall-clock below includes host dispatch and transfers.
+        Compare kernel time with nsys -- see this demo's README.
+
+extern "C" __global__ void elementwise(long long *_kernel_context, unsigned char *_constant_region, unsigned char *_local_region, int *_atomics, unsigned char *arg1, unsigned char *arg2)
+{
+  unsigned long long ul_0, ul_1, ul_7, ul_9; 
+  int i_2; 
+  bool b_3; 
+  long long l_4, l_5, l_6; 
+  float f_8, f_10; 
+
+  // BLOCK 0
+  ul_0  =  (unsigned long long) arg1;
+  ul_1  =  (unsigned long long) arg2;
+  i_2  =  (blockIdx.x*blockDim.x+threadIdx.x);
+  b_3  =  i_2 < 4096;
+  if(b_3)
+  {
+    // BLOCK 1
+    l_4  =  (long long) i_2;
+    l_5  =  l_4 + 4L;
+    l_6  =  l_5 << 2;
+    ul_7  =  ul_0 + l_6;
+    f_8  =  *(( float *) ul_7);
+    ul_9  =  ul_1 + l_6;
+    f_10  =  fma(f_8, 0.25F, 0.1F);
+    *(( float *) ul_9)  =  f_10;
+  }  // B0
+  else
+  {
+    // BLOCK 2
+  }  // B0
+  // BLOCK 3 MERGES [2 1 ]
+  return;
+}  //  kernel
+
+extern "C" __global__ void polynomial(long long *_kernel_context, unsigned char *_constant_region, unsigned char *_local_region, int *_atomics, unsigned char *arg1, unsigned char *arg2, int arg3)
+{
+  unsigned long long ul_0, ul_1, ul_7, ul_9; 
+  int i_2; 
+  bool b_3; 
+  long long l_4, l_5, l_6; 
+  float f_8, f_10, f_11, f_12, f_13, f_14, f_15, f_16, f_17; 
+
+  // BLOCK 0
+  ul_0  =  (unsigned long long) arg1;
+  ul_1  =  (unsigned long long) arg2;
+  i_2  =  (blockIdx.x*blockDim.x+threadIdx.x);
+  b_3  =  i_2 < 4096;
+  if(b_3)
+  {
+    // BLOCK 1
+    l_4  =  (long long) i_2;
+    l_5  =  l_4 + 4L;
+    l_6  =  l_5 << 2;
+    ul_7  =  ul_0 + l_6;
+    f_8  =  *(( float *) ul_7);
+    ul_9  =  ul_1 + l_6;
+    f_10  =  f_8 + 0.5F;
+    f_11  =  fma(f_10, f_8, 0.5F);
+    f_12  =  fma(f_11, f_8, 0.5F);
+    f_13  =  fma(f_12, f_8, 0.5F);
+    f_14  =  fma(f_13, f_8, 0.5F);
+    f_15  =  fma(f_14, f_8, 0.5F);
+    f_16  =  fma(f_15, f_8, 0.5F);
+    f_17  =  fma(f_16, f_8, 0.5F);
+    *(( float *) ul_9)  =  f_17;
+  }  // B0
+  else
+  {
+    // BLOCK 2
+  }  // B0
+  // BLOCK 3 MERGES [2 1 ]
+  return;
+}  //  kernel
+
+extern "C" __global__ void stencil(long long *_kernel_context, unsigned char *_constant_region, unsigned char *_local_region, int *_atomics, unsigned char *arg1, unsigned char *arg2, int arg3)
+{
+  unsigned long long ul_0, ul_1, ul_9, ul_10, ul_11, ul_12, ul_5, ul_22, ul_19, ul_27, ul_29; 
+  int i_2, i_8, i_15, i_16; 
+  bool b_3, b_4, b_14; 
+  float f_13, f_7, f_6, f_23, f_21, f_20, f_28, f_30, f_31, f_32; 
+  long long l_17, l_18, l_24, l_25, l_26; 
+
+  // BLOCK 0
+  ul_0  =  (unsigned long long) arg1;
+  ul_1  =  (unsigned long long) arg2;
+  i_2  =  (blockIdx.x*blockDim.x+threadIdx.x);
+  b_3  =  i_2 < 4096;
+  if(b_3)
+  {
+    // BLOCK 1
+    b_4  =  i_2 < 1;
+    if(b_4)
+    {
+      // BLOCK 2
+      ul_5  =  ul_0 + 16L;
+      f_6  =  *(( float *) ul_5);
+      f_7  =  f_6;
+    }  // B1
+    else
+    {
+      // BLOCK 3
+      i_8  =  i_2 + -1;
+      ul_9  =  i_8 & 4294967295UL;
+      ul_10  =  ul_9 + 4L;
+      ul_11  =  ul_10 << 2;
+      ul_12  =  ul_0 + ul_11;
+      f_13  =  *(( float *) ul_12);
+      f_7  =  f_13;
+    }  // B1
+    // BLOCK 4 MERGES [3 2 ]
+    b_14  =  i_2 < 4095;
+    if(b_14)
+    {
+      // BLOCK 5
+      i_15  =  i_2 + 1;
+      i_16  =  i_15 + 4;
+      l_17  =  (long long) i_16;
+      l_18  =  l_17 << 2;
+      ul_19  =  ul_0 + l_18;
+      f_20  =  *(( float *) ul_19);
+      f_21  =  f_20;
+    }  // B4
+    else
+    {
+      // BLOCK 6
+      ul_22  =  ul_0 + 16396L;
+      f_23  =  *(( float *) ul_22);
+      f_21  =  f_23;
+    }  // B4
+    // BLOCK 7 MERGES [5 6 ]
+    l_24  =  (long long) i_2;
+    l_25  =  l_24 + 4L;
+    l_26  =  l_25 << 2;
+    ul_27  =  ul_0 + l_26;
+    f_28  =  *(( float *) ul_27);
+    ul_29  =  ul_1 + l_26;
+    f_30  =  f_7 + f_28;
+    f_31  =  f_21 + f_30;
+    f_32  =  f_31 * 0.33333334F;
+    *(( float *) ul_29)  =  f_32;
+  }  // B0
+  else
+  {
+    // BLOCK 8
+  }  // B0
+  // BLOCK 9 MERGES [8 7 ]
+  return;
+}  //  kernel
+
+first execution (JIT compile): 95663 us
+steady-state median wall-clock (n=1): 428 us
+validation PASSED (max abs err 0.0000001, 0/4096 elements out of tol)
+Result is correct

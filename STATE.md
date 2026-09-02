@@ -467,3 +467,63 @@ pinned host memory for graph capture (02/11), the event fork/join needed to
 capture a stream pool (11), `__cvta_generic_to_shared` for `cp.async` (14), and
 CUTLASS's tile shapes and bias-broadcast convention (12). Each is a
 silent-wrong-answer bug if missed.
+
+## Batch 21 — kernel-time-only comparison, TornadoVM vs hand-written CUDA (2026-09-02)
+
+New demo `demos/15-kernel-time-comparison`, plus two standalone attribution
+probes. Every other timed demo here reports wall-clock, which on TornadoVM is
+dominated by host dispatch; this batch isolates **kernel time** to compare
+generated code rather than runtime overhead. Evidence:
+`results/raw/21-kernel-time-comparison/` (+ `MANIFEST.md`). All Observed:
+
+- Three kernels with different bottlenecks — `elementwise` (memory-bound),
+  `polynomial` (compute-bound FMA chain), `stencil` (memory-bound, neighbours).
+  Controlled so only codegen differs: identical kernel names (so the two `nsys`
+  tables line up row by row), identical 256-thread blocks and grids, identical
+  arithmetic including bounds checks, no `-use_fast_math` on either side. Both
+  implementations validate at `max abs err 0.0000001`.
+- **Result** (mean per-kernel `Avg (ns)` from `nsys`, 3 runs x 20 executions,
+  spread under 1%):
+
+| Kernel | TornadoVM | CUDA | Ratio |
+|---|---|---|---|
+| `elementwise` | 13944 ns | 10621 ns | CUDA 1.31x faster |
+| `stencil` | 14322 ns | 11546 ns | CUDA 1.24x faster |
+| `polynomial` | 35236 ns | 39926 ns | **TornadoVM 1.13x faster** |
+
+- **Both differences were attributed, not left as "the compiler is
+  better/worse".** Each has a standalone probe committed in the demo folder.
+  - *Memory-bound gap = the `FloatArray` 16-byte header.* The generated CUDA
+    offsets every access by `+ 4L`; a warp reads 128 bytes, so that offset makes
+    every warp-wide access straddle a 128-byte boundary — two transactions
+    instead of one. `ProbeHeaderAlignment.cu` runs the identical CUDA kernel at
+    offset 0 vs offset 4 floats and reproduces 1.28x / 1.27x, against the
+    measured 1.31x / 1.24x. Accounts for essentially the whole gap.
+  - *Compute-bound win = JIT specialisation.* `degree` is a task argument, so
+    Graal compiles with its value known and fully unrolls the FMA chain
+    (`--printKernel` shows straight-line `fma()`, no loop; `cuobjdump -sass`
+    shows 11 branches in nvcc's version). `ProbeJitSpecialisation.cu` gives nvcc
+    the same information via a template parameter: 34.7 µs vs TornadoVM's
+    35.24 µs — equal within 1.6%.
+- **Conclusion recorded in the demo README:** controlling for both effects, the
+  generated arithmetic is *equivalent*. TornadoVM pays ~25–30% on
+  bandwidth-bound kernels for a fixable layout issue and gains on kernels whose
+  shape depends on a runtime value. The README states explicitly that three
+  kernels are not a benchmark suite and must not be generalised to
+  "TornadoVM is X% of CUDA".
+- `scripts/run-all-demos.sh` now covers 13 demos (39/39); `scripts/run-all-cuda.sh`
+  covers 13 CUDA programs plus the 2 probes (28/28).
+
+### Bug filed upstream
+
+- **[#1065](https://github.com/beehive-lab/TornadoVM/issues/1065)** —
+  `FloatArray`'s 16-byte header misaligns warp-coalesced accesses, costing
+  ~25–30% on bandwidth-bound kernels. Includes the offset-0-vs-offset-4
+  attribution probe and notes that padding the header to 128 bytes would likely
+  fix it. The issue explicitly records that, with this effect controlled for,
+  TornadoVM's generated arithmetic matched hand-written CUDA on all three
+  kernels — it is the one systematic gap measurable here.
+
+Nsight Compute hardware counters, which would show the transaction-count effect
+directly instead of by inference from timing, remain blocked on this machine
+(`ERR_NVGPUCTRPERM`). Re-confirmed unchanged.

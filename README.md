@@ -101,6 +101,7 @@ profiler, not the wall clock, is what shows the effect at all.
 | [12](demos/12-cutlass-fused-epilogue/) | `CutlassFusedEpilogue.java` | CUTLASS fused epilogue (GEMM+bias+ReLU in one kernel) vs. GEMM + a separate JIT pass | `tornado --classpath . CutlassFusedEpilogue` |
 | [13](demos/13-cudnn-jit-convblock/) | `CuDnnConvBlockHybrid.java` | CNN block alternating vendor and JIT kernels: JIT scale → cuDNN conv2d → JIT bias → cuDNN relu | `tornado --classpath . CuDnnConvBlockHybrid` |
 | [14](demos/14-warp-async-shared/) | `WarpAsyncSharedReduce.java` | `cp.async` + shared memory + `__shfl_down_sync` from Java, verified in the generated CUDA | `tornado --classpath . WarpAsyncSharedReduce` |
+| [15](demos/15-kernel-time-comparison/) | `KernelTimeComparison.java` | **Kernel time only**, TornadoVM vs hand-written CUDA over 3 kernels, measured with `nsys` | `tornado --classpath . KernelTimeComparison` |
 
 Every demo also runs as `java @$TORNADOVM_HOME/tornado-argfile -cp . <MainClass> [args]`.
 
@@ -147,7 +148,7 @@ read side by side. All twelve compile and run, and each produces the same
 result as its Java counterpart:
 
 ```bash
-bash scripts/run-all-cuda.sh          # 12 compiles + 12 runs, no JDK needed
+bash scripts/run-all-cuda.sh          # 13 compiles + 13 runs + 2 probes, no JDK needed
 ```
 
 Demo 12 additionally needs CUTLASS, which is header-only and not vendored here:
@@ -171,7 +172,31 @@ faster everywhere** — the interesting part is the pattern, not the direction:
 | 13 | conv block, end to end | 367 µs | 69 µs |
 | 14 | naive → optimised | 228 → 105 µs (2.17x) | 64 → 14 µs (4.47x) |
 
-Two things follow, and both are worth saying out loud rather than hiding:
+**Demo 15 measures kernel time alone** and finds the picture is different once
+host overhead is excluded — see its README for the full analysis:
+
+| Kernel | TornadoVM | CUDA | |
+|---|---|---|---|
+| `elementwise` (memory-bound) | 13.94 µs | 10.62 µs | CUDA 1.31x faster |
+| `stencil` (memory-bound) | 14.32 µs | 11.55 µs | CUDA 1.24x faster |
+| `polynomial` (compute-bound) | 35.24 µs | 39.93 µs | **TornadoVM 1.13x faster** |
+
+Both differences were attributed to a specific cause with a standalone probe,
+rather than left as "the compiler is better/worse":
+
+- The memory-bound gap is **entirely** TornadoVM's 16-byte `FloatArray` header,
+  which misaligns warp-coalesced 128-byte accesses. Running the *identical* CUDA
+  kernel at a 4-float offset reproduces it (1.28x / 1.27x vs the measured
+  1.31x / 1.24x). Filed as
+  [#1065](https://github.com/beehive-lab/TornadoVM/issues/1065).
+- The compute-bound win is **entirely** JIT specialisation: `degree` is a task
+  argument, so Graal unrolls the FMA chain on its actual value. Give nvcc the
+  same information via a template parameter and it lands at 34.7 µs against
+  TornadoVM's 35.24 µs — equal.
+
+Controlling for both, **the generated arithmetic is equivalent**. Two things
+also follow from the wall-clock table above, both worth saying out loud rather
+than hiding:
 
 1. **The gap is host-side dispatch overhead, not kernel quality.** Demo 14's
    TornadoVM *kernel* is 26.6x faster than its naive kernel; its wall-clock is
@@ -209,13 +234,15 @@ convention (demo 12). Each of those is a silent-wrong-answer bug if you miss it.
 
 ## Upstream issues filed
 
-Two reproducible bugs were found in TornadoVM 6.0.0 while building demos 12–14
+Three reproducible bugs were found in TornadoVM 6.0.0 while building demos 12–15
 and reported upstream with minimal test cases:
 
 | Issue | Summary | Effect here |
 |---|---|---|
 | [beehive-lab/TornadoVM#1063](https://github.com/beehive-lab/TornadoVM/issues/1063) | `CuDnn.sdpaForward` launches no kernel and silently returns an all-zero result — the SDK's own `BenchmarkSdpa` fails, and Nsight Systems confirms zero cuDNN kernels are launched | demo 13 uses `cudnnConv2d`/`cudnnRelu` instead of SDPA; do not demo SDPA live |
 | [beehive-lab/TornadoVM#1064](https://github.com/beehive-lab/TornadoVM/issues/1064) | CUDA lowering crashes with `Node implementing Lowerable not handled: NewInstance` when a ternary precedes an allocation; `Math.max` compiles | demo 12's JIT `biasRelu` uses `Math.max`, not `v > 0 ? v : 0` |
+
+| [beehive-lab/TornadoVM#1065](https://github.com/beehive-lab/TornadoVM/issues/1065) | `FloatArray`'s 16-byte header misaligns warp-coalesced accesses, costing ~25–30% on bandwidth-bound kernels | quantified and attributed in demo 15 |
 
 One further problem was **observed but not filed**, because it could not be
 reduced to a reliable reproducer: an `@Parallel` reduction over a `ByteArray`

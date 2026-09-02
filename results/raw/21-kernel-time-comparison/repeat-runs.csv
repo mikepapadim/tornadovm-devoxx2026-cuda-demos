@@ -1,0 +1,10 @@
+run,kernel,tornado_avg_ns,cuda_avg_ns
+1,elementwise,13899.1,10560.2
+1,polynomial,35102.7,39654.7
+1,stencil,14289.6,11499.4
+2,elementwise,13979.5,10678.5
+2,polynomial,35272.3,40209.8
+2,stencil,14344.1,11576.0
+3,elementwise,13953.6,10624.0
+3,polynomial,35331.7,39912.3
+3,stencil,14331.4,11563.3

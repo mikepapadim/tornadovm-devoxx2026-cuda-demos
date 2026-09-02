@@ -66,6 +66,7 @@ done <<'DEMOS'
 12-cutlass-fused-epilogue:CutlassFusedEpilogue:512 512 512 5
 13-cudnn-jit-convblock:CuDnnConvBlockHybrid:4 16 32 32 16 5
 14-warp-async-shared:WarpAsyncSharedReduce:2048 512 5
+15-kernel-time-comparison:KernelTimeComparison:1048576 128 5
 DEMOS
 
 echo

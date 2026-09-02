@@ -77,7 +77,21 @@ done <<'DEMOS'
 12-cutlass-fused-epilogue|CutlassFusedEpilogue.cu||512 512 512 5
 13-cudnn-jit-convblock|CuDnnConvBlockHybrid.cu|-I/usr/include/x86_64-linux-gnu -lcudnn|4 16 32 32 16 5
 14-warp-async-shared|WarpAsyncSharedReduce.cu||2048 512 5
+15-kernel-time-comparison|KernelTimeComparison.cu||1048576 128 5
 DEMOS
+
+# Demo 15's two diagnostic probes: they attribute the kernel-time differences
+# rather than validating a result, so they are checked for a clean build+run only.
+for probe in ProbeHeaderAlignment ProbeJitSpecialisation; do
+  src="$repo_root/demos/15-kernel-time-comparison/$probe.cu"
+  [ -f "$src" ] || continue
+  if nvcc -arch="$arch" -o "$out/$probe" "$src" > "$out/$probe.build.log" 2>&1 \
+     && "$out/$probe" > "$out/$probe.run.log" 2>&1; then
+    echo "OK   15-kernel-time-comparison/$probe"; pass=$((pass + 1))
+  else
+    echo "FAIL 15-kernel-time-comparison/$probe (see $out/$probe.*.log)"; fail=$((fail + 1))
+  fi
+done
 
 echo
 echo "== Summary: $pass passed, $fail failed, $skip skipped =="
