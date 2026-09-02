@@ -122,6 +122,41 @@ returns an all-zero result on this machine and prints
 `Results DO NOT match`. Reported upstream — see the repo README's
 "Upstream issues filed" section. Do not demo it live.
 
+## CUDA equivalent
+
+[`CuDnnConvBlockHybrid.cu`](CuDnnConvBlockHybrid.cu) is the same demo written directly in CUDA C++, for side-by-side comparison.
+
+```bash
+nvcc -arch=sm_89 -I/usr/include/x86_64-linux-gnu -lcudnn -o cudnn_conv_block CuDnnConvBlockHybrid.cu && ./cudnn_conv_block
+```
+
+This is the pair where the hybrid API earns the most. Two `libraryTask` calls in
+Java become, in CUDA: a handle, two tensor descriptors, a filter descriptor, a
+convolution descriptor, an activation descriptor, an algorithm choice, a
+workspace-size query, a workspace allocation, and six matching `destroy` calls.
+
+```c
+cudnnSetTensor4dDescriptor(inDesc, CUDNN_TENSOR_NCHW, CUDNN_DATA_FLOAT, n, c, h, w);
+cudnnSetFilter4dDescriptor(filterDesc, CUDNN_DATA_FLOAT, CUDNN_TENSOR_NCHW, k, c, R, S);
+cudnnSetConvolution2dDescriptor(convDesc, PAD, PAD, STRIDE, STRIDE, 1, 1,
+                                CUDNN_CROSS_CORRELATION, CUDNN_DATA_FLOAT);
+cudnnGetConvolutionForwardWorkspaceSize(cudnn, inDesc, filterDesc, convDesc,
+                                        outDesc, algo, &workspaceBytes);
+```
+
+`CUDNN_CROSS_CORRELATION` is the trap: pick `CUDNN_CONVOLUTION` instead and
+cuDNN flips the filter, so the result stops matching any reference written the
+obvious way. The Java `cudnnConv2d` picks cross-correlation for you — which is
+why the Java demo's reference matches with no filter flip.
+
+Both versions validate at **max abs err `0.000000`**. Steady-state median
+wall-clock: TornadoVM 367 µs, CUDA 69 µs.
+
+138 lines of Java against 186 of CUDA, and nearly all of the difference is
+descriptor plumbing.
+
+`bash scripts/run-all-cuda.sh` builds and runs the CUDA equivalent of every demo (needs only the CUDA toolkit, no JDK).
+
 ## JBang
 
 Not verified: `jbang` is not installed on this machine (`which jbang` → exit 1,

@@ -84,6 +84,26 @@ Earlier 5.2.1 logs:
 `results/raw/04-cublas-hybrid/cublassgemvhybrid-run.log`,
 `cublassgemvhybrid-run-javaargfile.log`.
 
+## CUDA equivalent
+
+[`CuBlasSgemvHybrid.cu`](CuBlasSgemvHybrid.cu) is the same demo written directly in CUDA C++, for side-by-side comparison.
+
+```bash
+nvcc -arch=sm_89 -lcublas -o cublas_sgemv CuBlasSgemvHybrid.cu && ./cublas_sgemv
+```
+
+The three-stage hybrid graph, by hand: create a cuBLAS handle, allocate and
+copy every buffer, launch your `scale` kernel, call `cublasSgemv` on the buffer
+it just wrote, launch your `bias` kernel on the library's output, copy back.
+
+Note `CUBLAS_OP_T` appears in both versions and for the same reason — cuBLAS is
+column-major and the matrix is row-major. The hybrid API does not hide that;
+it hides the handle, the allocations and the copies.
+
+Output is identical: `output[0]=157.0` on every iteration.
+
+`bash scripts/run-all-cuda.sh` builds and runs the CUDA equivalent of every demo (needs only the CUDA toolkit, no JDK).
+
 ## JBang
 
 Not verified: `jbang` is not installed on this machine (`which jbang` →

@@ -1,0 +1,46 @@
+Integrated showcase: 6 chains of (scale -> cuBLAS sgemv -> bias), 8x8, 20 executions, mode=all
+
+=== baseline ===
+execution 0: correct, wall=25938 us
+execution 1: correct, wall=101 us
+execution 2: correct, wall=103 us
+execution 19: correct, wall=95 us
+baseline first execution: 25938 us
+baseline steady-state median wall-clock (n=19): 100 us
+baseline: All executions correct
+
+=== concurrent ===
+execution 0: correct, wall=67 us
+execution 1: correct, wall=49 us
+execution 2: correct, wall=49 us
+execution 19: correct, wall=48 us
+concurrent first execution: 67 us
+concurrent steady-state median wall-clock (n=19): 48 us
+concurrent: All executions correct
+
+=== graph ===
+execution 0: correct, wall=111 us
+execution 1: correct, wall=90 us
+execution 2: correct, wall=108 us
+execution 19: correct, wall=105 us
+graph first execution: 111 us
+graph steady-state median wall-clock (n=19): 108 us
+graph: All executions correct
+
+=== combined ===
+execution 0: correct, wall=56 us
+execution 1: correct, wall=39 us
+execution 2: correct, wall=30 us
+execution 19: correct, wall=29 us
+combined first execution: 56 us
+combined steady-state median wall-clock (n=19): 37 us
+combined: All executions correct
+
+=== Summary (steady-state median us, this run/this GPU) ===
+baseline   : 99.9
+concurrent : 48.4 (2.06x vs baseline)
+graph      : 107.9 (0.93x vs baseline)
+combined   : 36.7 (2.73x vs baseline)
+
+=== BONUS: Tensor Core mma.sync single-tile GEMM (demo 08 kernel, reused) ===
+Tensor Core tile validation: PASSED (max abs err 0.00000, 0/128 cells out of tol)

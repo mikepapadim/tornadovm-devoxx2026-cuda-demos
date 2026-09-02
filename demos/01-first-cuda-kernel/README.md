@@ -56,6 +56,25 @@ Total time: <ns>
 
 and a profiler JSON block confirming `"BACKEND": "CUDA"`, `"DEVICE": "NVIDIA GeForce RTX 4090"`.
 
+## CUDA equivalent
+
+[`VectorAddKernel.cu`](VectorAddKernel.cu) is the same demo written directly in CUDA C++, for side-by-side comparison.
+
+```bash
+nvcc -arch=sm_89 -o vector_add VectorAddKernel.cu && ./vector_add
+```
+
+Put this next to what `tornado --printKernel` dumps for the Java version: the
+generated `vectorAdd` kernel body is the same computation with the same bounds
+check. That is the demo's whole point — TornadoVM is not interpreting your Java
+on the GPU, it compiled it to this.
+
+The host side is where they diverge: allocate, copy, launch, copy back, free,
+plus CUDA events if you want the timing the Java version gets from
+`--enableProfiler`.
+
+`bash scripts/run-all-cuda.sh` builds and runs the CUDA equivalent of every demo (needs only the CUDA toolkit, no JDK).
+
 ## JBang
 
 Not verified: `jbang` is not installed on this machine (checked 2026-08-19,

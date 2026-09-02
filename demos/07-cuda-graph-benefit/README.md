@@ -112,6 +112,35 @@ fall back to the captured logs above and demo 02's simpler capture/replay
 correctness demo, which makes the qualitative point (graph replay exists and
 works) without depending on a live timing number.
 
+## CUDA equivalent
+
+[`CudaGraphBenefit.cu`](CudaGraphBenefit.cu) is the same demo written directly in CUDA C++, for side-by-side comparison.
+
+```bash
+nvcc -arch=sm_89 -o cuda_graph_benefit CudaGraphBenefit.cu && ./cuda_graph_benefit 4096 6 50 both
+```
+
+The same experiment against raw CUDA graphs — and the most interesting
+comparison in the repo, because the two do **not** agree:
+
+| | TornadoVM | CUDA |
+|---|---|---|
+| nograph steady-state median | 292–364 µs | 18.6 µs |
+| graph steady-state median | 36 µs | 14.5 µs |
+| **speedup from graphs** | **8.1x–10.0x** | **1.28x** |
+
+Read that carefully before quoting it. CUDA graphs remove *host-side dispatch
+overhead*. Raw CUDA barely has any for a 6-kernel chain, so graphs buy it
+almost nothing (1.28x). TornadoVM has a great deal of it, so graphs buy it a
+lot (8–10x) — and even then land at 36 µs, still ~2.5x the handwritten 14.5 µs.
+
+The honest framing for a talk: `withCUDAGraph()` is not making TornadoVM faster
+than CUDA, it is removing most of the interpreter's own per-execution cost. It
+is the single highest-leverage flag in the API precisely because that cost
+exists.
+
+`bash scripts/run-all-cuda.sh` builds and runs the CUDA equivalent of every demo (needs only the CUDA toolkit, no JDK).
+
 ## JBang
 
 Not verified: `jbang` is not installed on this machine (`which jbang` → exit

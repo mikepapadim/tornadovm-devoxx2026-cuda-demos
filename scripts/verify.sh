@@ -76,8 +76,24 @@ else
   ok "no demo README instructs --enable-preview"
 fi
 
+echo "== Every Track A demo has a CUDA equivalent =="
+missing_cu=0
+for d in demos/[0-9]*/; do
+  # 09 and 10 are the Maven-built GPULlama3 demos, not Track A.
+  case "$d" in demos/09-*|demos/10-*) continue ;; esac
+  if ! ls "$d"*.cu >/dev/null 2>&1; then
+    echo "     missing a .cu in $d"
+    missing_cu=$((missing_cu + 1))
+  fi
+done
+if [ "$missing_cu" -eq 0 ]; then
+  ok "every Track A demo folder has a hand-written CUDA equivalent"
+else
+  bad "$missing_cu demo(s) have no .cu equivalent"
+fi
+
 echo "== Helper scripts present and executable =="
-for sc in scripts/setup-env.sh scripts/run-all-demos.sh; do
+for sc in scripts/setup-env.sh scripts/run-all-demos.sh scripts/run-all-cuda.sh; do
   if [ -x "$sc" ]; then ok "$sc is executable"; else bad "$sc missing or not executable"; fi
 done
 

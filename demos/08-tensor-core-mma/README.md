@@ -145,6 +145,42 @@ run doesn't reproduce, the fallback is the captured
 directly off `results/raw/08-tensor-core-mma/tensorcoremma-printkernel.log`
 without re-running anything live.
 
+## CUDA equivalent
+
+[`TensorCoreMMA.cu`](TensorCoreMMA.cu) is the same demo written directly in CUDA C++, for side-by-side comparison.
+
+```bash
+nvcc -arch=sm_89 -o tensor_core_mma TensorCoreMMA.cu && ./tensor_core_mma
+```
+
+This is the pair worth studying, because the CUDA version is *shorter* (121
+lines vs 129) and much harder to get right.
+
+`ctx.mmaLoadA` / `mmaLoadB` / `mma` / `mmaStore` encapsulate the
+register-to-matrix-element mapping fixed by the PTX ISA. Written out, each lane
+holds 8 halves of A, 4 of B and 4 floats of C at positions like:
+
+```c
+a[0] = A[(groupID) * K + (2 * threadInGroup)];
+a[2] = A[(groupID + 8) * K + (2 * threadInGroup)];
+b[0] = B[(2 * threadInGroup) * N + groupID];
+C[(groupID + 8) * N + (2 * threadInGroup)] = d[2];
+```
+
+Get one index wrong and the result is silently incorrect — there is no compiler
+error, just a wrong matrix. That is what the Java helpers are for.
+
+Both emit exactly one tensor-core instruction. Verify the CUDA one:
+
+```bash
+cuobjdump -sass tensor_core_mma | grep -c HMMA    # -> 1
+```
+
+against the Java version's `--printKernel | grep -c mma.sync.aligned` — also 1.
+Identical validation output, max abs err `0.00000`.
+
+`bash scripts/run-all-cuda.sh` builds and runs the CUDA equivalent of every demo (needs only the CUDA toolkit, no JDK).
+
 ## JBang
 
 Not verified: `jbang` is not installed on this machine (`which jbang` → exit

@@ -1,0 +1,7 @@
+Low-pass filter via hybrid cuFFT pipeline: n=4096, cutoff bin=16, iterations=5
+iteration 0: correct maxError=4.76837e-07 filtered[0]=0.49999997
+iteration 1: correct maxError=4.76837e-07 filtered[0]=0.49999997
+iteration 2: correct maxError=4.76837e-07 filtered[0]=0.49999997
+iteration 3: correct maxError=4.76837e-07 filtered[0]=0.49999997
+iteration 4: correct maxError=4.76837e-07 filtered[0]=0.49999997
+All iterations correct

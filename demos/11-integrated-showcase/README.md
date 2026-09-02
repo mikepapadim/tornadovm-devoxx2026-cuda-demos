@@ -238,6 +238,40 @@ already satisfy this task's "profiler evidence" acceptance criterion.
   open the pre-recorded `.nsys-rep`/CSV files from
   `results/raw/11-integrated-showcase/` instead.
 
+## CUDA equivalent
+
+[`IntegratedShowcase.cu`](IntegratedShowcase.cu) is the same demo written directly in CUDA C++, for side-by-side comparison.
+
+```bash
+nvcc -arch=sm_89 -lcublas -o integrated_showcase IntegratedShowcase.cu && ./integrated_showcase 6 8 8 20 all
+```
+
+All four modes by hand. In Java they differ by one method call on the same
+plan; here each is different host code — a stream pool to build and tear down,
+a capture/instantiate/launch cycle, pinned buffers so captured copies stay
+valid, and `cublasSetStream` calls to keep cuBLAS bound to the right stream.
+
+The `combined` mode is the fiddly one: capturing work issued across a stream
+pool needs an explicit fork (record an event on the capture stream, have every
+pool stream wait on it) and a matching join before `cudaStreamEndCapture`.
+`withCUDAGraph().withIntraPlanConcurrency()` is two method calls.
+
+**Measured, same machine, 6 chains, 20 executions:**
+
+| Mode | TornadoVM | vs its baseline | CUDA | vs its baseline |
+|---|---|---|---|---|
+| baseline | 831 µs | — | 99.9 µs | — |
+| concurrent | 740 µs | 1.12x | 48.4 µs | **2.06x** |
+| graph | 148 µs | **5.61x** | 107.9 µs | 0.93x |
+| combined | 146 µs | 5.69x | 36.7 µs | 2.73x |
+
+The two profiles are almost mirror images, and for a consistent reason: graphs
+help whoever has host overhead to remove (TornadoVM), streams help whoever is
+already close to the hardware (CUDA). On this small workload, graph capture
+actually costs raw CUDA slightly more than it saves (0.93x).
+
+`bash scripts/run-all-cuda.sh` builds and runs the CUDA equivalent of every demo (needs only the CUDA toolkit, no JDK).
+
 ## JBang
 
 Not verified: `jbang` is not installed on this machine (`which jbang` → exit

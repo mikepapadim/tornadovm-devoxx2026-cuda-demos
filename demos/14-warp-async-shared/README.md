@@ -167,6 +167,44 @@ established here by probing and is what the index arithmetic above relies on.
   Re-run; if it persists, fall back to the captured logs in
   `results/raw/19-cutlass-cudnn-warp-demos/`.
 
+## CUDA equivalent
+
+[`WarpAsyncSharedReduce.cu`](WarpAsyncSharedReduce.cu) is the same demo written directly in CUDA C++, for side-by-side comparison.
+
+```bash
+nvcc -arch=sm_89 -o warp_async_shared WarpAsyncSharedReduce.cu && ./warp_async_shared
+```
+
+Put this side by side with the `--printKernel` dump above — they are nearly
+line-for-line the same, which is the claim this demo exists to support:
+`KernelContext.asyncCopyToLocal` and `simdShuffleDown` are not an abstraction
+*over* `cp.async` and `shfl.sync`, they compile to exactly those instructions.
+
+```c
+uint32_t smem = static_cast<uint32_t>(__cvta_generic_to_shared(&tile[tid]));
+asm volatile("cp.async.ca.shared.global [%0], [%1], 4;\n" :: "r"(smem), "l"(src));
+asm volatile("cp.async.commit_group;\n");
+asm volatile("cp.async.wait_group 0;\n");
+...
+value += __shfl_down_sync(0xffffffff, value, delta);
+```
+
+The one thing you must do by hand and Java does for you: `cp.async`'s
+destination is a **shared-window** address, not a generic pointer, hence the
+`__cvta_generic_to_shared` cast. Pass a generic pointer and it fails at runtime.
+
+At 164 lines the CUDA version is *shorter* than the 175-line Java one. The
+argument for the Java version here is not brevity — it is that the same source
+compiles and runs under an ordinary JVM debugger, and that `int8` unpacking and
+validation are plain Java.
+
+**Measured, 4096x1024:** TornadoVM naive 228 µs → optimised 105 µs (2.17x);
+CUDA naive 64 µs → optimised 14 µs (4.47x). TornadoVM's *kernel* speedup was
+26.6x (see the Nsight section above); CUDA's wall-clock ratio is closer to its
+kernel ratio simply because it has far less fixed host overhead to dilute it.
+
+`bash scripts/run-all-cuda.sh` builds and runs the CUDA equivalent of every demo (needs only the CUDA toolkit, no JDK).
+
 ## JBang
 
 Not verified: `jbang` is not installed on this machine (`which jbang` → exit 1,

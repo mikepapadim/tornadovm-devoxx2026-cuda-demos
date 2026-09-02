@@ -58,6 +58,31 @@ Re-verified on TornadoVM 6.0.0 / JDK 25, both run paths:
 `results/raw/18-tornadovm-6-migration/00-hello-tornado.log`,
 `00-hello-javaargfile.log`.
 
+## CUDA equivalent
+
+[`Hello.cu`](Hello.cu) is the same demo written directly in CUDA C++, for side-by-side comparison.
+
+```bash
+nvcc -arch=sm_89 -o hello Hello.cu && ./hello
+```
+
+Same program without TornadoVM. The `@Parallel` loop becomes a `__global__`
+kernel with an explicit bounds check, and everything the `TaskGraph` implied
+becomes a line of host code: `cudaMalloc` per buffer, `cudaMemcpy` in both
+directions, a launch configuration you compute yourself, and `cudaFree`.
+
+Output is identical:
+
+```
+in:  [0, 1, 2, 3, 4, 5, 6, 7]
+out: [1, 2, 3, 4, 5, 6, 7, 8]
+```
+
+33 lines of Java against 48 of CUDA — the gap here is small, and most of it is
+error handling and memory management rather than the computation itself.
+
+`bash scripts/run-all-cuda.sh` builds and runs the CUDA equivalent of every demo (needs only the CUDA toolkit, no JDK).
+
 ## JBang
 
 Not verified: `jbang` is not installed on this machine (`which jbang` →

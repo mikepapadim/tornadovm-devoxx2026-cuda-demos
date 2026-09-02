@@ -133,6 +133,51 @@ away. Reported upstream — see the repo README's "Upstream issues filed" sectio
 - Fall back to the captured logs and CSV in
   `results/raw/19-cutlass-cudnn-warp-demos/`.
 
+## CUDA equivalent
+
+[`CutlassFusedEpilogue.cu`](CutlassFusedEpilogue.cu) is the same demo written directly in CUDA C++, for side-by-side comparison.
+
+```bash
+nvcc -arch=sm_89 -std=c++17 -I$CUTLASS_DIR/include -I$CUTLASS_DIR/tools/util/include -o cutlass_fused_epilogue CutlassFusedEpilogue.cu && ./cutlass_fused_epilogue
+```
+
+CUTLASS is header-only and **not vendored in this repo**. Fetch it once:
+
+```bash
+git clone --depth 1 --branch v3.5.1 https://github.com/NVIDIA/cutlass.git
+export CUTLASS_DIR=$PWD/cutlass
+```
+
+In Java, choosing the epilogue is choosing a method: `cutlassGemmBiasRelu`
+versus `cutlassHgemm`. In CUDA it is a template parameter, and you supply
+everything around it yourself:
+
+```c
+using GemmRelu = cutlass::gemm::device::Gemm<
+    Element, Layout, Element, Layout, Element, Layout,
+    float, cutlass::arch::OpClassTensorOp, cutlass::arch::Sm80,
+    ThreadblockShape, WarpShape, InstructionShape,
+    cutlass::epilogue::thread::LinearCombinationRelu<Element, 4, float, float>,
+    ...>;
+```
+
+Those tile shapes (`128x128x32`, `64x64x32`, `16x8x16`, 3 stages) are the ones
+TornadoVM's provider picks — you can read them straight out of the kernel name
+in the nsys trace above. Choosing them is a decision the Java API makes for you.
+
+One structural difference worth knowing: CUTLASS's fused epilogue applies bias
+through its `C` operand with `beta = 1`, so the length-N bias vector has to be
+broadcast to a full MxN matrix first. The Java `cutlassGemmBiasRelu` takes the
+vector directly and handles that internally.
+
+**Measured, 1024³, 20 executions:** CUDA fused 233 µs vs unfused 241 µs
+(fused 1.04x faster); TornadoVM fused 317 µs vs unfused 304 µs. Both are within
+the noise floor of wall-clock at this size — see the Nsight Systems section
+above for the measurement that actually resolves the epilogue difference.
+Validation is identical in both: max abs err `0.00781`.
+
+`bash scripts/run-all-cuda.sh` builds and runs the CUDA equivalent of every demo (needs only the CUDA toolkit, no JDK).
+
 ## JBang
 
 Not verified: `jbang` is not installed on this machine (`which jbang` → exit 1,

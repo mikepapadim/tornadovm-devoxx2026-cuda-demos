@@ -72,6 +72,35 @@ run paths: `results/raw/18-tornadovm-6-migration/02-cudagraph-tornado.log`,
 Earlier 5.2.1 logs: `results/raw/03-cuda-runtime-api/cudagraphreplay-run.log`,
 `cudagraphreplay-run-javaargfile.log`.
 
+## CUDA equivalent
+
+[`CudaGraphReplay.cu`](CudaGraphReplay.cu) is the same demo written directly in CUDA C++, for side-by-side comparison.
+
+```bash
+nvcc -arch=sm_89 -o cuda_graph_replay CudaGraphReplay.cu && ./cuda_graph_replay
+```
+
+`plan.withCUDAGraph()` is one method call. This is what it stands for:
+
+```c
+cudaStreamBeginCapture(stream, cudaStreamCaptureModeGlobal);
+cudaMemcpyAsync(...); axpy<<<...,stream>>>(...); cudaMemcpyAsync(...);
+cudaStreamEndCapture(stream, &graph);
+cudaGraphInstantiate(&graphExec, graph, nullptr, nullptr, 0);
+...
+cudaGraphLaunch(graphExec, stream);   // per replay
+```
+
+Plus a requirement that is easy to miss: the host buffers must be **pinned**
+(`cudaMallocHost`), because the captured copies reference them by address. Use
+pageable memory and the capture either fails or silently replays stale data —
+which is exactly the failure this demo's per-replay validation is designed to
+catch.
+
+Output is identical to the Java version, all 8 replays correct.
+
+`bash scripts/run-all-cuda.sh` builds and runs the CUDA equivalent of every demo (needs only the CUDA toolkit, no JDK).
+
 ## JBang
 
 Not verified: `jbang` is not installed on this machine (`which jbang` →

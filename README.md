@@ -77,7 +77,8 @@ and JDK-specific — `-XX:+EnableJVMCI` is required on JDK ≤ 26 and fatal on J
 
 ## Track A demos — Hybrid API (`demos/`)
 
-Each demo is one self-contained Java file. Every row below runs on
+Each demo is one self-contained Java file, paired with a hand-written CUDA C++
+equivalent in the same folder (see **CUDA equivalents** below). Every row below runs on
 TornadoVM 6.0.0 / JDK 25 / RTX 4090; logs in
 `results/raw/18-tornadovm-6-migration/` (demos 00–11) and
 `results/raw/19-cutlass-cudnn-warp-demos/` (demos 12–14).
@@ -137,6 +138,74 @@ and only marginally faster (1.08–1.12x), unchanged in character from 5.2.1.
 `ERR_NVGPUCTRPERM`, `NVreg_RestrictProfilingToAdminUsers=1`, no passwordless
 sudo on this machine. Not a TornadoVM limitation.
 `results/failures/08-nsight-compute-permission.md`.
+
+## CUDA equivalents
+
+Every Track A demo ships a hand-written CUDA C++ version in the same folder
+(`Hello.java` next to `Hello.cu`, and so on), so the Java and the CUDA can be
+read side by side. All twelve compile and run, and each produces the same
+result as its Java counterpart:
+
+```bash
+bash scripts/run-all-cuda.sh          # 12 compiles + 12 runs, no JDK needed
+```
+
+Demo 12 additionally needs CUTLASS, which is header-only and not vendored here:
+
+```bash
+git clone --depth 1 --branch v3.5.1 https://github.com/NVIDIA/cutlass.git
+export CUTLASS_DIR=$PWD/cutlass
+```
+
+### What the comparison actually shows
+
+Steady-state medians, same machine, same session, same workloads. **Raw CUDA is
+faster everywhere** — the interesting part is the pattern, not the direction:
+
+| Demo | Metric | TornadoVM | CUDA |
+|---|---|---|---|
+| 06 | sequential → concurrent | 2174 → 960 µs (**2.26x**) | 1243 → 571 µs (**2.18x**) |
+| 07 | nograph → graph | 292–364 → 36 µs (**8.1–10.0x**) | 18.6 → 14.5 µs (**1.28x**) |
+| 11 | concurrent vs baseline | 1.12x | **2.06x** |
+| 11 | graph vs baseline | **5.61x** | 0.93x |
+| 13 | conv block, end to end | 367 µs | 69 µs |
+| 14 | naive → optimised | 228 → 105 µs (2.17x) | 64 → 14 µs (4.47x) |
+
+Two things follow, and both are worth saying out loud rather than hiding:
+
+1. **The gap is host-side dispatch overhead, not kernel quality.** Demo 14's
+   TornadoVM *kernel* is 26.6x faster than its naive kernel; its wall-clock is
+   only 2.17x faster, because ~100 µs per execution goes elsewhere. Demo 08
+   shows both versions emitting exactly one tensor-core instruction.
+2. **That is why `withCUDAGraph()` is the highest-leverage call in the API.**
+   CUDA graphs remove host dispatch cost. Raw CUDA has little to remove, so
+   graphs buy it 1.28x — and on demo 11's small workload they actually cost it
+   slightly (0.93x). TornadoVM has a lot to remove, so graphs buy it 8–10x.
+   Conversely, stream concurrency helps raw CUDA more (2.06x vs 1.12x on demo
+   11), because TornadoVM's dispatch overhead masks the device parallelism
+   that streams expose.
+
+### Lines of code
+
+Non-comment, non-blank lines. The Java is usually shorter, but not dramatically
+so — and on two demos it is *longer*:
+
+| Demo | Java | CUDA | | Demo | Java | CUDA |
+|---|---|---|---|---|---|---|
+| 00 hello | 33 | 48 | | 08 tensor-core | 129 | **121** |
+| 01 vector-add | 42 | 65 | | 11 showcase | 266 | 298 |
+| 02 cuda-graph | 51 | 78 | | 12 cutlass | 163 | 187 |
+| 04 cublas | 100 | 108 | | 13 cudnn | 138 | 186 |
+| 05 cufft | 77 | 104 | | 14 warp/async | 175 | **164** |
+| 06 streams | 107 | 130 | | | | |
+| 07 graph-benefit | 110 | 136 | | | | |
+
+Line count is the weakest part of the argument, so the demo READMEs lead with
+what the CUDA version has to get *right* instead: the MMA fragment register
+mapping (demo 08), `CUDNN_CROSS_CORRELATION` vs `CUDNN_CONVOLUTION` (demo 13),
+pinned host memory for graph capture (demo 02), the generic→shared address cast
+for `cp.async` (demo 14), and CUTLASS's tile shapes and bias-broadcast
+convention (demo 12). Each of those is a silent-wrong-answer bug if you miss it.
 
 ## Upstream issues filed
 
@@ -199,6 +268,7 @@ Track B on 6.0.0 is open work, not a result — nothing here claims it now works
 - `demos/` — Track A demos, one directory and one README each.
 - `scripts/setup-env.sh` — sets `JAVA_HOME`/`TORNADOVM_HOME`, generates the argfile.
 - `scripts/run-all-demos.sh` — compiles and runs all 12 demos both ways. Needs a GPU.
+- `scripts/run-all-cuda.sh` — builds and runs the hand-written CUDA equivalents. Needs a GPU and the CUDA toolkit, but no JDK.
 - `scripts/verify.sh` — validates deliverables and cited evidence paths. No GPU needed.
 - `docs/` — talk drafts, runbook, claims ledger, supporting evidence documents.
 - `results/raw/` — immutable raw outputs. `results/failures/` — captured failures.

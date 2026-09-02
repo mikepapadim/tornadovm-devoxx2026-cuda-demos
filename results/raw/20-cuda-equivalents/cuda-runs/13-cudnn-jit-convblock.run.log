@@ -1,0 +1,8 @@
+cuDNN + hand-written kernels conv block: NCHW 4x16x32x32, 16 filters 3x3 (pad 1, stride 1)
+  pipeline: scale -> cudnnConvolutionForward -> addBias -> cudnnActivationForward(ReLU)
+  5 executions, steady-state median reported (first execution excluded)
+
+  first execution (cuDNN plan setup): 23028 us
+  steady-state median wall-clock (n=4): 69 us
+  validation PASSED (max abs err 0.000000, 0/65536 elements out of tol)
+Result is correct

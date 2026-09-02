@@ -1,0 +1,17 @@
+CUTLASS fused epilogue demo: C[512x512] = relu(scale(A[512x512]) * B[512x512] + bias), fp16
+  5 executions per mode, steady-state median reported (first execution excluded)
+
+=== FUSED (CUTLASS LinearCombinationRelu epilogue - one kernel) ===
+  first execution (CUTLASS plan setup): 116 us
+  steady-state median wall-clock (n=4): 84 us
+  [fused  ] validation PASSED (max abs err 0.00391, 0/262144 cells out of tol)
+
+=== UNFUSED (CUTLASS LinearCombination + separate bias/ReLU kernel) ===
+  first execution (CUTLASS plan setup): 113 us
+  steady-state median wall-clock (n=4): 81 us
+  [unfused] validation PASSED (max abs err 0.00391, 0/262144 cells out of tol)
+
+=== Summary (steady-state median us, this run/this GPU) ===
+fused   : 84
+unfused : 81 (0.96x the fused time)
+Both modes produce the same, correct result

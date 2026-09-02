@@ -103,6 +103,24 @@ Earlier 5.2.1 logs:
 pipeline shape, run before writing this demo):
 `results/raw/05-cufft-hybrid/upstream-frequencyfilterexample.log`.
 
+## CUDA equivalent
+
+[`CuFftLowPassHybrid.cu`](CuFftLowPassHybrid.cu) is the same demo written directly in CUDA C++, for side-by-side comparison.
+
+```bash
+nvcc -arch=sm_89 -lcufft -o cufft_lowpass CuFftLowPassHybrid.cu && ./cufft_lowpass
+```
+
+Four stages alternating library and hand-written kernels, by hand. Two cuFFT
+plans (one per direction), the shared device buffers, and the same
+`1.0f / n` normalisation the Java version needs — cuFFT's inverse is
+unnormalised in both.
+
+Output is bit-identical: `maxError=4.76837e-07`, `filtered[0]=0.49999997`,
+matching the Java run exactly.
+
+`bash scripts/run-all-cuda.sh` builds and runs the CUDA equivalent of every demo (needs only the CUDA toolkit, no JDK).
+
 ## JBang
 
 Not verified: `jbang` is not installed on this machine (`which jbang` →

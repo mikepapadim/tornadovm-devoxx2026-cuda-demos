@@ -410,3 +410,60 @@ than falling back cleanly. It did not reproduce under `--debug` or
 `--fullDebug`, so there is no reliable reproducer to file. Demo 14's baseline
 was rewritten to use `KernelContext` indexing, stable across every run since.
 Worth a dedicated reproduction task before reporting.
+
+## Batch 20 — hand-written CUDA equivalents for every Track A demo (2026-09-02)
+
+Each demo folder now holds a CUDA C++ version of the same program next to the
+Java source (`Hello.java` / `Hello.cu`), plus `scripts/run-all-cuda.sh`.
+Evidence: `results/raw/20-cuda-equivalents/` (+ `MANIFEST.md`). All Observed:
+
+- **24/24 checks pass** (12 compiles + 12 runs). Every CUDA program reproduces
+  its Java counterpart's result, several bit-identically: demo 05 gives
+  `maxError=4.76837e-07` / `filtered[0]=0.49999997`, demo 13 `max abs err
+  0.000000`, demo 04 `output[0]=157.0`, demo 08 and 14 `max abs err 0.00000`.
+- **Demo 08 emits exactly one tensor-core instruction in both toolchains** —
+  `cuobjdump -sass | grep -c HMMA` → 1 for the CUDA build, matching the Java
+  `--printKernel | grep -c mma.sync.aligned` → 1. The MMA fragment register
+  mapping was written out by hand and validated first try.
+- CUTLASS is header-only and **not vendored**; demo 12's CUDA build needs an
+  external checkout (`CUTLASS_DIR`), and `run-all-cuda.sh` skips it cleanly when
+  that is unset. Verified against CUTLASS v3.5.1.
+
+### Measured comparison — raw CUDA is faster everywhere
+
+| Demo | Metric | TornadoVM | CUDA |
+|---|---|---|---|
+| 06 | sequential → concurrent | 2174 → 960 µs (2.26x) | 1243 → 571 µs (2.18x) |
+| 07 | nograph → graph | 292–364 → 36 µs (8.1–10.0x) | 18.6 → 14.5 µs (1.28x) |
+| 11 | baseline | 831 µs | 99.9 µs |
+| 11 | concurrent / graph / combined vs baseline | 1.12x / 5.61x / 5.69x | 2.06x / 0.93x / 2.73x |
+| 13 | conv block end to end | 367 µs | 69 µs |
+| 14 | naive → optimised | 228 → 105 µs (2.17x) | 64 → 14 µs (4.47x) |
+
+Analysis (not measurement): the gap is **host-side dispatch overhead**, not
+kernel quality — demo 14's TornadoVM *kernel* is 26.6x faster than its naive
+kernel (batch 19 nsys) while its wall-clock ratio is 2.17x, and demo 08 shows
+both toolchains emitting the same single tensor-core instruction. That also
+explains the mirror-image profiles on demos 07 and 11: CUDA graphs remove host
+dispatch cost, so they buy raw CUDA almost nothing (1.28x, and a net 0.93x loss
+on demo 11's small workload) and buy TornadoVM a great deal (8–10x); stream
+concurrency exposes device parallelism, so it helps raw CUDA more (2.06x vs
+1.12x) because TornadoVM's dispatch overhead masks it.
+
+**These numbers are reported plainly in the repo README rather than framed
+favourably.** A talk that claims TornadoVM beats CUDA on throughput is not
+supported by this evidence; what is supported is that it reaches the same
+kernels and the same correctness with less machinery, at a measurable
+host-side cost.
+
+### Lines of code — the weakest form of the argument
+
+Non-comment lines, Java vs CUDA: 33/48, 42/65, 51/78, 100/108, 77/104, 107/130,
+110/136, **129/121**, 266/298, 163/187, 138/186, **175/164**. The Java is
+usually shorter but not dramatically, and on demos 08 and 14 it is *longer*. The
+demo READMEs therefore lead with correctness traps instead: the MMA fragment
+register mapping (08), `CUDNN_CROSS_CORRELATION` vs `CUDNN_CONVOLUTION` (13),
+pinned host memory for graph capture (02/11), the event fork/join needed to
+capture a stream pool (11), `__cvta_generic_to_shared` for `cp.async` (14), and
+CUTLASS's tile shapes and bias-broadcast convention (12). Each is a
+silent-wrong-answer bug if missed.

@@ -1,0 +1,50 @@
+/tmp/claude-1005/-home-michalis/f4f53e66-a204-4aa1-9493-bf4efd670c8b/scratchpad/cutlass/include/cutlass/conv/conv3d_problem_size.h(215): warning #20013-D: calling a constexpr __host__ function("get") from a __host__ __device__ function("Conv3dProblemSize") is not allowed. The experimental flag '--expt-relaxed-constexpr' can be used to allow this.
+        {std::get<0>(padding)[1], std::get<1>(padding)[1],
+         ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/tmp/claude-1005/-home-michalis/f4f53e66-a204-4aa1-9493-bf4efd670c8b/scratchpad/cutlass/include/cutlass/conv/conv3d_problem_size.h(215): warning #20013-D: calling a constexpr __host__ function("get") from a __host__ __device__ function("Conv3dProblemSize") is not allowed. The experimental flag '--expt-relaxed-constexpr' can be used to allow this.
+        {std::get<0>(padding)[1], std::get<1>(padding)[1],
+                                  ^
+
+/tmp/claude-1005/-home-michalis/f4f53e66-a204-4aa1-9493-bf4efd670c8b/scratchpad/cutlass/include/cutlass/conv/conv3d_problem_size.h(216): warning #20013-D: calling a constexpr __host__ function("get") from a __host__ __device__ function("Conv3dProblemSize") is not allowed. The experimental flag '--expt-relaxed-constexpr' can be used to allow this.
+         std::get<0>(padding)[2], std::get<1>(padding)[2]},
+         ^
+
+/tmp/claude-1005/-home-michalis/f4f53e66-a204-4aa1-9493-bf4efd670c8b/scratchpad/cutlass/include/cutlass/conv/conv3d_problem_size.h(216): warning #20013-D: calling a constexpr __host__ function("get") from a __host__ __device__ function("Conv3dProblemSize") is not allowed. The experimental flag '--expt-relaxed-constexpr' can be used to allow this.
+         std::get<0>(padding)[2], std::get<1>(padding)[2]},
+                                  ^
+
+/tmp/claude-1005/-home-michalis/f4f53e66-a204-4aa1-9493-bf4efd670c8b/scratchpad/cutlass/include/cutlass/conv/conv3d_problem_size.h(221): warning #20013-D: calling a constexpr __host__ function("get") from a __host__ __device__ function("Conv3dProblemSize") is not allowed. The experimental flag '--expt-relaxed-constexpr' can be used to allow this.
+      pad_d(std::get<0>(padding)[0]), stride_d(stride[0]), dilation_d(dilation[0])
+            ^
+
+/tmp/claude-1005/-home-michalis/f4f53e66-a204-4aa1-9493-bf4efd670c8b/scratchpad/cutlass/include/cutlass/conv/conv3d_problem_size.h(224): warning #20013-D: calling a constexpr __host__ function("get") from a __host__ __device__ function("Conv3dProblemSize") is not allowed. The experimental flag '--expt-relaxed-constexpr' can be used to allow this.
+        Z = ((D + pad_d + std::get<1>(padding)[0] - T * dilation_d) / stride_d) + 1;
+                          ^
+
+/tmp/claude-1005/-home-michalis/f4f53e66-a204-4aa1-9493-bf4efd670c8b/scratchpad/cutlass/include/cutlass/conv/conv3d_problem_size.h(212): warning #20015-D: calling a constexpr __host__ function from a __host__ __device__ function is not allowed. The experimental flag '--expt-relaxed-constexpr' can be used to allow this.
+      Conv2dProblemSize(
+      ^
+
+/tmp/claude-1005/-home-michalis/f4f53e66-a204-4aa1-9493-bf4efd670c8b/scratchpad/cutlass/include/cutlass/conv/conv3d_problem_size.h(215): warning #20015-D: calling a constexpr __host__ function from a __host__ __device__ function is not allowed. The experimental flag '--expt-relaxed-constexpr' can be used to allow this.
+        {std::get<0>(padding)[1], std::get<1>(padding)[1],
+                              ^
+
+/tmp/claude-1005/-home-michalis/f4f53e66-a204-4aa1-9493-bf4efd670c8b/scratchpad/cutlass/include/cutlass/conv/conv3d_problem_size.h(215): warning #20015-D: calling a constexpr __host__ function from a __host__ __device__ function is not allowed. The experimental flag '--expt-relaxed-constexpr' can be used to allow this.
+        {std::get<0>(padding)[1], std::get<1>(padding)[1],
+                                                       ^
+
+/tmp/claude-1005/-home-michalis/f4f53e66-a204-4aa1-9493-bf4efd670c8b/scratchpad/cutlass/include/cutlass/conv/conv3d_problem_size.h(216): warning #20015-D: calling a constexpr __host__ function from a __host__ __device__ function is not allowed. The experimental flag '--expt-relaxed-constexpr' can be used to allow this.
+         std::get<0>(padding)[2], std::get<1>(padding)[2]},
+                              ^
+
+/tmp/claude-1005/-home-michalis/f4f53e66-a204-4aa1-9493-bf4efd670c8b/scratchpad/cutlass/include/cutlass/conv/conv3d_problem_size.h(221): warning #20015-D: calling a constexpr __host__ function from a __host__ __device__ function is not allowed. The experimental flag '--expt-relaxed-constexpr' can be used to allow this.
+      pad_d(std::get<0>(padding)[0]), stride_d(stride[0]), dilation_d(dilation[0])
+      ^
+
+/tmp/claude-1005/-home-michalis/f4f53e66-a204-4aa1-9493-bf4efd670c8b/scratchpad/cutlass/include/cutlass/conv/conv3d_problem_size.h(224): warning #20015-D: calling a constexpr __host__ function from a __host__ __device__ function is not allowed. The experimental flag '--expt-relaxed-constexpr' can be used to allow this.
+        Z = ((D + pad_d + std::get<1>(padding)[0] - T * dilation_d) / stride_d) + 1;
+        ^
+

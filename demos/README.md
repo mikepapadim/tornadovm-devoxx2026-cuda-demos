@@ -44,6 +44,27 @@ whichever JDK is active.
 `bash ../scripts/run-all-demos.sh` compiles and runs all twelve demos both ways
 and exits non-zero on any failure.
 
+## CUDA equivalents
+
+Each demo folder also contains a hand-written CUDA C++ version of the same
+program, named after the Java file (`Hello.java` / `Hello.cu`). They exist to be
+read side by side, and all twelve compile and produce the same results:
+
+```bash
+bash ../scripts/run-all-cuda.sh   # 12 compiles + 12 runs; CUDA toolkit only, no JDK
+```
+
+Demo 12 needs a CUTLASS checkout (header-only, not vendored):
+`git clone --depth 1 --branch v3.5.1 https://github.com/NVIDIA/cutlass.git`
+and `export CUTLASS_DIR=$PWD/cutlass`.
+
+Each demo's README has a **CUDA equivalent** section covering what the CUDA
+version has to do by hand, and — where the demos are timed — how the two
+compare. The short version: raw CUDA is faster everywhere, the gap is
+host-side dispatch overhead rather than kernel quality, and that is exactly
+why `withCUDAGraph()` buys TornadoVM 8–10x on demo 07 while buying raw CUDA
+only 1.28x. The repo README has the full table.
+
 ## Evidence
 
 All twelve demos run on TornadoVM 6.0.0 / JDK 25.0.2 / RTX 4090: **36/36**

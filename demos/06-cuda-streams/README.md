@@ -131,6 +131,32 @@ are in `results/raw/06-cuda-streams/` (`nsys-sequential.nsys-rep`,
 To open the raw `.nsys-rep` files in the Nsight Systems GUI on a machine that
 has one: `nsys-ui results/raw/06-cuda-streams/nsys-concurrent.nsys-rep`.
 
+## CUDA equivalent
+
+[`CudaStreamsOverlap.cu`](CudaStreamsOverlap.cu) is the same demo written directly in CUDA C++, for side-by-side comparison.
+
+```bash
+nvcc -arch=sm_89 -o cuda_streams CudaStreamsOverlap.cu && ./cuda_streams 8 32768 65536 8 both
+```
+
+`plan.withIntraPlanConcurrency()` becomes: create a pool of four streams,
+round-robin the independent units across them, issue every copy as
+`cudaMemcpyAsync` on the unit's stream, and synchronise all four at the end.
+
+**Measured on the same machine, same workload:**
+
+| | TornadoVM | CUDA |
+|---|---|---|
+| sequential (1 stream) | 2174 µs | 1243 µs |
+| concurrent (4 streams) | 960 µs | 571 µs |
+| **speedup** | **2.26x** | **2.18x** |
+
+The *ratio* is the same — the concurrency win is real and TornadoVM captures
+essentially all of it. The absolute difference (~1.7x) is TornadoVM's host-side
+dispatch overhead, which is the honest cost of the abstraction here.
+
+`bash scripts/run-all-cuda.sh` builds and runs the CUDA equivalent of every demo (needs only the CUDA toolkit, no JDK).
+
 ## JBang
 
 Not verified: `jbang` is not installed on this machine (`which jbang` →
