@@ -12,15 +12,16 @@ Source: [`Hello.java`](Hello.java).
 ## Build
 
 ```bash
-source vendor/tornadovm/setvars.sh   # from repo root; pins the CUDA-backend build in env/versions.env
+source scripts/setup-env.sh   # from repo root; pins the SDK in env/versions.env
 cd demos/00-hello-gpu
-javac --release 21 --enable-preview \
-  -cp "$TORNADOVM_HOME/share/java/tornado/tornado-api-5.2.1-jdk21-dev.jar" \
+javac -cp "$TORNADOVM_HOME/share/java/tornado/*" \
   -d . Hello.java
 ```
 
-`--enable-preview` is required because `tornado-api` ships compiled with
-Java preview features on this pinned build (JDK 21).
+No `--enable-preview` anywhere: the pinned `6.0.0-jdk22plus-cuda` SDK is a
+non-preview build (`etc/tornado.jdk`: floor 22, preview false), so any JDK 22+
+compiles and runs it. The JDK-21-only `6.0.0-jdk21-cuda` SDK is the one that
+still needs preview flags — this repo does not use it.
 
 ## Run
 
@@ -33,13 +34,12 @@ tornado --classpath . Hello
 Reproducibility form (`java @arg-file`, per `docs/run-conventions.md`):
 
 ```bash
-java @../tornado.args -cp . Hello
+java @$TORNADOVM_HOME/tornado-argfile -cp . Hello
 ```
 
-`demos/tornado.args` was generated on this machine with
-`tornado --generate-argfile` against the pinned build and committed for
-reference; regenerate it with that command if the JDK or TornadoVM build
-changes.
+`tornado --generate-argfile` writes `$TORNADOVM_HOME/tornado-argfile`.
+It is generated into the installed SDK rather than committed here because its
+flags are absolute-path and JDK-specific; `scripts/setup-env.sh` regenerates it.
 
 ## Expected output
 
@@ -54,6 +54,10 @@ e.g. `"BACKEND": "CUDA", "DEVICE": "NVIDIA GeForce RTX 4090"`. Captured logs:
 `results/raw/02-hello-kernel/hello-run-profiler.log`,
 `results/raw/02-hello-kernel/hello-run-javaargfile.log`.
 
+Re-verified on TornadoVM 6.0.0 / JDK 25, both run paths:
+`results/raw/18-tornadovm-6-migration/00-hello-tornado.log`,
+`00-hello-javaargfile.log`.
+
 ## JBang
 
 Not verified: `jbang` is not installed on this machine (`which jbang` →
@@ -64,8 +68,7 @@ tested on the pinned environment:
 ```bash
 jbang --version
 jbang -cp "$TORNADOVM_HOME/share/java/tornado/*" \
-  --javac-opts="--release 21 --enable-preview" \
-  --java-opts="@../tornado.args" \
+  --java-opts="@$TORNADOVM_HOME/tornado-argfile" \
   Hello.java
 ```
 
@@ -74,5 +77,6 @@ jbang -cp "$TORNADOVM_HOME/share/java/tornado/*" \
 - Re-run `tornado --devices` — if it does not show exactly one CUDA device,
   the environment, not the demo, is broken; fall back to showing the
   captured logs in `results/raw/02-hello-kernel/`.
-- If compilation fails with a preview-feature error, confirm `--release 21
-  --enable-preview` is present on the `javac` command.
+- If the JVM refuses to start with "built for JDK 21 with preview features
+  enabled", `TORNADOVM_HOME` points at `6.0.0-jdk21-cuda` instead of
+  `6.0.0-jdk22plus-cuda`; re-run `source scripts/setup-env.sh`.

@@ -1,0 +1,32 @@
+WARNING: module-info.class ignored in patch: /home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda/share/java/jvmci/jvmci-21.0.2.jar
+units=8 unitSize=32768 innerIterations=65536 executions=8 mode=both
+
+=== SEQUENTIAL (single stream) ===
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess (file:/home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda/share/java/tornado/tornado-runtime-6.0.0.jar)
+WARNING: Please consider reporting this to the maintainers of class uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+execution 0: correct, wall=131068 us
+execution 1: correct, wall=2253 us
+execution 2: correct, wall=2198 us
+execution 3: correct, wall=2171 us
+execution 4: correct, wall=2176 us
+execution 5: correct, wall=2150 us
+execution 6: correct, wall=2115 us
+execution 7: correct, wall=2138 us
+SEQUENTIAL (single stream) median wall-clock (all 8 executions incl. first/JIT): 2176 us
+SEQUENTIAL (single stream) median wall-clock (excl. first execution): 2176 us
+SEQUENTIAL (single stream): All executions correct
+
+=== CONCURRENT (withIntraPlanConcurrency) ===
+execution 0: correct, wall=55335 us
+execution 1: correct, wall=1022 us
+execution 2: correct, wall=915 us
+execution 3: correct, wall=936 us
+execution 4: correct, wall=890 us
+execution 5: correct, wall=881 us
+execution 6: correct, wall=773 us
+execution 7: correct, wall=1092 us
+CONCURRENT (withIntraPlanConcurrency) median wall-clock (all 8 executions incl. first/JIT): 936 us
+CONCURRENT (withIntraPlanConcurrency) median wall-clock (excl. first execution): 936 us
+CONCURRENT (withIntraPlanConcurrency): All executions correct

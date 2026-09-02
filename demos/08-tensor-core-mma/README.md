@@ -29,10 +29,9 @@ Source: [`TensorCoreMMA.java`](TensorCoreMMA.java).
 ## Build
 
 ```bash
-source vendor/tornadovm/setvars.sh   # from repo root
+source scripts/setup-env.sh   # from repo root; pins the SDK in env/versions.env
 cd demos/08-tensor-core-mma
-javac --release 21 --enable-preview \
-  -cp "$TORNADOVM_HOME/share/java/tornado/tornado-api-5.2.1-jdk21-dev.jar" \
+javac -cp "$TORNADOVM_HOME/share/java/tornado/*" \
   -d . TensorCoreMMA.java
 ```
 
@@ -45,7 +44,7 @@ tornado --classpath . TensorCoreMMA
 Reproducibility form (`java @arg-file`):
 
 ```bash
-java @../tornado.args -cp . TensorCoreMMA
+java @$TORNADOVM_HOME/tornado-argfile -cp . TensorCoreMMA
 ```
 
 To see the generated CUDA source (the actual `mma.sync`/`ldmatrix` asm):
@@ -65,10 +64,19 @@ Result is correct
 
 ## What was actually measured (Observed)
 
-Pinned build: `vendor/tornadovm` @ `99549c9862eda8d584e35e99924f9c865501eb3a`,
+Pinned SDK: TornadoVM `6.0.0-jdk22plus-cuda` (SDKMAN), JDK 25.0.2,
 RTX 4090, driver `565.57.01`, `nvcc`/`ptxas` 12.6.85.
 
-- Ran via `tornado --classpath .`, `java @../tornado.args`, and
+**Re-verified on 6.0.0:** both kernels still validate exactly, and
+`--printKernel` still emits exactly one `mma.sync.aligned` instruction —
+the generated-code claim below holds unchanged on the 6.0.0 CUDA backend.
+Logs: `results/raw/18-tornadovm-6-migration/08-mma-tornado.log`,
+`08-mma-javaargfile.log`, `08-mma-printkernel.log`.
+
+The detailed findings below were captured on the earlier 5.2.1 source-built
+pin (logs unmodified in `results/raw/08-tensor-core-mma/`):
+
+- Ran via `tornado --classpath .`, `java @$TORNADOVM_HOME/tornado-argfile`, and
   `tornado --enableProfiler console --classpath .` — all three runs: both
   kernels validate exactly (max abs err `0.00000`, since inputs and the
   16-term dot product are exact in fp16→f32 for these deterministic bounded

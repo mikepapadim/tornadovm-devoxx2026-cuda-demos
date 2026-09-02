@@ -1,0 +1,14 @@
+WARNING: module-info.class ignored in patch: /home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda/share/java/jvmci/jvmci-21.0.2.jar
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess (file:/home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda/share/java/tornado/tornado-runtime-6.0.0.jar)
+WARNING: Please consider reporting this to the maintainers of class uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+replay 0 (x=1.0, y=2.0): correct, result[0]=2.5 expected=2.5
+replay 1 (x=2.0, y=3.0): correct, result[0]=4.0 expected=4.0
+replay 2 (x=3.0, y=4.0): correct, result[0]=5.5 expected=5.5
+replay 3 (x=4.0, y=5.0): correct, result[0]=7.0 expected=7.0
+replay 4 (x=5.0, y=6.0): correct, result[0]=8.5 expected=8.5
+replay 5 (x=6.0, y=7.0): correct, result[0]=10.0 expected=10.0
+replay 6 (x=7.0, y=8.0): correct, result[0]=11.5 expected=11.5
+replay 7 (x=8.0, y=9.0): correct, result[0]=13.0 expected=13.0
+All replays correct

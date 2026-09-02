@@ -1,41 +1,54 @@
 # Profiler quick-start and demo runbook
 
-For a Java developer who has never touched TornadoVM or Nsight before. Every
-command on this page was re-run on this machine on 2026-08-22 against the
-pinned environment in `env/versions.env` (`vendor/tornadovm` @
-`99549c9862eda8d584e35e99924f9c865501eb3a`, RTX 4090, driver `565.57.01`,
-Nsight Systems `2024.5.1.113`, Nsight Compute `2024.3.2.0`/`2026.2.1.0`)
-before being written down. Copy-paste them; if one doesn't reproduce, see
-"If something doesn't work" at the bottom.
+For a Java developer who has never touched TornadoVM or Nsight before.
+
+The build/run commands in §0–§1 were re-run on 2026-09-02 against the current
+pinned environment in `env/versions.env`: TornadoVM `6.0.0-jdk22plus-cuda`
+(SDKMAN release), JDK 25.0.2, RTX 4090, driver `565.57.01`. The Nsight
+sections (§2 onward) were captured on 2026-08-22 against the earlier 5.2.1
+source-built pin (`99549c9862eda8d584e35e99924f9c865501eb3a`, Nsight Systems
+`2024.5.1.113`, Nsight Compute `2024.3.2.0`/`2026.2.1.0`); the profiling
+mechanics are unchanged, but those specific traces were not re-captured on
+6.0.0. Copy-paste them; if one doesn't reproduce, see "If something doesn't
+work" at the bottom.
 
 ## 0. One-time setup
 
+Install the toolchain once with SDKMAN (see the repo `README.md` for the full
+quick-install), then point the shell at it:
+
 ```bash
+sdk install java 25.0.2-open
+sdk install tornadovm 6.0.0-jdk22plus-cuda
+
 cd /path/to/tornadovm-devoxx2026-cuda-demos
-source vendor/tornadovm/setvars.sh
+source scripts/setup-env.sh
 echo "$TORNADOVM_HOME"   # sanity check: must print a path, not empty
+tornado --devices        # must list exactly one CUDA device
 nvidia-smi --query-gpu=utilization.gpu,memory.used,memory.total --format=csv,noheader
 ```
+
+Install `6.0.0-jdk22plus-cuda`, **not** `6.0.0-jdk21-cuda`: the latter is
+compiled with JDK 21 preview features and runs on JDK 21 only.
 
 Run the `nvidia-smi` check before any timed or profiled run — a busy GPU
 (another process already using it) will silently skew every number below.
 Every run captured in this repo was taken with the GPU idle (`0 %`, `4 MiB`).
 
-## 1. Run a demo (three ways)
+## 1. Run a demo (two supported ways)
 
 Every demo under `demos/` follows the same shape. Using `demos/00-hello-gpu`
 as the example (swap in any other demo directory and its main class):
 
 ```bash
 cd demos/00-hello-gpu
-javac --release 21 --enable-preview \
-  -cp "$TORNADOVM_HOME/share/java/tornado/tornado-api-5.2.1-jdk21-dev.jar" \
-  -d . Hello.java
+javac -cp "$TORNADOVM_HOME/share/java/tornado/*" -d . Hello.java
 ```
 
-Some demos need an extra vendor-library jar on the classpath (`tornado-cublas-*.jar`
-for `04-cublas-hybrid`, `tornado-cufft-*.jar` for `05-cufft-hybrid`) — check
-that demo's own `README.md` Build section.
+No `--enable-preview`: the pinned `jdk22plus` SDK is a non-preview build. The
+wildcard classpath covers the vendor-library jars some demos need
+(`tornado-cublas-6.0.0.jar` for `04-cublas-hybrid`, `tornado-cufft-6.0.0.jar`
+for `05-cufft-hybrid`).
 
 **Way 1 — `tornado` launcher (canonical, resolves the CUDA backend automatically):**
 
@@ -46,18 +59,25 @@ tornado --classpath . Hello
 **Way 2 — `java @arg-file` (reproducibility form, per `docs/run-conventions.md`):**
 
 ```bash
-java @../tornado.args -cp . Hello
+java @$TORNADOVM_HOME/tornado-argfile -cp . Hello
 ```
 
-`demos/tornado.args` is committed, generated with `tornado --generate-argfile`
-against the pinned build. Regenerate it if the JDK or TornadoVM build changes.
+The argfile is **not** committed to this repo. `tornado --generate-argfile`
+writes it into the installed SDK at `$TORNADOVM_HOME/tornado-argfile`, because
+its flags are absolute-path and JDK-specific (`-XX:+EnableJVMCI` is required on
+JDK ≤ 26 and fatal on JDK 27+). `scripts/setup-env.sh` regenerates it for
+whichever JDK is active, so switching JDK needs no manual step.
 
-**Way 3 — JBang: not verified on this machine.** `which jbang` still returns
-exit 1 as of 2026-08-22 (same finding as every demo task 00–13). Every demo's
-`README.md` documents the untested-but-expected JBang invocation shape (e.g.
-`jbang -cp "$TORNADOVM_HOME/share/java/tornado/*" --javac-opts="--release 21
---enable-preview" --java-opts="@../tornado.args" Hello.java`) — do not run
-these live in front of an audience; they have never been executed on this
+To check every demo at once, both ways: `bash scripts/run-all-demos.sh`
+(9 compiles + 9 `tornado` runs + 9 `java @argfile` runs; exits non-zero on any
+failure).
+
+**JBang: still not verified on this machine.** `which jbang` returns exit 1 as
+of 2026-09-02 (same finding as every earlier task). Every demo's `README.md`
+documents the untested-but-expected JBang invocation shape (e.g.
+`jbang -cp "$TORNADOVM_HOME/share/java/tornado/*"
+--java-opts="@$TORNADOVM_HOME/tornado-argfile" Hello.java`) — do not run these
+live in front of an audience; they have never been executed on this
 environment.
 
 Add `--enableProfiler console` to the `tornado` command on any demo to print
@@ -200,6 +220,11 @@ Full detail for every row is in that demo's own `README.md` under
 this table is a pointer, not a replacement.
 
 ## 7. GPULlama3.java quick-start
+
+> **Track B was not migrated to TornadoVM 6.0.0.** This section describes the
+> earlier source-built 5.2.1 pin it was captured against and still assumes a
+> `vendor/tornadovm` checkout with `setvars.sh`. Do not mix it with the
+> SDKMAN-based §0 setup above.
 
 ```bash
 source vendor/tornadovm/setvars.sh

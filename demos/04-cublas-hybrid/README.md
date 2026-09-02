@@ -31,10 +31,9 @@ same deterministic (non-random) matrix/vector fill.
 ## Build
 
 ```bash
-source vendor/tornadovm/setvars.sh   # from repo root
+source scripts/setup-env.sh   # from repo root; pins the SDK in env/versions.env
 cd demos/04-cublas-hybrid
-javac --release 21 --enable-preview \
-  -cp "$TORNADOVM_HOME/share/java/tornado/tornado-api-5.2.1-jdk21-dev.jar:$TORNADOVM_HOME/share/java/tornado/tornado-cublas-5.2.1-jdk21-dev.jar" \
+javac -cp "$TORNADOVM_HOME/share/java/tornado/*" \
   -d . CuBlasSgemvHybrid.java
 ```
 
@@ -50,7 +49,7 @@ tornado --enableProfiler console --classpath . CuBlasSgemvHybrid 8 8 5
 Reproducibility form (`java @arg-file`):
 
 ```bash
-java @../tornado.args -cp . CuBlasSgemvHybrid 8 8 5
+java @$TORNADOVM_HOME/tornado-argfile -cp . CuBlasSgemvHybrid 8 8 5
 ```
 
 Arguments: `<m> <n> <iterations>` (defaults `8 8 5` if omitted). `m` is the
@@ -75,7 +74,13 @@ the JIT tasks and the cuBLAS library task all execute on the CUDA device
 inside a single task graph. The first iteration's `TOTAL_TASK_GRAPH_TIME` is
 dominated by JIT compilation of the two Java tasks (Graal + driver compile,
 tens of ms); later iterations drop to sub-millisecond since the compiled
-code is reused. Captured logs:
+code is reused.
+
+Re-verified on TornadoVM 6.0.0 / JDK 25 — 5/5 iterations correct under both
+run paths: `results/raw/18-tornadovm-6-migration/04-cublas-tornado.log`,
+`04-cublas-javaargfile.log`.
+
+Earlier 5.2.1 logs:
 `results/raw/04-cublas-hybrid/cublassgemvhybrid-run.log`,
 `cublassgemvhybrid-run-javaargfile.log`.
 
@@ -89,8 +94,7 @@ run it live until tested on the pinned environment:
 ```bash
 jbang --version
 jbang -cp "$TORNADOVM_HOME/share/java/tornado/*" \
-  --javac-opts="--release 21 --enable-preview" \
-  --java-opts="@../tornado.args" \
+  --java-opts="@$TORNADOVM_HOME/tornado-argfile" \
   CuBlasSgemvHybrid.java
 ```
 
@@ -102,5 +106,5 @@ jbang -cp "$TORNADOVM_HOME/share/java/tornado/*" \
 - Re-run `tornado --devices` first — if it does not show exactly one CUDA
   device, the environment, not the demo, is broken.
 - `NoClassDefFoundError` for `uk.ac.manchester.tornado.cublas.*` usually
-  means the classpath is missing `tornado-cublas-5.2.1-jdk21-dev.jar` — add
-  it alongside `tornado-api-5.2.1-jdk21-dev.jar` (see Build above).
+  means the classpath is missing `tornado-cublas-6.0.0.jar` — add
+  it alongside `tornado-api-6.0.0.jar` (see Build above).

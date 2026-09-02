@@ -42,10 +42,9 @@ as demos `04`/`06`/`07`/`08`.
 ## Build
 
 ```bash
-source vendor/tornadovm/setvars.sh   # from repo root
+source scripts/setup-env.sh   # from repo root; pins the SDK in env/versions.env
 cd demos/11-integrated-showcase
-javac --release 21 --enable-preview \
-  -cp "$TORNADOVM_HOME/share/java/tornado/tornado-api-5.2.1-jdk21-dev.jar:$TORNADOVM_HOME/share/java/tornado/tornado-cublas-5.2.1-jdk21-dev.jar" \
+javac -cp "$TORNADOVM_HOME/share/java/tornado/*" \
   -d . IntegratedShowcase.java
 ```
 
@@ -60,7 +59,7 @@ tornado --classpath . IntegratedShowcase 6 8 8 20 all
 Reproducibility form (`java @arg-file`):
 
 ```bash
-java @../tornado.args -cp . IntegratedShowcase 6 8 8 20 all
+java @$TORNADOVM_HOME/tornado-argfile -cp . IntegratedShowcase 6 8 8 20 all
 ```
 
 Arguments: `<units> <m> <n> <executions> <mode>` (defaults `6 8 8 20 all`).
@@ -71,28 +70,28 @@ a single mode to get a clean, single-mechanism Nsight Systems trace.
 
 ```
 === BASELINE (single stream, no graph) ===
-execution 0: correct, wall=189761 us
+execution 0: correct, wall=<large, JIT compile of 18 tasks> us
 execution 1: correct, wall=1170 us
 ...
-BASELINE (single stream, no graph) steady-state median wall-clock (n=19): 958 us
+BASELINE (single stream, no graph) steady-state median wall-clock (n=19): 831 us
 
 === CONCURRENT (withIntraPlanConcurrency) ===
 ...
-CONCURRENT (withIntraPlanConcurrency) steady-state median wall-clock (n=19): 794 us
+CONCURRENT (withIntraPlanConcurrency) steady-state median wall-clock (n=19): 740 us
 
 === GRAPH (withCUDAGraph) ===
 ...
-GRAPH (withCUDAGraph) steady-state median wall-clock (n=19): 146 us
+GRAPH (withCUDAGraph) steady-state median wall-clock (n=19): 148 us
 
 === COMBINED-EXPERIMENTAL (withCUDAGraph + withIntraPlanConcurrency) ===
 ...
-COMBINED-EXPERIMENTAL (withCUDAGraph + withIntraPlanConcurrency) steady-state median wall-clock (n=19): 245 us
+COMBINED-EXPERIMENTAL (withCUDAGraph + withIntraPlanConcurrency) steady-state median wall-clock (n=19): 146 us
 
 === Summary (steady-state median us, this run/this GPU) ===
-baseline   : 958.0
-concurrent : 794.0 (1.21x vs baseline)
-graph      : 146.0 (6.56x vs baseline)
-combined   : 245.0 (3.91x vs baseline)
+baseline   : 831.0
+concurrent : 740.0 (1.12x vs baseline)
+graph      : 148.0 (5.61x vs baseline)
+combined   : 146.0 (5.69x vs baseline)
 
 === BONUS: Tensor Core mma.sync single-tile GEMM (demo 08 kernel, reused) ===
 Tensor Core tile validation: PASSED (max abs err 0.00000, 0/128 cells out of tol)
@@ -100,16 +99,19 @@ Tensor Core tile validation: PASSED (max abs err 0.00000, 0/128 cells out of tol
 
 ## What was actually measured (Observed)
 
-Pinned build: `vendor/tornadovm` @ `99549c9862eda8d584e35e99924f9c865501eb3a`,
-RTX 4090, driver `565.57.01`, `nvcc`/`ptxas` 12.6.85.
+Pinned SDK: TornadoVM `6.0.0-jdk22plus-cuda` (SDKMAN), JDK 25.0.2,
+RTX 4090, driver `565.57.01`, `nvcc`/`ptxas` 12.6.85. Five independent runs,
+logs in `results/raw/18-tornadovm-6-migration/` (`11-showcase-tornado.log`,
+`11-showcase-javaargfile.log`, `11-showcase-repeat3..5.log`). Numbers from the
+earlier 5.2.1 source-built pin are kept for comparison and labelled as such;
+their logs are unmodified in `results/raw/11-integrated-showcase/`.
 
-- Ran three ways — `tornado --classpath .`, `java @../tornado.args`, and
-  `tornado --enableProfiler console --classpath .` — all correct in every
-  mode, every run. Profiler JSON confirms `"BACKEND": "CUDA"`,
-  `"DEVICE": "NVIDIA GeForce RTX 4090"` for every task (`scale`, `sgemv`,
-  `bias`) across all 6 units. Logs:
-  `results/raw/11-integrated-showcase/showcase-run.log`,
-  `showcase-run-javaargfile.log`, `showcase-profiler-console.log`.
+- Ran both supported ways on 6.0.0 — `tornado --classpath .` and
+  `java @$TORNADOVM_HOME/tornado-argfile` — all correct in every mode, every
+  run. The 5.2.1 pass additionally ran `--enableProfiler console` and
+  confirmed `"BACKEND": "CUDA"`, `"DEVICE": "NVIDIA GeForce RTX 4090"` for
+  every task (`scale`, `sgemv`, `bias`) across all 6 units
+  (`results/raw/11-integrated-showcase/showcase-profiler-console.log`).
 - **The experimental combined mode (`withCUDAGraph()` +
   `withIntraPlanConcurrency()` on the same plan) works and validates
   correctly**, across 3 independent runs (`showcase-run.log`,
@@ -122,32 +124,41 @@ RTX 4090, driver `565.57.01`, `nvcc`/`ptxas` 12.6.85.
   the graph modes still pay stream/graph-object setup but skip Java-side
   per-unit dispatch bookkeeping the first-time JIT compile dominates in
   baseline/concurrent).
-- **Steady-state numbers, this run** (n=19, excl. first execution, 6 units ×
-  8×8 sgemv each): baseline 958 µs, concurrent 794 µs (1.21×), graph 146 µs
-  (6.56×), combined 245 µs (3.91×). **Re-run to run; not gated.** A second
-  full run (`showcase-nsys-run.log`, under `nsys` instrumentation) measured
-  baseline 770 µs, concurrent 948 µs (**0.81×, i.e. slower than baseline that
-  run**), graph 157 µs (4.90×), combined 261 µs (2.95×).
+- **Steady-state numbers on 6.0.0** (n=19, excl. first execution, 6 units ×
+  8×8 sgemv each), across five runs: baseline 811–851 µs, concurrent
+  1.08–1.13×, graph 5.37–5.87× (141–153 µs), combined 5.55–5.71×
+  (144–149 µs). **Re-run to run; not gated.**
+- **Changed vs. 5.2.1 — `combined` mode caught up with `graph`.** On the
+  5.2.1 pin, stacking `withIntraPlanConcurrency()` on top of `withCUDAGraph()`
+  cost more than `graph` alone in every run (3.91× vs 6.56×; 2.95× vs 4.90×).
+  On 6.0.0 the two are indistinguishable within run-to-run noise (combined
+  5.55–5.71× vs graph 5.37–5.87×) — the extra stream-routing bookkeeping no
+  longer shows up as a penalty on an already-replayed graph. Observed, five
+  runs; the mechanism behind the change was not investigated.
 - **Honest, presenter-relevant caveat found by measuring, not assumed**:
   `concurrent` mode is *not reliably faster* than `baseline` for this
-  workload — one run showed a 1.21× speedup, another showed a 0.81×
-  slowdown. Unlike demo `06`'s heavier small-grid/heavy-inner-loop kernels
+  workload. On 5.2.1 one run showed a 1.21× speedup and another a 0.81×
+  slowdown; on 6.0.0 all five runs landed in a narrow 1.08–1.13× band — better
+  than break-even every time, but still a rounding error next to `graph` mode.
+  Unlike demo `06`'s heavier small-grid/heavy-inner-loop kernels
   (chosen specifically so a single unit does not saturate the SMs, per
   `TestStreamsPerformance`'s documented condition for genuine overlap), this
   demo's per-unit work (an 8×8 `scale` + `sgemv` + `bias`) is tiny and
   launch-overhead-bound, not compute-bound — there is little idle SM time
   for stream overlap to fill, and the extra stream-routing bookkeeping can
   cost more than it saves at this size. `graph` mode's speedup, by contrast,
-  is large and consistent across every run (4.9×–6.6×) because it removes
+  is large and consistent across every run (5.4×–5.9× on 6.0.0, 4.9×–6.6× on
+  5.2.1) because it removes
   the dominant cost directly (per-execution host-side CUDA-call dispatch),
   matching demo `07`'s finding. `combined` mode is consistently *between*
   `graph` alone and `baseline` — i.e., stacking `withIntraPlanConcurrency()`
   on top of an already-replayed graph did not help further at this size and
-  cost more than `graph` alone in both runs; not investigated further since
-  the acceptance criterion here is "does it work," not "is it optimal."
-  A future task with a larger/heavier per-unit workload (demo `06`'s sizing)
-  could test whether `combined` mode's concurrency benefit becomes visible
-  once units are large enough to saturate a single stream.
+  cost more than `graph` alone on 5.2.1; on 6.0.0 that penalty is gone and
+  `combined` simply matches `graph`. Either way the acceptance criterion here
+  is "does it work," not "is it optimal." A future task with a
+  larger/heavier per-unit workload (demo `06`'s sizing) could test whether
+  `combined` mode's concurrency benefit becomes a *gain* once units are large
+  enough to saturate a single stream.
 - **Tensor Core bonus stage**: validates exactly (max abs err `0.00000`),
   reusing demo `08`'s kernel unmodified — see demo `08`'s own README for the
   `--printKernel` generated-`mma.sync`-asm evidence; not re-captured here to
@@ -166,7 +177,7 @@ RTX 4090, driver `565.57.01`, `nvcc`/`ptxas` 12.6.85.
 ## Nsight Systems evidence
 
 ```bash
-source vendor/tornadovm/setvars.sh
+source scripts/setup-env.sh   # from repo root; pins the SDK in env/versions.env
 nsys profile --trace=cuda,nvtx,osrt -o showcase-nsys \
   tornado --classpath . IntegratedShowcase 6 8 8 20 all
 nsys stats --report cuda_gpu_kern_sum,cuda_api_sum,cuda_gpu_mem_time_sum \
@@ -223,7 +234,7 @@ already satisfy this task's "profiler evidence" acceptance criterion.
   `combined` (present as "here's what we measured," not as a guaranteed live
   speedup, given the run-to-run variance documented above).
 - If `nsys` is not on `PATH` (found directly at `/usr/local/cuda-12.6/bin/nsys`
-  on this machine, without sourcing `setvars.sh`), skip the live capture and
+  on this machine, without sourcing `scripts/setup-env.sh`), skip the live capture and
   open the pre-recorded `.nsys-rep`/CSV files from
   `results/raw/11-integrated-showcase/` instead.
 
@@ -235,7 +246,6 @@ until tested on the pinned environment:
 
 ```bash
 jbang -cp "$TORNADOVM_HOME/share/java/tornado/*" \
-  --javac-opts="--release 21 --enable-preview" \
-  --java-opts="@../tornado.args" \
+  --java-opts="@$TORNADOVM_HOME/tornado-argfile" \
   IntegratedShowcase.java
 ```

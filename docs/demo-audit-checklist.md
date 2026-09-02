@@ -14,7 +14,7 @@ and command-verified this batch, not assumed from prior STATE.md summaries.
 | Lightweight comments | Comment-line ratio stays well under the file's code, and no comment restates what an identifier already says (WHY, not WHAT). |
 | Deterministic output | The demo validates its own result (closed-form/CPU reference) and prints PASS/FAIL rather than requiring visual inspection. |
 | Simple invocation | One short canonical run command a presenter can type live, not a multi-step wrapper. |
-| `java @arg-file` | `java @../tornado.args -cp . <Main> ...` (or equivalent) is documented and actually runs. |
+| `java @arg-file` | `java @$TORNADOVM_HOME/tornado-argfile -cp . <Main> ...` (or equivalent) is documented and actually runs. |
 | JBang | Either a working `jbang` command is documented, or JBang's absence on the pinned environment is stated explicitly (not silently omitted). |
 
 ## Per-demo results (Track A, `00`–`08`, `11`)
@@ -26,7 +26,7 @@ and command-verified this batch, not assumed from prior STATE.md summaries.
 | 02-cuda-runtime-api | pass (1 class, 80 lines) | pass (19 lines incl. 1 javadoc block explaining CUDA-graph capture/replay, non-obvious) | pass | pass | documented (task 02/03 evidence) | not installed |
 | 04-cublas-hybrid | pass (1 class, 133 lines) | pass (18 lines, 2 javadoc blocks) | pass | pass | documented | not installed |
 | 05-cufft-hybrid | pass (1 class, 109 lines) | pass (20 lines, 2 javadoc blocks) | pass | pass | documented | not installed |
-| 06-cuda-streams | pass (1 class, 149 lines) | pass (28 lines — largest ratio of the simple demos, justified: explains stream-role/event-ordering, a non-obvious mechanism) | pass | pass | **re-verified live this batch**: `java @../tornado.args -cp . CudaStreamsOverlap 8 32768 65536 8 both` → exit 0, both modes "All executions correct" (`results/raw/16-demo-audit/06-cuda-streams-argfile-spotcheck.log`) | not installed |
+| 06-cuda-streams | pass (1 class, 149 lines) | pass (28 lines — largest ratio of the simple demos, justified: explains stream-role/event-ordering, a non-obvious mechanism) | pass | pass | **re-verified live this batch**: `java @../tornado.args -cp . CudaStreamsOverlap 8 32768 65536 8 both` (5.2.1-era path) → exit 0, both modes "All executions correct" (`results/raw/16-demo-audit/06-cuda-streams-argfile-spotcheck.log`) | not installed |
 | 07-cuda-graph-benefit | pass (1 class, 155 lines) | pass (28 lines) | pass | pass | documented | not installed |
 | 08-tensor-core-mma | pass (1 class, 165 lines) | pass (16 lines, 3 javadoc blocks) | pass | pass | documented (task 14) | not installed |
 | 11-integrated-showcase | pass (1 class, 342 lines — deliberately the largest, combines 5 mechanisms by design per task 15, not a violation) | pass (44 lines, ~13% ratio, lowest relative density of all demos) | pass | pass (`tornado --classpath . IntegratedShowcase 6 8 8 20 all`) | documented (task 15) | not installed |

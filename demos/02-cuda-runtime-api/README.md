@@ -26,10 +26,9 @@ replaying stale data.
 ## Build
 
 ```bash
-source vendor/tornadovm/setvars.sh   # from repo root
+source scripts/setup-env.sh   # from repo root; pins the SDK in env/versions.env
 cd demos/02-cuda-runtime-api
-javac --release 21 --enable-preview \
-  -cp "$TORNADOVM_HOME/share/java/tornado/tornado-api-5.2.1-jdk21-dev.jar" \
+javac -cp "$TORNADOVM_HOME/share/java/tornado/*" \
   -d . CudaGraphReplay.java
 ```
 
@@ -45,7 +44,7 @@ tornado --enableProfiler console --classpath . CudaGraphReplay 8192 8
 Reproducibility form (`java @arg-file`):
 
 ```bash
-java @../tornado.args -cp . CudaGraphReplay 8192 8
+java @$TORNADOVM_HOME/tornado-argfile -cp . CudaGraphReplay 8192 8
 ```
 
 Arguments: `<array size> <number of replays>` (defaults `8192 8` if omitted).
@@ -66,7 +65,11 @@ With `--enableProfiler console`, the first execution's profiler block shows
 graph capture); every subsequent replay's block shows only
 `TOTAL_TASK_GRAPH_TIME`, typically well under 100 microseconds — the
 observable effect of replaying a captured graph instead of re-dispatching.
-Captured logs: `results/raw/03-cuda-runtime-api/cudagraphreplay-run.log`,
+Re-verified on TornadoVM 6.0.0 / JDK 25 — all 8 replays correct under both
+run paths: `results/raw/18-tornadovm-6-migration/02-cudagraph-tornado.log`,
+`02-cudagraph-javaargfile.log`.
+
+Earlier 5.2.1 logs: `results/raw/03-cuda-runtime-api/cudagraphreplay-run.log`,
 `cudagraphreplay-run-javaargfile.log`.
 
 ## JBang
@@ -80,8 +83,7 @@ pinned environment:
 ```bash
 jbang --version
 jbang -cp "$TORNADOVM_HOME/share/java/tornado/*" \
-  --javac-opts="--release 21 --enable-preview" \
-  --java-opts="@../tornado.args" \
+  --java-opts="@$TORNADOVM_HOME/tornado-argfile" \
   CudaGraphReplay.java
 ```
 

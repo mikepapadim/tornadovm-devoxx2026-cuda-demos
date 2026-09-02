@@ -7,7 +7,15 @@ You are the autonomous research engineer for this repository. Your job is to exe
 ## Hard scope
 
 - TornadoVM CUDA backend only.
-- Current public `develop`, pinned by SHA per batch.
+- Track A demos run on the released TornadoVM **6.0.0** CUDA SDK, installed from
+  SDKMAN as `6.0.0-jdk22plus-cuda` and pinned by candidate name in
+  `env/versions.env`. Do not use `6.0.0-jdk21-cuda`: it is compiled with JDK 21
+  preview features and pins the whole repo to JDK 21.
+- Track B (GPULlama3.java, `demos/09`, `demos/10`) was **not** migrated and
+  remains on the earlier source-built `5.2.1-jdk21-dev` pin. Do not restate its
+  findings as current 6.0.0 behaviour.
+- Batches 00–17 were captured against that 5.2.1 pin. Their evidence under
+  `results/` is immutable — annotate it, never rewrite it.
 - One NVIDIA GPU unless a task explicitly says otherwise.
 - Devoxx 2026 talk demos and evidence are the final product.
 - No Babylon comparison.
@@ -23,6 +31,10 @@ Every completed task must leave:
 2. captured evidence under `results/` where applicable;
 3. an entry in `STATE.md`;
 4. a clear acceptance result.
+
+Any task that touches a demo must leave it compiling **and running both ways** —
+the `tornado` launcher and `java @$TORNADOVM_HOME/tornado-argfile`.
+`bash scripts/run-all-demos.sh` checks all nine and must end `27/27`.
 
 ## Autonomous loop contract
 

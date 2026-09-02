@@ -29,16 +29,57 @@ require_file "docs/talk-1-hybrid-api.md"
 require_file "docs/talk-2-llm-inference.md"
 
 echo "== Pinned environment =="
-if grep -q '^TORNADO_SHA=[0-9a-f]\{7,\}' env/versions.env 2>/dev/null; then
-  ok "TORNADO_SHA is recorded"
+# Track A pins a released SDKMAN SDK by candidate name, not a source SHA.
+if grep -q '^TORNADO_SDKMAN_CANDIDATE=[0-9]\+\.[0-9]\+\.[0-9]\+-jdk[0-9a-z]\+-cuda$' env/versions.env 2>/dev/null; then
+  ok "TORNADO_SDKMAN_CANDIDATE is recorded"
 else
-  bad "TORNADO_SHA missing or malformed in env/versions.env"
+  bad "TORNADO_SDKMAN_CANDIDATE missing or malformed in env/versions.env"
 fi
+# The jdk21 SDK is preview-compiled and pins the whole repo to JDK 21; the
+# jdk22plus SDK is the supported one. Catch a regression to the wrong candidate.
+if grep -q '^TORNADO_SDKMAN_CANDIDATE=.*-jdk22plus-cuda$' env/versions.env 2>/dev/null; then
+  ok "pinned TornadoVM SDK is a jdk22plus (non-preview) CUDA build"
+else
+  bad "pinned TornadoVM SDK is not a jdk22plus CUDA build — see README 'Pick the right SDK'"
+fi
+if grep -q '^JDK_SDKMAN_CANDIDATE=' env/versions.env 2>/dev/null; then
+  ok "JDK_SDKMAN_CANDIDATE is recorded"
+else
+  bad "JDK_SDKMAN_CANDIDATE missing in env/versions.env"
+fi
+# Track B was not migrated; its pins must stay recorded so historical
+# evidence under results/ remains interpretable.
 if grep -q '^GPULLAMA3_SHA=[0-9a-f]\{7,\}' env/versions.env 2>/dev/null; then
   ok "GPULLAMA3_SHA is recorded"
 else
   bad "GPULLAMA3_SHA missing or malformed in env/versions.env"
 fi
+
+echo "== No machine-specific arg-file is committed =="
+# The 6.0.0 arg-file belongs to the installed SDK: it holds absolute paths and
+# JDK-specific flags, so a committed copy is wrong everywhere but its origin.
+if [ -e demos/tornado.args ]; then
+  bad "demos/tornado.args is committed — generate it with 'tornado --generate-argfile' instead"
+else
+  ok "no committed arg-file (generated into \$TORNADOVM_HOME by scripts/setup-env.sh)"
+fi
+# Prose explaining that preview flags are NOT needed is expected; an actual
+# instruction to pass the flag is not. Only the latter should fail.
+preview_hits=$(grep -rn -- '--enable-preview' demos/*/README.md 2>/dev/null \
+  | grep -v 'No `--enable-preview`' \
+  | grep -v 'still needs preview flags' \
+  | grep -v 'preview features enabled')
+if [ -n "$preview_hits" ]; then
+  echo "$preview_hits"
+  bad "a demo README still instructs --enable-preview (not needed on the jdk22plus SDK)"
+else
+  ok "no demo README instructs --enable-preview"
+fi
+
+echo "== Helper scripts present and executable =="
+for sc in scripts/setup-env.sh scripts/run-all-demos.sh; do
+  if [ -x "$sc" ]; then ok "$sc is executable"; else bad "$sc missing or not executable"; fi
+done
 
 echo "== results/raw paths cited in docs/claims.md all exist =="
 if [ -f docs/claims.md ]; then

@@ -25,10 +25,9 @@ Source: [`CudaGraphBenefit.java`](CudaGraphBenefit.java).
 ## Build
 
 ```bash
-source vendor/tornadovm/setvars.sh   # from repo root
+source scripts/setup-env.sh   # from repo root; pins the SDK in env/versions.env
 cd demos/07-cuda-graph-benefit
-javac --release 21 --enable-preview \
-  -cp "$TORNADOVM_HOME/share/java/tornado/tornado-api-5.2.1-jdk21-dev.jar" \
+javac -cp "$TORNADOVM_HOME/share/java/tornado/*" \
   -d . CudaGraphBenefit.java
 ```
 
@@ -41,7 +40,7 @@ tornado --classpath . CudaGraphBenefit 4096 6 50 both
 Reproducibility form (`java @arg-file`):
 
 ```bash
-java @../tornado.args -cp . CudaGraphBenefit 4096 6 50 both
+java @$TORNADOVM_HOME/tornado-argfile -cp . CudaGraphBenefit 4096 6 50 both
 ```
 
 Arguments: `<array size> <chain stages> <executions> <mode>` where mode is
@@ -73,15 +72,20 @@ steady-state median: nograph=<N1> us, graph=<N2> us, speedup=<N1/N2>x
 
 ## What was actually measured (this run, this GPU — not a general guarantee)
 
-Three independent runs on the pinned build (`vendor/tornadovm` @
-`99549c9862eda8d584e35e99924f9c865501eb3a`, RTX 4090), all with
-size=4096, stages=6, and all executions correct in both modes:
+Three independent runs on the pinned TornadoVM 6.0.0 CUDA SDK
+(`6.0.0-jdk22plus-cuda`, JDK 25.0.2, RTX 4090), all with size=4096,
+stages=6, and all executions correct in both modes:
 
 | Run | nograph steady-state median | graph steady-state median | speedup |
 |---|---|---|---|
-| `tornado --classpath .` | 233.6 us | 36.1 us | 6.47x |
-| `java @../tornado.args` | 238.3 us | 36.2 us | 6.58x |
-| `--enableProfiler console` (5 executions, extra console-dump overhead in both modes) | 1008.8 us | 143.7 us | 7.02x |
+| `tornado --classpath .` | 364.2 us | 36.4 us | 10.00x |
+| `java @$TORNADOVM_HOME/tornado-argfile` | 292.4 us | 36.2 us | 8.08x |
+| `--enableProfiler console` (5 executions, extra console-dump overhead in both modes) | 1070.9 us | 121.4 us | 8.82x |
+
+The same three runs on the previous 5.2.1 source-built pin gave 6.47x, 6.58x
+and 7.02x. The `graph` steady-state median is essentially unchanged (~36 us on
+both); what moved is the `nograph` path, so read this as run-to-run variance in
+per-execution dispatch overhead, not as a measured 6.0.0 optimisation.
 
 The consistent direction across all three runs (graph replay several times
 faster, steady state, same validated correctness) is the presenter-visible
@@ -95,9 +99,11 @@ by itself quantify. The exact multiplier is workload/GPU/driver-dependent
 don't quote a specific "Nx" figure in the talk as a general TornadoVM claim,
 quote it as "observed on this machine, this workload."
 
-Captured logs:
-`results/raw/07-cuda-graph-benefit/cudagraphbenefit-run.log`,
-`cudagraphbenefit-run-javaargfile.log`, `cudagraphbenefit-profiler.log`.
+Captured logs (TornadoVM 6.0.0):
+`results/raw/18-tornadovm-6-migration/07-graphbenefit-tornado.log`,
+`07-graphbenefit-javaargfile.log`, `07-graphbenefit-profiler.log`.
+Earlier 5.2.1 logs are kept unmodified in
+`results/raw/07-cuda-graph-benefit/`.
 
 ## Fallback if the live demo fails
 

@@ -38,10 +38,9 @@ pass/fail gate).
 ## Build
 
 ```bash
-source vendor/tornadovm/setvars.sh   # from repo root
+source scripts/setup-env.sh   # from repo root; pins the SDK in env/versions.env
 cd demos/06-cuda-streams
-javac --release 21 --enable-preview \
-  -cp "$TORNADOVM_HOME/share/java/tornado/tornado-api-5.2.1-jdk21-dev.jar" \
+javac -cp "$TORNADOVM_HOME/share/java/tornado/*" \
   -d . CudaStreamsOverlap.java
 ```
 
@@ -56,7 +55,7 @@ tornado --classpath . CudaStreamsOverlap 8 32768 65536 8 both
 Reproducibility form (`java @arg-file`):
 
 ```bash
-java @../tornado.args -cp . CudaStreamsOverlap 8 32768 65536 8 both
+java @$TORNADOVM_HOME/tornado-argfile -cp . CudaStreamsOverlap 8 32768 65536 8 both
 ```
 
 Arguments: `<units> <unitSize> <innerIterations> <executions> <mode>`
@@ -88,13 +87,19 @@ the 8 unit kernels — same first-execution effect documented for demos `02`,
 this machine (RTX 4090) measured ~2.2ms sequential vs. ~0.9ms concurrent
 median steady-state wall-clock for this workload — **Observed, this run
 only**; re-run to get current numbers, they are not gated.
-Captured logs: `results/raw/06-cuda-streams/cudastreamsoverlap-run.log`,
-`cudastreamsoverlap-run-javaargfile.log`.
+
+On TornadoVM 6.0.0 the same workload measured 2174 µs sequential vs. 960 µs
+concurrent (`tornado`) and 2176 µs vs. 936 µs (`java @argfile`) — a ~2.3×
+concurrency benefit, unchanged in size from the 5.2.1 pin. Captured logs
+(6.0.0): `results/raw/18-tornadovm-6-migration/06-streams-tornado.log`,
+`06-streams-javaargfile.log`. Earlier 5.2.1 logs, including the Nsight Systems
+traces below, are unmodified in `results/raw/06-cuda-streams/`
+(`cudastreamsoverlap-run.log`, `cudastreamsoverlap-run-javaargfile.log`).
 
 ## Nsight Systems timeline evidence
 
 ```bash
-source vendor/tornadovm/setvars.sh
+source scripts/setup-env.sh   # from repo root; pins the SDK in env/versions.env
 nsys profile --trace=cuda -o nsys-sequential \
   tornado --classpath . CudaStreamsOverlap 8 32768 65536 8 sequential
 nsys profile --trace=cuda -o nsys-concurrent \
@@ -135,8 +140,7 @@ not run it live until tested on the pinned environment:
 ```bash
 jbang --version
 jbang -cp "$TORNADOVM_HOME/share/java/tornado/*" \
-  --javac-opts="--release 21 --enable-preview" \
-  --java-opts="@../tornado.args" \
+  --java-opts="@$TORNADOVM_HOME/tornado-argfile" \
   CudaStreamsOverlap.java
 ```
 
@@ -150,7 +154,7 @@ jbang -cp "$TORNADOVM_HOME/share/java/tornado/*" \
   device, the environment, not the demo, is broken.
 - If `nsys` is not on `PATH` (it lives at `/usr/local/cuda-12.6/bin/nsys` on
   this machine and was found there directly, without sourcing
-  `setvars.sh`, when checked 2026-08-20), skip the live capture and open the
+  `scripts/setup-env.sh`, when checked 2026-08-20), skip the live capture and open the
   pre-recorded `.nsys-rep`/CSV files from `results/raw/06-cuda-streams/`
   instead.
 - Speedup is not guaranteed on a different GPU/driver: if concurrent mode is

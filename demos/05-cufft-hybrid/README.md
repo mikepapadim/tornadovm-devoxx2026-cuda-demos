@@ -43,10 +43,9 @@ confirmed by hitting the same compiler error here.
 ## Build
 
 ```bash
-source vendor/tornadovm/setvars.sh   # from repo root
+source scripts/setup-env.sh   # from repo root; pins the SDK in env/versions.env
 cd demos/05-cufft-hybrid
-javac --release 21 --enable-preview \
-  -cp "$TORNADOVM_HOME/share/java/tornado/tornado-api-5.2.1-jdk21-dev.jar:$TORNADOVM_HOME/share/java/tornado/tornado-cufft-5.2.1-jdk21-dev.jar" \
+javac -cp "$TORNADOVM_HOME/share/java/tornado/*" \
   -d . CuFftLowPassHybrid.java
 ```
 
@@ -62,7 +61,7 @@ tornado --enableProfiler console --classpath . CuFftLowPassHybrid 4096 16 5
 Reproducibility form (`java @arg-file`):
 
 ```bash
-java @../tornado.args -cp . CuFftLowPassHybrid 4096 16 5
+java @$TORNADOVM_HOME/tornado-argfile -cp . CuFftLowPassHybrid 4096 16 5
 ```
 
 Arguments: `<n> <cutoff> <iterations>` (defaults `4096 16 5` if omitted).
@@ -91,7 +90,14 @@ iteration's `TOTAL_TASK_GRAPH_TIME` (~86 ms) is dominated by Graal + driver
 JIT compilation of the two Java tasks (`TOTAL_GRAAL_COMPILE_TIME` ~48 ms,
 `TOTAL_DRIVER_COMPILE_TIME` ~11 ms); iterations 1–4 drop to ~380–460
 microseconds once compiled code is reused — the same presenter-visible
-compile-then-reuse effect as demo `04`. Captured logs:
+compile-then-reuse effect as demo `04`.
+
+Re-verified on TornadoVM 6.0.0 / JDK 25 — 5/5 iterations correct, max abs
+error `4.7683716E-7` under both run paths:
+`results/raw/18-tornadovm-6-migration/05-cufft-tornado.log`,
+`05-cufft-javaargfile.log`.
+
+Earlier 5.2.1 logs:
 `results/raw/05-cufft-hybrid/cufftlowpasshybrid-run.log`,
 `cufftlowpasshybrid-run-javaargfile.log`. Upstream sanity check (same
 pipeline shape, run before writing this demo):
@@ -107,8 +113,7 @@ live until tested on the pinned environment:
 ```bash
 jbang --version
 jbang -cp "$TORNADOVM_HOME/share/java/tornado/*" \
-  --javac-opts="--release 21 --enable-preview" \
-  --java-opts="@../tornado.args" \
+  --java-opts="@$TORNADOVM_HOME/tornado-argfile" \
   CuFftLowPassHybrid.java
 ```
 
@@ -120,8 +125,8 @@ jbang -cp "$TORNADOVM_HOME/share/java/tornado/*" \
 - Re-run `tornado --devices` first — if it does not show exactly one CUDA
   device, the environment, not the demo, is broken.
 - `NoClassDefFoundError` for `uk.ac.manchester.tornado.cufft.*` usually
-  means the classpath is missing `tornado-cufft-5.2.1-jdk21-dev.jar` — add
-  it alongside `tornado-api-5.2.1-jdk21-dev.jar` (see Build above).
+  means the classpath is missing `tornado-cufft-6.0.0.jar` — add
+  it alongside `tornado-api-6.0.0.jar` (see Build above).
 - If a rebuild ever reintroduces a `[ERROR] Java method name corresponds to
   an OpenCL Token` sketch failure, rename the offending task method (see
   the gotcha above) — this is a TornadoSketcher restriction, not a runtime

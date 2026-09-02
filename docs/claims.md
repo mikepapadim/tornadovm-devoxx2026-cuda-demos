@@ -9,9 +9,16 @@ only), **Hypothesis**, **Blocked** (attempted, failed, reason captured).
 No claim below is invented. Every row cites a source path, a probe command, or
 a result log that actually exists in this repository.
 
-System under test throughout: `vendor/tornadovm` `develop` @
-`99549c9862eda8d584e35e99924f9c865501eb3a` (`env/versions.env`), CUDA backend
-only, RTX 4090, driver 565.57.01, CUDA toolkit 12.6.85, JDK 21.0.2.
+System under test, **Track A demos**: TornadoVM `6.0.0-jdk22plus-cuda`
+(SDKMAN release, `env/versions.env`), JDK 25.0.2, CUDA backend only, RTX 4090,
+driver 565.57.01, CUDA toolkit 12.6.85. Migration evidence:
+`results/raw/18-tornadovm-6-migration/`.
+
+System under test, **Track B (GPULlama3.java) and every claim below marked
+5.2.1**: the earlier source-built pin `vendor/tornadovm` `develop` @
+`99549c9862eda8d584e35e99924f9c865501eb3a`, JDK 21.0.2. Track B was **not**
+migrated to 6.0.0; its claims are recorded as they were observed and are not
+restated as current 6.0.0 behaviour.
 GPULlama3.java claims additionally pinned at `GPULLAMA3_SHA=bbe42fdc8cd475bb6104cefa42118dd6e068538b`.
 
 ## Track A — Hybrid API

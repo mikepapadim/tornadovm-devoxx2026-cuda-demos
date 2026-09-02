@@ -1,126 +1,177 @@
 # TornadoVM Devoxx 2026 — CUDA Demos
 
-Autonomous research, demo engineering, and talk-content study for two Devoxx
-sessions built around the **latest TornadoVM CUDA backend**.
+Java + NVIDIA CUDA demos for two Devoxx 2026 sessions, running on the
+**TornadoVM 6.0.0 CUDA release**. Write GPU kernels in plain Java, drive
+CUDA-runtime behaviour (graph capture/replay, multi-stream concurrency) from
+`TornadoExecutionPlan`, and call cuBLAS/cuFFT without writing a line of JNI.
 
-Every number and every command below was captured on this pinned
-environment (`env/versions.env`): `vendor/tornadovm` `develop` @
-`99549c9862eda8d584e35e99924f9c865501eb3a`, one NVIDIA GeForce RTX 4090,
-driver 565.57.01, CUDA toolkit 12.6.85, JDK 21.0.2. Full claim → evidence
-map: `docs/claims.md`.
+No source build required — TornadoVM 6.0.0 installs from SDKMAN in one command.
 
-## Talks
+## Quick install
 
-### 1. TornadoVM Hybrid API: Java + NVIDIA CUDA Libraries
+```bash
+# 1. SDKMAN (skip if you already have it)
+curl -s "https://get.sdkman.io" | bash
+source "$HOME/.sdkman/bin/sdkman-init.sh"
 
-Show Java developers how to write GPU kernels directly in Java, access
-CUDA-runtime behaviour (graph capture/replay, multi-stream concurrency)
-from `TornadoExecutionPlan`, invoke cuBLAS/cuFFT without handwritten JNI,
-and combine Java kernels with vendor-optimized NVIDIA libraries in one
-execution graph. Draft: `docs/talk-1-hybrid-api.md`.
+# 2. A JDK 22+ and the TornadoVM 6.0.0 CUDA SDK
+sdk install java 25.0.2-open
+sdk install tornadovm 6.0.0-jdk22plus-cuda
+```
 
-### 2. Java LLM Inference with TornadoVM
+That is the whole toolchain. Point the shell at it and confirm the GPU is visible:
 
-Show how TornadoVM underpins local LLM inference in Java, using
-GPULlama3.java as the case study — quantized data paths (FP16/Q8_0
-working, Q4_0 explicitly unimplemented upstream), GPU profiling, and
-Quarkus/LangChain4j integration, including where that integration is
-currently blocked and why. Draft: `docs/talk-2-llm-inference.md`.
+```bash
+git clone https://github.com/mikepapadim/tornadovm-devoxx2026-cuda-demos
+cd tornadovm-devoxx2026-cuda-demos
+source scripts/setup-env.sh   # sets JAVA_HOME / TORNADOVM_HOME / PATH, generates the argfile
+tornado --devices
+```
 
-## Scope
+```
+Number of Tornado drivers: 1
+Driver: CUDADriver
+  Total number of CUDADriver devices  : 1
+  Tornado device=0:0  (DEFAULT)
+	CUDA --  [NVIDIA CUDA] -- NVIDIA GeForce RTX 4090
+```
 
-**CUDA only.** The study uses the current TornadoVM `develop` tree, pinned
-by SHA for every measurement batch. No OpenCL, Metal, the legacy PTX
-backend, Babylon, or another GPU framework anywhere in this repo
-(`scripts/verify.sh` checks this).
+Run everything — compiles each demo and runs it both via the `tornado`
+launcher and via `java @argfile`:
+
+```bash
+bash scripts/run-all-demos.sh
+```
+
+### Pick the right SDK: `jdk22plus`, not `jdk21`
+
+TornadoVM 6.0.0 ships two CUDA SDKs and they are **not** interchangeable:
+
+| SDKMAN candidate | JDK contract | Use it? |
+|---|---|---|
+| `6.0.0-jdk22plus-cuda` | floor JDK 22, **no** preview features | **Yes** — what this repo pins |
+| `6.0.0-jdk21-cuda` | JDK 21 **only**, compiled `--enable-preview` | No — preview bytecode pins you to exactly JDK 21 |
+
+Picking `jdk21` and running it on anything but JDK 21 fails immediately with
+`This TornadoVM SDK was built for JDK 21 with preview features enabled`. The
+`jdk22plus` SDK is the reason this repo no longer needs `--enable-preview`
+anywhere: not on `javac`, not on the JVM, not in the argfile.
+
+## Running a demo
+
+Two supported paths, both verified for every demo on every commit
+(`scripts/run-all-demos.sh`):
+
+```bash
+cd demos/00-hello-gpu
+javac -cp "$TORNADOVM_HOME/share/java/tornado/*" -d . Hello.java
+
+tornado --classpath . Hello                          # canonical launcher
+java @$TORNADOVM_HOME/tornado-argfile -cp . Hello    # explicit, reproducible
+```
+
+`tornado --generate-argfile` writes `$TORNADOVM_HOME/tornado-argfile`. It is
+generated into the SDK, not committed here, because its flags are absolute-path
+and JDK-specific — `-XX:+EnableJVMCI` is required on JDK ≤ 26 and fatal on JDK 27+.
+`scripts/setup-env.sh` regenerates it for whichever JDK is active.
 
 ## Track A demos — Hybrid API (`demos/`)
 
-Each demo is a single presenter-friendly Java file. Every row below has been
-run on the pinned CUDA backend; raw logs are cited per demo.
+Each demo is one self-contained Java file. Every row below was re-run on
+TornadoVM 6.0.0 / JDK 25 / RTX 4090; logs in
+`results/raw/18-tornadovm-6-migration/`.
 
-| # | Demo | Run | `java @arg-file` |
-|---|------|-----|-------------------|
-| [00](demos/00-hello-gpu/) | `Hello.java` — one `@Parallel` task, smallest TornadoVM program | `tornado --classpath . Hello` | `java @../tornado.args -cp . Hello` |
-| [01](demos/01-first-cuda-kernel/) | `VectorAddKernel.java` — vector add + `--printKernel` generated-CUDA-source proof | `tornado --classpath . VectorAddKernel` | `java @../tornado.args -cp . VectorAddKernel` |
-| [02](demos/02-cuda-runtime-api/) | `CudaGraphReplay.java` — `withCUDAGraph()` capture + 8 replays, CUDA-runtime API, not a vendor library | `tornado --classpath . CudaGraphReplay` | `java @../tornado.args -cp . CudaGraphReplay` |
-| [04](demos/04-cublas-hybrid/) | `CuBlasSgemvHybrid.java` — JIT `scale` → cuBLAS `sgemv` → JIT `bias`, one graph, shared buffers | `tornado --classpath . CuBlasSgemvHybrid` | `java @../tornado.args -cp . CuBlasSgemvHybrid` |
-| [05](demos/05-cufft-hybrid/) | `CuFftLowPassHybrid.java` — cuFFT forward (R2C) → JIT low-pass → cuFFT inverse (C2R) → JIT normalize | `tornado --classpath . CuFftLowPassHybrid` | `java @../tornado.args -cp . CuFftLowPassHybrid` |
-| [06](demos/06-cuda-streams/) | `CudaStreamsOverlap.java` — sequential (1 stream) vs. concurrent (4-stream pool) with Nsight Systems overlap evidence | `tornado --classpath . CudaStreamsOverlap 8 32768 65536 8 both` | `java @../tornado.args -cp . CudaStreamsOverlap 8 32768 65536 8 both` |
-| [07](demos/07-cuda-graph-benefit/) | `CudaGraphBenefit.java` — `nograph` vs. `graph`, 50 executions, quantified steady-state speedup | `tornado --classpath . CudaGraphBenefit 4096 6 50 both` | `java @../tornado.args -cp . CudaGraphBenefit 4096 6 50 both` |
-| [08](demos/08-tensor-core-mma/) | `TensorCoreMMA.java` — one `M16N8K16` fp16 tile, one `mma.sync.aligned` instruction, vs. scalar reference | `tornado --printKernel --classpath . TensorCoreMMA` | `java @../tornado.args -cp . TensorCoreMMA` |
-| [11](demos/11-integrated-showcase/) | `IntegratedShowcase.java` — kernel + cuBLAS x 6 chains, baseline/concurrent/graph/combined + Tensor Core bonus stage | `tornado --classpath . IntegratedShowcase 6 8 8 20 all` | `java @../tornado.args -cp . IntegratedShowcase 6 8 8 20 all` |
-| [09](demos/09-quarkus-langchain4j-gpullama3/) | Quarkus + LangChain4j GPULlama3 extension — builds, **blocked at runtime** (JDK preview-feature vs. JDK-23+ split, see below) | n/a — do not run live, see `docs/quarkus-langchain4j-integration.md` | n/a |
-| [10](demos/10-langchain4j-gpullama3/) | Standalone LangChain4j GPULlama3 provider — same blocker as 09 | n/a — do not run live | n/a |
+| # | Demo | Concept | Run |
+|---|------|---------|-----|
+| [00](demos/00-hello-gpu/) | `Hello.java` | Smallest TornadoVM program: one `@Parallel` task, one `TaskGraph` | `tornado --classpath . Hello` |
+| [01](demos/01-first-cuda-kernel/) | `VectorAddKernel.java` | Vector add + `--printKernel` to show the generated CUDA source | `tornado --classpath . VectorAddKernel` |
+| [02](demos/02-cuda-runtime-api/) | `CudaGraphReplay.java` | `withCUDAGraph()` — CUDA graph capture + 8 validated replays | `tornado --classpath . CudaGraphReplay` |
+| [04](demos/04-cublas-hybrid/) | `CuBlasSgemvHybrid.java` | One graph, three stages: JIT `scale` → cuBLAS `sgemv` → JIT `bias` | `tornado --classpath . CuBlasSgemvHybrid` |
+| [05](demos/05-cufft-hybrid/) | `CuFftLowPassHybrid.java` | cuFFT R2C → JIT low-pass → cuFFT C2R → JIT normalize, GPU-resident | `tornado --classpath . CuFftLowPassHybrid` |
+| [06](demos/06-cuda-streams/) | `CudaStreamsOverlap.java` | `withIntraPlanConcurrency()` — 1 stream vs. a 4-stream pool | `tornado --classpath . CudaStreamsOverlap 8 32768 65536 8 both` |
+| [07](demos/07-cuda-graph-benefit/) | `CudaGraphBenefit.java` | Same graph `nograph` vs. `graph`, 50 executions — quantifies replay speedup | `tornado --classpath . CudaGraphBenefit 4096 6 50 both` |
+| [08](demos/08-tensor-core-mma/) | `TensorCoreMMA.java` | One warp, one `M16N8K16` fp16 tile, exactly one `mma.sync.aligned` | `tornado --printKernel --classpath . TensorCoreMMA` |
+| [11](demos/11-integrated-showcase/) | `IntegratedShowcase.java` | Everything at once: JIT + cuBLAS × 6 chains, baseline/concurrent/graph/combined | `tornado --classpath . IntegratedShowcase 6 8 8 20 all` |
 
-`demos/tornado.args` is a committed `tornado --generate-argfile` output,
-generated against the pinned build in `env/versions.env`. **JBang: not
-verified on this machine** — `which jbang` returns exit 1, reconfirmed every
-task; every demo README documents the expected-but-untested JBang shape and
-says explicitly not to run it live. Full presenter usability audit:
-`docs/demo-audit-checklist.md`.
+Every demo also runs as `java @$TORNADOVM_HOME/tornado-argfile -cp . <MainClass> [args]`.
 
-## Measured results (Observed, this machine, this run — not general claims)
+**JBang: still not verified here** — `which jbang` returns exit 1 on this
+machine (re-checked 2026-09-02). Each demo README documents the expected JBang
+shape and says explicitly not to run it live.
 
-| Demo | Metric | Result | Tool | Evidence |
-|---|---|---|---|---|
-| 04-cublas-hybrid | Correctness | 5/5 iterations correct vs. sequential Java reference | `--enableProfiler console` | `results/raw/04-cublas-hybrid/` |
-| 05-cufft-hybrid | Correctness | 5/5 iterations correct vs. analytic low-frequency signal | — | `results/raw/05-cufft-hybrid/` |
-| 06-cuda-streams | Stream count / overlap | sequential: 1 CUDA stream, strictly back-to-back; concurrent: 4-stream pool, genuinely overlapping windows | Nsight Systems `2024.5.1.113` (`cuda_gpu_trace`) | `results/raw/06-cuda-streams/nsys-timeline-evidence.txt` |
-| 07-cuda-graph-benefit | Steady-state speedup, graph vs. nograph (size=4096, 6 stages, 50 executions) | 6.47x, 6.58x, 7.02x across 3 independent runs | wall-clock, cross-checked | `demos/07-cuda-graph-benefit/README.md` |
-| 08-tensor-core-mma | Generated code | 1x `mma.sync.aligned.m16n8k16...` PTX instruction vs. 0x in the scalar reference from the same compile | `--printKernel` | `results/raw/08-tensor-core-mma/tensorcoremma-printkernel.log` |
-| 09-profiling | Dominant setup cost | `cuCtxCreate_v2` is 89–99% of `Time (%)` in every trace (whole-JVM-process trace, not compute cost) | Nsight Systems | `results/raw/09-profiling/PROFILING-SUMMARY.md` |
-| 11-integrated-showcase | `graph` mode speedup vs. baseline | 4.9x–6.6x across runs | wall-clock | `results/raw/11-integrated-showcase/`, `STATE.md` batch 15/16 |
-| 11-integrated-showcase | `concurrent` mode vs. baseline (small launch-overhead-bound workload) | 0.78x–1.21x — **not reliably faster**, workload-dependent | wall-clock | `STATE.md` batch 15 |
-| GPULlama3.java FP16 | Throughput, 1B model, 25–64 tokens | 153.18–164.20 tok/s | `--profiler` JSON, confirms `"BACKEND": "CUDA"` | `results/raw/10-gpullama3/`, `results/raw/11-quantization/` |
-| GPULlama3.java Q8_0 | Throughput, same model family | 186.47 tok/s | same | `results/raw/11-quantization/q8_0-inference-run.log` |
-| GPULlama3.java FP16 decode | Dominant GPU kernel | `fusedRmsNormFFNGateUp` (FFN gate/up), 39.0% of GPU kernel time | Nsight Systems | `results/raw/12-llm-profiling/PROFILING-SUMMARY.md` |
-| GPULlama3.java FP16 decode | Memory traffic | 99.1% H2D memcpy | Nsight Systems | `results/raw/12-llm-profiling/PROFILING-SUMMARY.md` |
-| GPULlama3.java FP16 decode | Time-to-first-token vs. steady-state | ~756 ms (JIT warm-up, ~148 task-graph variants) vs. ~6.45 ms/token steady-state (cross-checked within ~1% of reported tok/s) | Nsight Systems `cuda_gpu_trace` | `results/raw/12-llm-profiling/PROFILING-SUMMARY.md` §6 |
+## Measured on TornadoVM 6.0.0 (Observed — this machine, this run)
 
-**Blocked, system-wide, both talks:** Nsight Compute (`ncu`) hardware
-counters (occupancy, GPU utilization %, memory throughput %, tensor-pipe
-activity) — `ERR_NVGPUCTRPERM`, `NVreg_RestrictProfilingToAdminUsers=1`, no
-passwordless sudo on this machine. Re-verified 4x (tasks 08, 09, 12, 14).
-Not a TornadoVM limitation. Full writeup: `results/failures/08-nsight-compute-permission.md`.
+RTX 4090, driver 565.57.01, CUDA 12.6.85, JDK 25.0.2. Not general claims.
 
-## Track B — GPULlama3.java on TornadoVM CUDA (Observed unless marked)
+| Demo | Metric | Result | Evidence |
+|---|---|---|---|
+| 00, 01, 02 | Correctness | all pass under both `tornado` and `java @argfile` | `results/raw/18-tornadovm-6-migration/` |
+| 04-cublas-hybrid | Correctness | 5/5 iterations match the sequential Java reference | `04-cublas-*.log` |
+| 05-cufft-hybrid | Correctness | 5/5 iterations, max abs error `4.77e-7` vs. the analytic signal | `05-cufft-*.log` |
+| 06-cuda-streams | Concurrency benefit | sequential 2174–2176 µs vs. concurrent 936–960 µs → **~2.3x** | `06-streams-*.log` |
+| 07-cuda-graph-benefit | Graph replay speedup | nograph 292–364 µs vs. graph 36 µs → **8.1x / 10.0x** across the two run paths | `07-graphbenefit-*.log` |
+| 08-tensor-core-mma | Generated code | exactly **1** `mma.sync.aligned.m16n8k16` PTX instruction; 0 in the scalar reference | `08-mma-printkernel.log` |
+| 11-integrated-showcase | Mode comparison vs. baseline | concurrent 1.08–1.12x, graph 5.37–5.61x, combined 5.66–5.69x | `11-showcase-*.log` |
+| all 9 demos | Compile + run, both paths | **27/27 checks pass** | `run-all-demos.log` |
 
-- Build: `./mvnw clean install -DskipTests -Dtornadovm.base.version=5.2.1 -Djdk.version.suffix=-jdk21-dev` (a build-property override for a real cross-version incompatibility between GPULlama3.java's documented Maven Central pin and this repo's pinned CUDA SDK — source unmodified). `docs/gpullama3-reproduction.md`.
-- Quantization: FP16 and Q8_0 **work**; legacy Q4_0 is **blocked** (`UnsupportedOperationException`, matches source-level dispatch exactly, upstream marks it "not yet implemented"); K-quants are **documented, not independently reproduced** (no test file on this machine). `docs/quantization-paths.md`.
-- Quarkus (`quarkus-langchain4j-gpu-llama3:1.13.0`) and LangChain4j (`langchain4j-gpu-llama3:1.19.0-beta29`) integrations both **build** against the pinned CUDA jar but are **blocked at model-load time**: this repo's CUDA build uses JDK 21 `--enable-preview` bytecode (loadable only by JDK 21), while both integration modules require JDK 23+ to load their own classes — no single JVM satisfies both. `docs/quarkus-langchain4j-integration.md`.
+Compared with the previous 5.2.1 source-built pin, demo 07's replay speedup
+rose from 6.47–7.02x to 8.08–10.00x, and demo 06's concurrency benefit became
+unambiguous (~2.3x). Demo 11's `concurrent` mode remains launch-overhead-bound
+and only marginally faster (1.08–1.12x), unchanged in character from 5.2.1.
 
-## Outputs
+**Still blocked, system-wide:** Nsight Compute (`ncu`) hardware counters —
+`ERR_NVGPUCTRPERM`, `NVreg_RestrictProfilingToAdminUsers=1`, no passwordless
+sudo on this machine. Not a TornadoVM limitation.
+`results/failures/08-nsight-compute-permission.md`.
 
-- `docs/talk-1-hybrid-api.md` / `docs/talk-2-llm-inference.md` — evidence-backed talk drafts.
-- `docs/demo-runbook.md` — exact live-demo sequence, what to say, per-step fallback.
-- `docs/claims.md` — every claim → source/probe/result evidence map.
-- `docs/hybrid-api-inventory.md`, `docs/gpullama3-reproduction.md`, `docs/quantization-paths.md`, `docs/quarkus-langchain4j-integration.md`, `docs/profiling-quickstart.md`, `docs/demo-audit-checklist.md`, `docs/run-conventions.md` — supporting evidence documents.
-- `results/raw/` — immutable raw outputs. `results/failures/` — captured failures and diagnoses.
-- `STATE.md` — durable autonomous-study state. `auto/` — autonomous Claude task queue, supervisor, preflight, prompt contracts.
-- `scripts/verify.sh` — validates the deliverables above and every cited evidence path exists, without needing a GPU.
+## What changed migrating 5.2.1 → 6.0.0
 
-## Autonomous execution
+| | Before (5.2.1, source build) | Now (6.0.0, SDKMAN) |
+|---|---|---|
+| Install | `git clone` + `make BACKEND=cuda` into `vendor/tornadovm` | `sdk install tornadovm 6.0.0-jdk22plus-cuda` |
+| JDK | 21 only, `--enable-preview` on `javac` **and** the JVM | any JDK ≥ 22, no preview flags |
+| Env var | `TORNADO_SDK` | `TORNADOVM_HOME` |
+| Argfile | `demos/tornado.args`, committed with absolute paths baked in | `$TORNADOVM_HOME/tornado-argfile`, generated by `tornado --generate-argfile` |
+| JVMCI | platform module as-is | vendored + `--patch-module jdk.internal.vm.ci` (JDK 22–26), fully vendored on JDK 27+ |
+| Native access | — | `--enable-native-access=tornado.runtime` |
 
-```bash
-bash auto/gen_tasks.sh
-bash auto/preflight.sh
-bash auto/supervisor.sh
-```
+No demo source needed an API change: all nine compile unmodified against
+`tornado-api-6.0.0`.
 
-Validate committed evidence at any time, no GPU required:
+## Track B — GPULlama3.java (`demos/09`, `demos/10`) — not migrated
 
-```bash
-bash scripts/verify.sh
-```
+The GPULlama3.java demos and every Track B measurement under `results/` were
+captured against the previous source-built `5.2.1-jdk21-dev` pin and are
+**deliberately left untouched** by this migration. Their historical findings
+stand as recorded, but they do not describe the 6.0.0 runtime:
 
-The loop is derived from the unattended workflow used in the
-TornadoVM-vs-Babylon CUDA study: one task per Claude invocation, durable
-state, explicit acceptance criteria, retries/timeouts, stall detection, and
-a publication guard.
+- FP16 and Q8_0 inference **worked** (153–186 tok/s, 1B model); legacy Q4_0 was
+  **blocked** upstream (`UnsupportedOperationException`). `docs/quantization-paths.md`.
+- Quarkus and LangChain4j integrations **built** but were **blocked at model load**:
+  the 5.2.1 CUDA build was JDK 21 `--enable-preview` bytecode while both
+  integrations require JDK 23+, and no single JVM satisfied both.
+  `docs/quarkus-langchain4j-integration.md`.
 
-## Publication boundary
+Worth noting: 6.0.0's `jdk22plus` SDK removes the `--enable-preview` half of
+that blocker, so the JDK-version conflict is no longer structural. Re-testing
+Track B on 6.0.0 is open work, not a result — nothing here claims it now works.
 
-Autonomous pushes are restricted to this repository. The agent must not
-create or modify issues, PRs, releases, gists, or upstream
-TornadoVM/GPULlama3.java repositories.
+## Talks
+
+1. **TornadoVM Hybrid API: Java + NVIDIA CUDA Libraries** — `docs/talk-1-hybrid-api.md`
+2. **Java LLM Inference with TornadoVM** — `docs/talk-2-llm-inference.md`
+
+## Repository layout
+
+- `demos/` — Track A demos, one directory and one README each.
+- `scripts/setup-env.sh` — sets `JAVA_HOME`/`TORNADOVM_HOME`, generates the argfile.
+- `scripts/run-all-demos.sh` — compiles and runs all 9 demos both ways. Needs a GPU.
+- `scripts/verify.sh` — validates deliverables and cited evidence paths. No GPU needed.
+- `docs/` — talk drafts, runbook, claims ledger, supporting evidence documents.
+- `results/raw/` — immutable raw outputs. `results/failures/` — captured failures.
+- `env/versions.env` — the pinned environment. `STATE.md` — durable study state.
+
+## Scope
+
+**CUDA only.** No OpenCL, Metal, the legacy PTX backend, Babylon, or another
+GPU framework anywhere in this repo (`scripts/verify.sh` enforces this).

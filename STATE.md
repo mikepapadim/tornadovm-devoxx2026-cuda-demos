@@ -280,3 +280,66 @@ Acceptance for task 17 ("Talk drafts, runbook, claims ledger, profiler guide, an
 ### Next invocation
 
 Check `auto/tasks/` for a task numbered 18 or higher — none was confirmed to exist as of this batch (only 00-17.md were present). If none exists, the queued task list is exhausted; re-verify that before assuming more work is queued. If resuming this study's open threads instead: the combined-mode workload-size retest (batch 15) and the Nsight Compute `ERR_NVGPUCTRPERM` system-wide block (re-verify only if a future environment might have counter access — the ready-to-rerun commands are already collected in `results/failures/08-nsight-compute-permission.md`) remain open, plus `docs/quarkus-langchain4j-integration.md` §4's untested JDK-25-throughout hypothesis. Before starting anything: re-check `git status` clean, re-verify `vendor/tornadovm` HEAD still matches `env/versions.env`, and check `ps`/`nvidia-smi` for concurrent instances or GPU activity per the batch-01 operational note.
+
+## Batch 18 — Migrated Track A to the TornadoVM 6.0.0 CUDA release (2026-09-02)
+
+Modernization batch, not a study task: moved the Track A demos off the
+source-built `5.2.1-jdk21-dev` pin (`99549c9862eda8d584e35e99924f9c865501eb3a`)
+and onto the released TornadoVM **6.0.0** CUDA SDK installed from SDKMAN.
+Deliverables: rewritten `README.md` (SDKMAN quick install), `env/versions.env`,
+`demos/README.md` + all 9 demo READMEs, `scripts/setup-env.sh`,
+`scripts/run-all-demos.sh`, updated `scripts/verify.sh`, `CLAUDE.md`, and the
+operational docs. Evidence: `results/raw/18-tornadovm-6-migration/`
+(+ `MANIFEST.md`). All Observed:
+
+- **SDK selection matters and is now pinned by name.** 6.0.0 ships two CUDA
+  SDKs. `6.0.0-jdk21-cuda` is compiled `--enable-preview` and its launcher
+  refuses any JVM but JDK 21 (`etc/tornado.jdk`: `floor=21, preview=true`).
+  `6.0.0-jdk22plus-cuda` is the non-preview build (`floor=22, preview=false`).
+  This repo pins the latter (`TORNADO_SDKMAN_CANDIDATE` in `env/versions.env`,
+  enforced by `scripts/verify.sh`). Installed both to confirm the difference.
+- **`TORNADO_SDK` was renamed to `TORNADOVM_HOME`.** 6.0.0's `tornado.py`
+  resolves the SDK from `TORNADOVM_HOME`; a stale `TORNADO_SDK` silently
+  selects a different SDK and produces a misleading "built for JDK 21" error.
+  `scripts/setup-env.sh` unsets the old name.
+- **The arg-file moved into the SDK.** `tornado --generate-argfile` now writes
+  `$TORNADOVM_HOME/tornado-argfile` and prints that as the documented usage.
+  The committed, machine-specific `demos/tornado.args` (absolute paths to
+  `/home/michalis/...`) was **deleted**; `verify.sh` now fails if one
+  reappears. New 6.0.0 flags in it: `-Djdk.internal.vm.ci.enabled=true`,
+  `--patch-module jdk.internal.vm.ci=<sdk>/share/java/jvmci/jvmci-21.0.2.jar`
+  (JDK 22–26 vendoring), `--enable-native-access=tornado.runtime`. Gone:
+  `--enable-preview`.
+- **No demo source needed an API change.** All nine Track A demos compile
+  unmodified against `tornado-api-6.0.0` under JDK 25 with no preview flags.
+  The migration is entirely packaging, JDK level, and launch flags.
+- **All nine demos run correctly both ways**: `tornado --classpath .` and
+  `java @$TORNADOVM_HOME/tornado-argfile -cp .`. 27/27 checks pass via the new
+  `scripts/run-all-demos.sh` (`run-all-demos.log`).
+- **Two behavioural changes vs. 5.2.1, both in demo 11** (n=5 runs): the
+  experimental `combined` mode (`withCUDAGraph()` + `withIntraPlanConcurrency()`)
+  no longer costs more than `graph` alone — 5.55–5.71× vs. graph's 5.37–5.87×,
+  where 5.2.1 measured 3.91× vs. 6.56× and 2.95× vs. 4.90×; and `concurrent`
+  mode never went below break-even (1.08–1.13× across all five runs, vs. 5.2.1's
+  0.81×–1.21× spread). Mechanism not investigated — recorded as Observed only.
+- Demo 07's ratio rose to 8.08–10.00× (from 6.47–7.02×), but its `graph`
+  steady-state median is ~36 µs on **both** pins — the `nograph` baseline is
+  what moved, so this is dispatch-overhead variance, not a 6.0.0 optimisation.
+  Demo 06 (~2.3× concurrency benefit) and demo 08 (exactly one
+  `mma.sync.aligned` instruction) are unchanged.
+
+### Deliberately out of scope
+
+- **Track B (GPULlama3.java, `demos/09`, `demos/10`) was not migrated.** Its
+  pins, docs, and every `results/` measurement stay on 5.2.1 and are labelled
+  as such throughout. Note for a future batch: 6.0.0's `jdk22plus` SDK is a
+  non-preview build, which removes the preview-bytecode half of the
+  JDK-21-vs-JDK-23+ blocker recorded in batch 13 — that blocker is no longer
+  structural, but nothing was rebuilt or re-tested, so it is **not** a claim
+  that the integrations now work.
+- **Nsight Systems traces were not re-captured.** The 5.2.1 timelines remain
+  cited as mechanism evidence only. Nsight Compute is still blocked
+  (`ERR_NVGPUCTRPERM`), re-confirmed unchanged.
+- `results/raw/00-baseline/` … `17-final-rehearsal/` are left byte-for-byte
+  unmodified. Where a doc cites them it now says which pin they came from.
+- JBang still not installed on this machine (`which jbang` → exit 1).

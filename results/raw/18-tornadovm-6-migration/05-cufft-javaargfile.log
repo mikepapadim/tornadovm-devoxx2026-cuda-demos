@@ -1,0 +1,22 @@
+WARNING: module-info.class ignored in patch: /home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda/share/java/jvmci/jvmci-21.0.2.jar
+Low-pass filter via hybrid cuFFT pipeline: n=4096, cutoff bin=16, iterations=5
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess (file:/home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda/share/java/tornado/tornado-runtime-6.0.0.jar)
+WARNING: Please consider reporting this to the maintainers of class uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+iteration 0: correct maxError=4.7683716E-7 filtered[0]=0.49999997
+Enable the profiler with: -Dtornado.profiler=True
+  total task-graph time: 0 ns
+iteration 1: correct maxError=4.7683716E-7 filtered[0]=0.49999997
+Enable the profiler with: -Dtornado.profiler=True
+  total task-graph time: 0 ns
+iteration 2: correct maxError=4.7683716E-7 filtered[0]=0.49999997
+Enable the profiler with: -Dtornado.profiler=True
+  total task-graph time: 0 ns
+iteration 3: correct maxError=4.7683716E-7 filtered[0]=0.49999997
+Enable the profiler with: -Dtornado.profiler=True
+  total task-graph time: 0 ns
+iteration 4: correct maxError=4.7683716E-7 filtered[0]=0.49999997
+Enable the profiler with: -Dtornado.profiler=True
+  total task-graph time: 0 ns
+All iterations correct

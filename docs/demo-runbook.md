@@ -6,19 +6,29 @@ screen, what to say, and what to do if a stage fails. Built from
 demo's own `README.md` "Fallback if the live demo fails" section — this file
 sequences them into a talk-length run-of-show, it does not replace them.
 
-Environment for every command below: `env/versions.env`
-(`vendor/tornadovm` @ `99549c9862eda8d584e35e99924f9c865501eb3a`, RTX 4090,
-driver 565.57.01, CUDA 12.6.85, JDK 21.0.2).
+Environment for the Talk 1 / Track A commands below: `env/versions.env` —
+TornadoVM `6.0.0-jdk22plus-cuda` (SDKMAN release), JDK 25.0.2, RTX 4090,
+driver 565.57.01, CUDA 12.6.85.
+
+Talk 2 / Track B (GPULlama3.java) was **not** migrated to 6.0.0 and still runs
+against the earlier source-built pin (`vendor/tornadovm` @
+`99549c9862eda8d584e35e99924f9c865501eb3a`, JDK 21.0.2). Its sections below
+are marked; do not mix the two setups in one shell.
 
 ## Pre-talk setup (do this before walking on stage, not live)
 
 ```bash
 cd /path/to/tornadovm-devoxx2026-cuda-demos
-source vendor/tornadovm/setvars.sh
+source scripts/setup-env.sh
 echo "$TORNADOVM_HOME"                                   # must print a path
 nvidia-smi --query-gpu=utilization.gpu,memory.used,memory.total --format=csv,noheader
 tornado --devices                                        # must show exactly one CUDA device
+bash scripts/run-all-demos.sh                            # all 9 demos, both run paths, must end 27/27
 ```
+
+Running `scripts/run-all-demos.sh` once before the talk is the cheapest
+insurance there is: it compiles every demo and runs it both via `tornado` and
+via `java @argfile`, and exits non-zero if anything is broken.
 
 Expect `0 %, 4 MiB, 24564 MiB` from `nvidia-smi`. If the GPU is not idle,
 another process is using it — every number in this repo was captured on an
@@ -176,6 +186,8 @@ carries the "shared buffers, one graph" point); never cut the opening
 ### Setup (do before the audience is watching, ~756 ms first-token pause is expected)
 
 ```bash
+# Track B only — the 5.2.1 source-built pin, NOT the SDKMAN 6.0.0 SDK.
+# Use a separate terminal tab from the Talk 1 demos.
 cd vendor/GPULlama3.java
 source ../tornadovm/setvars.sh
 source ./set_paths
@@ -250,7 +262,11 @@ link against our pinned CUDA jar. Both hit the same wall at runtime: our
 GPULlama3.java build uses Java preview features under JDK 21, and preview
 bytecode can only be loaded by the exact JDK release that compiled it — never
 older, never newer. The integration modules themselves need JDK 23+. There
-is no single JVM that satisfies both today." Show the exact error transcript
+was no single JVM that satisfied both." If asked whether TornadoVM 6.0.0
+changes this: its `jdk22plus` SDK is a non-preview build, so the
+preview-bytecode half of the blocker is gone in principle — but Track B has
+not been rebuilt or re-tested on 6.0.0, so say that it is now unblocked *in
+principle* and untested, not that it works. Show the exact error transcript
 from `docs/quarkus-langchain4j-integration.md` §3 if asked for proof — it's
 a real, reproduced failure, not a guess.
 

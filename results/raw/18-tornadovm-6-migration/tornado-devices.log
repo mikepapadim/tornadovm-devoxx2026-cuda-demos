@@ -1,0 +1,3 @@
+WARNING: module-info.class ignored in patch: /home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda/share/java/jvmci/jvmci-21.0.2.jar
+Error occurred during initialization of boot layer
+java.lang.module.ResolutionException: Module jar.fused contains package org.graalvm.collections, module org.graalvm.collections exports package org.graalvm.collections to jar.fused

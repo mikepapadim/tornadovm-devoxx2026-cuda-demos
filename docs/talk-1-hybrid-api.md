@@ -4,8 +4,11 @@ Draft content. Every technical claim below carries an evidence tag
 (**Observed** / **Source-backed** / **Documented** / **Hypothesis** /
 **Blocked**) per `PLAN.md` §6 — cross-reference `docs/claims.md` for the full
 evidence map. Live sequence and exact commands: `docs/demo-runbook.md`.
-System under test: `vendor/tornadovm` `develop` @
-`99549c9862eda8d584e35e99924f9c865501eb3a`, CUDA backend only, one RTX 4090.
+System under test: TornadoVM `6.0.0-jdk22plus-cuda` (SDKMAN release),
+JDK 25.0.2, CUDA backend only, one RTX 4090. Numbers re-measured on 6.0.0 are
+in `README.md` and `results/raw/18-tornadovm-6-migration/`; where this draft
+still quotes a figure from the earlier 5.2.1 source-built pin
+(`99549c9862eda8d584e35e99924f9c865501eb3a`) it says so.
 
 ## Opening (2–3 min)
 

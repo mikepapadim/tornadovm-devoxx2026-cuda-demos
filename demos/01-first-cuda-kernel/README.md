@@ -10,10 +10,9 @@ before it is compiled with `nvcc`/`ptxas` and launched on the device.
 ## Build
 
 ```bash
-source vendor/tornadovm/setvars.sh   # from repo root
+source scripts/setup-env.sh   # from repo root; pins the SDK in env/versions.env
 cd demos/01-first-cuda-kernel
-javac --release 21 --enable-preview \
-  -cp "$TORNADOVM_HOME/share/java/tornado/tornado-api-5.2.1-jdk21-dev.jar" \
+javac -cp "$TORNADOVM_HOME/share/java/tornado/*" \
   -d . VectorAddKernel.java
 ```
 
@@ -28,13 +27,15 @@ tornado --enableProfiler console --printKernel --classpath . VectorAddKernel 102
 Reproducibility form (`java @arg-file`):
 
 ```bash
-java @../tornado.args -cp . VectorAddKernel 1024
+java @$TORNADOVM_HOME/tornado-argfile -cp . VectorAddKernel 1024
 ```
 
 ## Expected output
 
 Generated CUDA kernel (captured verbatim in
-`results/raw/02-hello-kernel/vectoraddkernel-run.log`):
+`results/raw/02-hello-kernel/vectoraddkernel-run.log`; re-verified on
+TornadoVM 6.0.0 in `results/raw/18-tornadovm-6-migration/01-vectoradd-tornado.log`
+and `01-vectoradd-javaargfile.log`):
 
 ```c
 extern "C" __global__ void vectorAdd(long long *_kernel_context, unsigned char *_constant_region, unsigned char *_local_region, int *_atomics, unsigned char *arg0, unsigned char *arg1, unsigned char *arg2)
@@ -59,7 +60,7 @@ and a profiler JSON block confirming `"BACKEND": "CUDA"`, `"DEVICE": "NVIDIA GeF
 
 Not verified: `jbang` is not installed on this machine (checked 2026-08-19,
 same as [`../00-hello-gpu/README.md`](../00-hello-gpu/README.md)). The
-shape would be the same `jbang -cp ... --java-opts="@../tornado.args"
+shape would be the same `jbang -cp ... --java-opts="@$TORNADOVM_HOME/tornado-argfile"
 VectorAddKernel.java` pattern — do not run it live until it has been tested
 on the pinned environment.
 
