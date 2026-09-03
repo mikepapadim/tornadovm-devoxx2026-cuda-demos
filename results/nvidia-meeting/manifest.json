@@ -1,0 +1,284 @@
+{
+  "schema": "tornadovm-nvidia-meeting/1",
+  "generated_utc": "2026-09-03T23:17:47Z",
+  "rules": [
+    "never aggregate across GPU architectures",
+    "no general TornadoVM-vs-CUDA percentage from one machine",
+    "ncu kernel times are not comparable to nsys or wall-clock",
+    "no CUDA Tile performance claim is made"
+  ],
+  "environment": {
+    "captured_utc": "2026-09-03T23:17:47Z",
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 4090",
+      "compute_capability": "8.9",
+      "memory_total_mib": 24564,
+      "max_sm_clock_mhz": 3105,
+      "max_mem_clock_mhz": 10501,
+      "power_limit_w": 450.0,
+      "persistence_mode": "Enabled"
+    },
+    "driver": "565.57.01",
+    "cuda_toolkit": "12.6.85",
+    "nvrtc": "12.6.85",
+    "nvrtc_supported_archs": [
+      "sm_50",
+      "sm_52",
+      "sm_53",
+      "sm_60",
+      "sm_61",
+      "sm_62",
+      "sm_70",
+      "sm_72",
+      "sm_75",
+      "sm_80",
+      "sm_86",
+      "sm_87",
+      "sm_89",
+      "sm_90"
+    ],
+    "os": "Ubuntu 22.04.5 LTS",
+    "kernel": "6.8.0-58-generic",
+    "jdk": "OpenJDK 25.0.2",
+    "tornadovm_measured": {
+      "distribution": "SDKMAN release 6.0.0-jdk22plus-cuda",
+      "home": "$HOME/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda",
+      "rationale": "pristine, versioned, redistributable; local checkout is dirty and used for source reading only"
+    },
+    "tornadovm_checkout_source_reading_only": {
+      "commit": "5bbe99cb0a40d11c3a30c9661e2cf1a643c7f32d",
+      "branch": "perf/mma-shape-operand-validation",
+      "origin_develop": "e06a2e56fbb0ddb5bef4c6ebbf422594395d5a81",
+      "origin_master": "e06a2e56fbb0ddb5bef4c6ebbf422594395d5a81",
+      "uncommitted_files": [
+        "ornado-drivers/cuda/src/main/java/uk/ac/manchester/tornado/drivers/cuda/graal/lir/CUDALIRStmt.java",
+        "tornado-drivers/cuda/src/main/java/uk/ac/manchester/tornado/drivers/cuda/graal/nodes/CUDAMMAComputeNode.java",
+        "tornado-drivers/cuda/src/main/java/uk/ac/manchester/tornado/drivers/cuda/graal/phases/CUDATensorCoreSupportPhase.java"
+      ],
+      "note": "1 commit behind origin/develop; NOT used for any measurement"
+    },
+    "demo_repo_commit": "f76b01fc67e1fb61c97973388155b3db6428b5ad",
+    "profilers": {
+      "nsight_compute": "2024.3.2.0",
+      "nsight_compute_path": "/opt/nvidia/nsight-compute/2024.3.2/ncu",
+      "nsight_systems": "2024.5.1.113",
+      "note": "the ncu on PATH is 2026.2.1.0 and cannot connect to driver 565.57.01"
+    },
+    "profiling_permission": "RmProfilingAdminOnly=0"
+  },
+  "results": [
+    {
+      "id": "B.alignment-sweep",
+      "task": "B",
+      "status": "measured",
+      "claim": "Sector cost is caused by sub-32-byte base misalignment, not by generated arithmetic",
+      "method": "single compiled CUDA binary; only the base-pointer byte offset varies",
+      "source": "results/nvidia-meeting/AlignmentSweep.cu",
+      "problem_size": "n=4194304 float",
+      "dtype": "float32",
+      "layout": "1D contiguous",
+      "grid_block": "grid=16384, block=256",
+      "warmup": 3,
+      "iterations": 30,
+      "statistic": "median",
+      "correctness": "not applicable (identical kernel; layout probe)",
+      "raw": [
+        "results/nvidia-meeting/alignment-sweep-ncu.csv",
+        "results/nvidia-meeting/alignment-sweep-timing.log"
+      ],
+      "command": "ncu --csv --metrics <sector/dram/time> ./alignment_sweep --counters ; ./alignment_sweep",
+      "values": [
+        {
+          "offset_bytes": 0,
+          "ld_sectors_per_request": 4.0,
+          "st_sectors_per_request": 4.0,
+          "ld_sectors": 524288,
+          "median_us": 11.7
+        },
+        {
+          "offset_bytes": 16,
+          "ld_sectors_per_request": 5.0,
+          "st_sectors_per_request": 5.0,
+          "ld_sectors": 655360,
+          "median_us": 15.0,
+          "note": "TornadoVM FloatArray payload offset"
+        },
+        {
+          "offset_bytes": 32,
+          "ld_sectors_per_request": 4.0,
+          "st_sectors_per_request": 4.0,
+          "ld_sectors": 524288,
+          "median_us": 12.0
+        },
+        {
+          "offset_bytes": 64,
+          "ld_sectors_per_request": 4.0,
+          "st_sectors_per_request": 4.0,
+          "ld_sectors": 524288,
+          "median_us": 12.0
+        },
+        {
+          "offset_bytes": 128,
+          "ld_sectors_per_request": 4.0,
+          "st_sectors_per_request": 4.0,
+          "ld_sectors": 524288,
+          "median_us": 11.7
+        }
+      ],
+      "conclusion": "32-byte (sector) alignment restores 4.00 sectors/request; 128-byte alignment is not required. Layout issue, not codegen.",
+      "architecture": "sm_89"
+    },
+    {
+      "id": "G.tile-inventory",
+      "task": "G",
+      "status": "measured",
+      "claim": "No CUDA Tile path exists on this host at CUDA 12.6.85",
+      "method": "filesystem and symbol inventory; NVRTC runtime arch query",
+      "raw": [
+        "results/nvidia-meeting/tile-feasibility/inventory.txt"
+      ],
+      "command": "find /usr/local/cuda*/include -iname '*tile*'; nm -D libnvrtc.so.12 | grep -i tile; nvrtcGetSupportedArchs",
+      "values": {
+        "toolkit_headers_matching_tile": 0,
+        "toolkit_libs_matching_tile": 0,
+        "nvcc_flags_matching_tile": 0,
+        "libnvrtc_symbols_matching_tile": 0,
+        "nvrtc_max_supported_arch": "sm_90",
+        "nvrtc_exports_relevant": [
+          "nvrtcGetCUBIN",
+          "nvrtcGetPTX",
+          "nvrtcGetNVVM",
+          "nvrtcGetLTOIR"
+        ]
+      },
+      "conclusion": "Tile unavailable on this toolkit. NVRTC exposes NVVM and LTOIR outputs, relevant to the IR-ingestion question.",
+      "architecture": "sm_89"
+    },
+    {
+      "id": "A.codegen-baseline",
+      "task": "A",
+      "status": "measured",
+      "inherited_from": "batches 21/22/27",
+      "claim": "Generated arithmetic is equivalent once layout and specialisation are controlled",
+      "raw": [
+        "results/raw/21-kernel-time-comparison/MANIFEST.md",
+        "results/raw/22-ncu-alignment-counters/MANIFEST.md",
+        "results/raw/27-profiler-metrics/metrics.csv"
+      ],
+      "grid_block": "block=256 both sides (held constant)",
+      "statistic": "mean per-kernel Avg(ns) from nsys cuda_gpu_kern_sum over 3 runs",
+      "values": {
+        "elementwise_ns": {
+          "tornadovm": 13944,
+          "cuda": 10621
+        },
+        "stencil_ns": {
+          "tornadovm": 14322,
+          "cuda": 11546
+        },
+        "polynomial_ns": {
+          "tornadovm": 35236,
+          "cuda": 39926
+        }
+      },
+      "conclusion": "Memory-bound gap attributable to layout (task B); compute-bound advantage to JIT specialisation (task C).",
+      "architecture": "sm_89"
+    },
+    {
+      "id": "D.tensor-core",
+      "task": "D",
+      "status": "measured",
+      "label": "code-generation validation only",
+      "claim": "All five emitter operand combinations produce the expected instruction and correct results",
+      "raw": [
+        "results/raw/23-ncu-tensor-core-counters/MANIFEST.md",
+        "results/raw/26-tensor-core-datatypes/MANIFEST.md"
+      ],
+      "correctness": "CPU reference over same stored values; max abs err 0.00000 over 256 cells",
+      "values": {
+        "gemmBF16": {
+          "hmma": 4,
+          "imma": 0
+        },
+        "gemmInt8": {
+          "hmma": 0,
+          "imma": 2
+        },
+        "gemmFP8E4M3": {
+          "hmma": 2,
+          "imma": 0
+        },
+        "gemmFP8E5M2": {
+          "hmma": 2,
+          "imma": 0
+        },
+        "demo08_mma": {
+          "hmma": 1,
+          "tensor_cycles": 16
+        },
+        "demo08_scalar": {
+          "hmma": 0,
+          "tensor_cycles": 0
+        }
+      },
+      "conclusion": "int8 dispatches to IMMA; BF16 and both FP8 to HMMA. No timing claim: 128-256 elements on one warp.",
+      "architecture": "sm_89"
+    },
+    {
+      "id": "E.host-dispatch",
+      "task": "E",
+      "status": "partial",
+      "claim": "Per-execution CUDA driver overhead is ~8.3 us for a one-kernel graph",
+      "method": "difference two execution counts so fixed start-up cancels",
+      "raw": [
+        "results/raw/25-host-dispatch-breakdown/MANIFEST.md"
+      ],
+      "values": {
+        "per_execution_api_us": 8.3,
+        "cuStreamSynchronize_per_execution": 3,
+        "h2d_24byte_stack_frame_per_launch": 1
+      },
+      "gaps": [
+        "CUDA Graph replay not differenced",
+        "device-buffer reuse across graph nodes not verified from trace"
+      ],
+      "conclusion": "Known upstream: TornadoVM#1028 findings 1 and 2; PR #1022 open, not in 6.0.0.",
+      "architecture": "sm_89"
+    },
+    {
+      "id": "C.jit-specialisation",
+      "task": "C",
+      "status": "partial",
+      "claim": "Compute-bound advantage is JIT specialisation on a runtime argument, not better arithmetic",
+      "raw": [
+        "results/raw/21-kernel-time-comparison/probe-jit-specialisation.log",
+        "results/raw/21-kernel-time-comparison/cuda-sass.log"
+      ],
+      "values": {
+        "tornadovm_ns": 35236,
+        "nvcc_runtime_arg_ns": 39500,
+        "nvcc_template_constant_ns": 34700
+      },
+      "gaps": [
+        "SASS captured for the CUDA side only; TornadoVM's cubin is produced in-process by NVRTC and not written to disk"
+      ],
+      "conclusion": "Given the same compile-time information, nvcc reaches parity (34.7 us vs 35.24 us).",
+      "architecture": "sm_89"
+    },
+    {
+      "id": "F.fused-gemm",
+      "task": "F",
+      "status": "gap",
+      "claim": null,
+      "reason": "demo 12's hand-written CUDA side requires a CUTLASS checkout (CUTLASS_DIR) not vendored in this repo",
+      "partial_raw": [
+        "results/raw/19-cutlass-cudnn-warp-demos/"
+      ],
+      "gaps": [
+        "no counters for demo 12",
+        "cold vs warm compilation time not separated anywhere"
+      ],
+      "architecture": "sm_89"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+=== capture time (UTC) ===
+2026-09-03T23:12:56Z
+
+=== demo repo ===
+commit=f76b01fc67e1fb61c97973388155b3db6428b5ad
+authored=2026-09-03T14:12:02+01:00
+subject=Add a presentation brief indexing every claim to its data file
+dirty:
+?? results/nvidia-meeting/
+
+=== TornadoVM checkout (source reading only; NOT the measurement SDK) ===
+commit=5bbe99cb0a40d11c3a30c9661e2cf1a643c7f32d
+subject=[ci] Don't let a UnicodeEncodeError on a cosmetic log line crash the release SDK build
+branch=perf/mma-shape-operand-validation
+origin/develop=e06a2e56fbb0ddb5bef4c6ebbf422594395d5a81
+origin/master=e06a2e56fbb0ddb5bef4c6ebbf422594395d5a81
+uncommitted-files:
+ M tornado-drivers/cuda/src/main/java/uk/ac/manchester/tornado/drivers/cuda/graal/lir/CUDALIRStmt.java
+ M tornado-drivers/cuda/src/main/java/uk/ac/manchester/tornado/drivers/cuda/graal/nodes/CUDAMMAComputeNode.java
+ M tornado-drivers/cuda/src/main/java/uk/ac/manchester/tornado/drivers/cuda/graal/phases/CUDATensorCoreSupportPhase.java
+
+=== OS / kernel ===
+Ubuntu 22.04.5 LTS
+Linux 6.8.0-58-generic x86_64 GNU/Linux
+
+=== GPU ===
+name, compute_cap, driver_version, memory.total [MiB], clocks.max.sm [MHz], clocks.max.memory [MHz], power.limit [W], persistence_mode
+NVIDIA GeForce RTX 4090, 8.9, 565.57.01, 24564 MiB, 3105 MHz, 10501 MHz, 450.00 W, Enabled
+SM count:
+1
+
+=== CUDA toolkit / NVRTC ===
+Cuda compilation tools, release 12.6, V12.6.85
+Build cuda_12.6.r12.6/compiler.35059454_0
+cuda
+cuda-12.6
+nvrtc:
+/usr/local/cuda/lib64/libnvrtc.so
+/usr/local/cuda/lib64/libnvrtc.so.12
+/usr/local/cuda/lib64/libnvrtc.so.12.6.85
+
+=== profilers ===
+NVIDIA (R) Nsight Compute Command Line Profiler
+Copyright (c) 2018-2024 NVIDIA Corporation
+Version 2024.3.2.0 (build 34861637) (public-release)
+NVIDIA Nsight Systems version 2024.5.1.113-245134619542v0
+
+=== profiling permission ===
+RmProfilingAdminOnly: 0

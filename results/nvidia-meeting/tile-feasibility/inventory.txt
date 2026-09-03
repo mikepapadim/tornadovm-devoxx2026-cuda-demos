@@ -1,0 +1,46 @@
+### CUDA Tile / cuTile feasibility inventory
+host: storm; date: 2026-09-03T23:14:17Z
+
+== toolkit version ==
+Cuda compilation tools, release 12.6, V12.6.85
+Build cuda_12.6.r12.6/compiler.35059454_0
+
+== toolkit headers matching tile ==
+(count: 0)
+
+== toolkit libraries matching tile ==
+(count: 0)
+
+== nvcc flags mentioning tile ==
+(count: 0)
+
+== libnvrtc exported symbols mentioning tile ==
+(count: 0)
+
+== all nvrtc exported API entry points (for reference) ==
+nvrtcAddNameExpression@@libnvrtc.so.12
+nvrtcCompileProgram@@libnvrtc.so.12
+__nvrtcCPEx@@libnvrtc.so.12
+nvrtcCreateProgram@@libnvrtc.so.12
+nvrtcDestroyProgram@@libnvrtc.so.12
+nvrtcGetCUBIN@@libnvrtc.so.12
+nvrtcGetCUBINSize@@libnvrtc.so.12
+nvrtcGetErrorString@@libnvrtc.so.12
+nvrtcGetLoweredName@@libnvrtc.so.12
+nvrtcGetLTOIR@@libnvrtc.so.12
+nvrtcGetLTOIRSize@@libnvrtc.so.12
+nvrtcGetNumSupportedArchs@@libnvrtc.so.12
+nvrtcGetNVVM@@libnvrtc.so.12
+nvrtcGetNVVMSize@@libnvrtc.so.12
+nvrtcGetOptiXIR@@libnvrtc.so.12
+nvrtcGetOptiXIRSize@@libnvrtc.so.12
+nvrtcGetProgramLog@@libnvrtc.so.12
+nvrtcGetProgramLogSize@@libnvrtc.so.12
+nvrtcGetPTX@@libnvrtc.so.12
+nvrtcGetPTXSize@@libnvrtc.so.12
+nvrtcGetSupportedArchs@@libnvrtc.so.12
+nvrtcVersion@@libnvrtc.so.12
+
+== nvrtc supported architectures (runtime query) ==
+nvrtc version: 12.6
+supported archs (14): sm_50, sm_52, sm_53, sm_60, sm_61, sm_62, sm_70, sm_72, sm_75, sm_80, sm_86, sm_87, sm_89, sm_90

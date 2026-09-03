@@ -1,0 +1,43 @@
+==PROF== Connected to process 66978 (/tmp/claude-1005/-home-michalis/32d9a071-8eab-4bd7-9e82-2ba5652d1717/scratchpad/alignment_sweep)
+offset= 0 floats (  0 B) : launched
+offset= 4 floats ( 16 B) : launched
+offset= 8 floats ( 32 B) : launched
+offset=16 floats ( 64 B) : launched
+offset=32 floats (128 B) : launched
+==PROF== Disconnected from process 66978
+"ID","Process ID","Process Name","Host Name","Kernel Name","Context","Stream","Block Size","Grid Size","Device","CC","Section Name","Metric Name","Metric Unit","Metric Value"
+"0","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_read.sum","byte","16,780,032"
+"0","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_write.sum","byte","0"
+"0","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","gpu__time_duration.sum","ns","19,520"
+"0","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","4"
+"0","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_st.ratio","sector/1","4"
+"0","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","524,288"
+"0","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum","sector","524,288"
+"1","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_read.sum","byte","16,779,904"
+"1","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_write.sum","byte","0"
+"1","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","gpu__time_duration.sum","ns","19,520"
+"1","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","5"
+"1","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_st.ratio","sector/1","5"
+"1","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","655,360"
+"1","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum","sector","655,360"
+"2","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_read.sum","byte","16,779,904"
+"2","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_write.sum","byte","0"
+"2","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","gpu__time_duration.sum","ns","19,488"
+"2","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","4"
+"2","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_st.ratio","sector/1","4"
+"2","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","524,288"
+"2","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum","sector","524,288"
+"3","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_read.sum","byte","16,779,904"
+"3","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_write.sum","byte","0"
+"3","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","gpu__time_duration.sum","ns","19,520"
+"3","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","4"
+"3","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_st.ratio","sector/1","4"
+"3","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","524,288"
+"3","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum","sector","524,288"
+"4","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_read.sum","byte","16,780,032"
+"4","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_write.sum","byte","0"
+"4","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","gpu__time_duration.sum","ns","19,488"
+"4","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","4"
+"4","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_st.ratio","sector/1","4"
+"4","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","524,288"
+"4","66978","alignment_sweep","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum","sector","524,288"
