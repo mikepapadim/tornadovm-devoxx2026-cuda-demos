@@ -1,138 +1,144 @@
-# Batch 25 — where demo 14's ~100 µs of host-side dispatch actually goes
+# Batch 25 — demo 14's host-side dispatch cost, itemised
 
 Captured 2026-09-03. RTX 4090 (sm_89), driver 565.57.01, CUDA 12.6.85,
 JDK 25.0.2, TornadoVM 6.0.0-jdk22plus-cuda, Nsight Systems 2024.5.1.
-`demos/14-warp-async-shared`, `4096 1024 20` — 20 executions per kernel,
-40 kernel launches total.
 
-Demo 14's README says the optimised kernel is 26.6x faster on the GPU while
-wall-clock improves only 2.17x, because "~100 µs per execution goes elsewhere".
-That number was never broken down. This batch breaks it down, by tracing the
-CUDA driver API rather than the kernels.
+> **Correction.** The first version of this manifest claimed the ~100 µs of
+> per-execution dispatch cost was ~19 256-byte device-to-host copies per
+> execution. **That was wrong.** It divided a *fixed startup* cost by the
+> execution count. The 256-byte transfers are constant at 512 each way and
+> complete before the first kernel launches. The corrected analysis is below;
+> the real per-execution CUDA API cost is **~8.3 µs**, not 100 µs.
 
-## Method
+## Method — difference two execution counts
 
-`nsys profile --trace=cuda` on both implementations, then
-`nsys stats --report cuda_api_sum` (host-side API call time) alongside
-`cuda_gpu_kern_sum` and the memcpy reports. Transfer-size histograms come from
-the exported SQLite (`transfer-size-histogram.txt`).
+Counting calls in a single trace cannot separate startup from per-execution
+cost. Profiling the *same* workload at two execution counts and differencing
+can: anything constant cancels, and the slope is the true per-execution cost.
 
-Invoke `java` directly, not the `tornado` launcher — under `nsys` the launcher
-resolves a different JDK and fails with `UnsupportedClassVersionError`:
+`DispatchOverhead.java` (in this directory) is the minimal reproducer — one
+task graph, one trivial kernel, one input, one output, executed N times in one
+`TornadoExecutionPlan`:
 
 ```bash
-nsys profile --trace=cuda -o warp14 \
-  $JAVA_HOME/bin/java @$TORNADOVM_HOME/tornado-argfile -cp . \
-  WarpAsyncSharedReduce 4096 1024 20
+javac -cp "$TORNADOVM_HOME/share/java/tornado/*" -d . DispatchOverhead.java
+for e in 10 40 100; do
+  nsys profile --trace=cuda --sample=none --cpuctxsw=none -o e$e \
+    $JAVA_HOME/bin/java @$TORNADOVM_HOME/tornado-argfile -cp . DispatchOverhead 1024 $e
+  nsys stats --report cuda_api_sum --format csv e$e.nsys-rep
+done
 ```
 
-## Result 1 — the kernels are not the problem
+Use `$JAVA_HOME/bin/java` directly — under `nsys` the `tornado` launcher
+resolves a different JDK and dies with `UnsupportedClassVersionError`.
 
-| kernel | TornadoVM | CUDA | |
+## Result 1 — the 256-byte transfers are startup, not per-execution
+
+| | n=1024, 10 exec | n=1024, 40 exec | n=1048576, 10 exec |
 |---|---|---|---|
-| `rowSumNaive` | 105,643 ns | 105,865 ns | equivalent |
-| `rowSumOptimised` | **3,941 ns** | 4,251 ns | TornadoVM **1.08x faster** |
+| 256-byte HtoD | **512** | **512** | **512** |
+| 256-byte DtoH | **512** | **512** | **512** |
+| 24-byte HtoD | 10 | 40 | 10 |
+| payload DtoH | 10 | 40 | 10 |
 
-In steady state over 20 executions, TornadoVM's optimised kernel is *marginally
-faster* than the hand-written CUDA one, despite carrying the #1065 sector
-penalty (batch 24). Under Nsight Compute's cold single-launch conditions the
-ordering reverses (7,360 vs 7,040 ns). Both gaps are small; the honest reading
-is that the two kernels are equivalent and the sector penalty is not the
-dominant term for this kernel.
+**Constant at 512 each way — they scale with neither data size nor execution
+count.** They are also unaffected by `-Dtornado.max.events`
+(32768 / 1024 / 256 all give 512; `repro-transfer-scaling.txt`), which rules out
+the wait-list row sizing of issue #1028's open item 3, despite 512 x 256 B being
+exactly 128 KB.
 
-**So the entire wall-clock gap is on the host side.**
+Timeline confirms it: in the 100-execution trace, **all 1,024 of them complete
+before the first kernel launch**, spread over the first 198 ms of a 262 ms
+start-up. They cost ~4.8 ms of host API time, one time, inside a start-up that
+issue #1028 measures as dominated by NVRTC compilation and `cuMemHostRegister`.
 
-## Result 2 — 1,620 memory-transfer calls versus 41
+**Not a per-execution defect, and small against the start-up it sits in.**
 
-Same 40 kernel launches, same work:
+## Result 2 — the true per-execution cost, minimal reproducer
 
-| | TornadoVM | hand-written CUDA |
+Differencing 10 → 100 executions. Call counts are exactly linear:
+
+| CUDA API | calls @10 | @40 | @100 | per execution | ns per execution |
+|---|---|---|---|---|---|
+| `cuStreamSynchronize` | 1054 | 1144 | 1324 | **3.00** | 2,751 |
+| `cuLaunchKernel` | 10 | 40 | 100 | **1.00** | 2,256 |
+| `cuMemcpyDtoHAsync_v2` | 522 | 552 | 612 | **1.00** | 1,535 |
+| `cuMemcpyHtoDAsync_v2` | 524 | 554 | 614 | **1.00** | 1,232 |
+| `cuEventCreate` | 1568 | 1658 | 1838 | **3.00** | 1,127 |
+| `cuCtxSetCurrent` | 1070 | 1160 | 1340 | **3.00** | 211 |
+| `cuEventRecord` | 1568 | 1658 | 1838 | **3.00** | 179 |
+| `cuEventDestroy_v2` | 1568 | 1658 | 1838 | **3.00** | 128 |
+| `cuStreamIsCapturing` | 1034 | 1064 | 1124 | **1.00** | 36 |
+
+**~9.5 µs of CUDA API time per execution**, of which the single H2D is the
+24-byte kernel argument stack frame — one upload per launch even though it never
+changes.
+
+## Result 3 — demo 14, same method
+
+Differencing 5 → 25 executions per kernel (2 task graphs, so 40 extra
+executions):
+
+| CUDA API | per execution | ns per execution |
 |---|---|---|
-| H2D transfer calls | 812 | **1** |
-| D2H transfer calls | 808 | **40** |
-| total transfer calls | **1,620** (40.5 per execution) | **41** (1.03 per execution) |
-| `cuStreamSynchronize` | 1,656 (41.4 per execution) | 0 |
-| event create/record/destroy | 6,392 (159.8 per execution) | 0 |
-| kernel launches | 40 | 40 |
+| `cuStreamSynchronize` | 3.00 | 54,446 |
+| `cuLaunchKernel` | 1.00 | 2,414 |
+| `cuMemcpyDtoHAsync_v2` | 1.00 | 2,407 |
+| `cuMemcpyHtoDAsync_v2` | 1.00 | 1,654 |
+| `cuEventCreate` | 3.00 | 1,212 |
+| `cuEventRecord` | 3.00 | 382 |
+| `cuCtxSetCurrent` | 3.00 | 249 |
+| `cuStreamIsCapturing` | 1.00 | 29 |
 
-**39.5x more transfer calls for the same work.**
+The 54,446 ns in `cuStreamSynchronize` is **not overhead** — it is the host
+blocking on the kernel. Demo 14's two kernels average
+(105,643 + 3,941) / 2 = 54,792 ns, which matches it to within 0.6%.
 
-## Result 3 — 95% of those transfers are 256 bytes
+**Excluding that genuine device wait, per-execution CUDA API overhead is
+~8.3 µs**, not the ~100 µs previously claimed here.
 
-Transfer-size histogram, TornadoVM:
+## What this does and does not explain
 
-```
-HtoD        256 bytes  x 768        <- 
-HtoD         24 bytes  x 40
-HtoD    4194320 bytes  x 2          <- the actual int8 input
-HtoD      16400 bytes  x 2
-DtoH        256 bytes  x 768        <- 
-DtoH      16400 bytes  x 40         <- the actual output, 1 per execution
-```
+Demo 14's optimised path is ~118 µs of wall-clock per execution against a
+3,941 ns kernel. The CUDA driver API accounts for roughly 8–12 µs of the
+difference. **The remainder is host-side runtime work that does not appear in a
+CUDA-only trace at all**, and attributing it needs JFR rather than `nsys` — the
+approach taken upstream in
+[TornadoVM#1028](https://github.com/beehive-lab/TornadoVM/issues/1028). No
+attribution for it is claimed here.
 
-and hand-written CUDA, for the identical workload:
+## Relationship to upstream
 
-```
-HtoD    4194304 bytes  x 1
-DtoH      16384 bytes  x 40
-```
+Everything measured in Results 2 and 3 as *per-execution* is already diagnosed
+in [#1028](https://github.com/beehive-lab/TornadoVM/issues/1028):
 
-**1,536 of TornadoVM's 1,620 transfers (94.8%) are exactly 256 bytes** — 768 in
-each direction, roughly 19 round-trips of 256 bytes per execution, for a task
-graph with one kernel and one real output. The payload they carry is ~4.9 KB per
-execution against the 16,400-byte real output.
+- the per-launch 24-byte stack-frame upload is that issue's finding **#1**
+- the 3 `cuStreamSynchronize` per execution is its finding **#2**
 
-## Result 4 — that is precisely the missing ~100 µs
-
-`cuMemcpyDtoHAsync_v2`, host-side API time:
-
-```
-Total 3,999,593 ns over 808 calls, avg 4,950 ns
-3,999,593 ns / 40 executions = 99,990 ns = 100.0 us per execution
-```
-
-**100.0 µs per execution, against the ~100 µs demo 14's README attributes to
-dispatch.** The match is exact.
-
-And it is per-call overhead, not bandwidth — the same copies on the device side:
-
-| | host-side API | device-side |
-|---|---|---|
-| D2H, average per call | **4,950 ns** | **872.7 ns** |
-
-Each async D2H costs ~5 µs of host time to *issue* and under 1 µs to actually
-perform. Issuing ~20 of them per execution is the cost.
-
-Two supporting terms, on top of the above (these overlap in wall-clock and must
-not be summed with it): `cuStreamSynchronize` 1,656 calls / 3.95 ms, and 6,392
-event create/record/destroy calls / 1.38 ms — about 160 event operations per
-execution.
-
-`cuLaunchKernel` is *not* the problem: 40 calls, 156,173 ns total, median
-2,362 ns.
-
-## What this means
-
-The gap between demo 14's 26.6x kernel speedup and its 2.17x wall-clock is
-**not** kernel quality, and not one large data transfer. It is roughly 40 small
-CUDA API round-trips per execution — ~19 of them 256-byte device-to-host copies
-that appear to be internal control or status traffic — each costing ~5 µs of
-host time to issue.
-
-This is also why `withCUDAGraph()` is worth 8–10x on TornadoVM and only 1.28x on
-raw CUDA: graph capture removes exactly this per-execution API traffic.
-
-**Candidate for a fourth upstream issue**, distinct from #1063/#1064/#1065: the
-256-byte control transfers scale with executions rather than with data, so they
-are pure per-dispatch overhead. Not yet filed — it needs a minimal reproducer
-and a read of what those buffers carry before it is worth reporting.
+Both are addressed by PR
+[#1022](https://github.com/beehive-lab/TornadoVM/pull/1022), which was **still
+open and unmerged** when TornadoVM 6.0.0 was released on 2026-09-02. So this
+batch is not a new defect; it is independent confirmation, on a released SDK
+rather than on `develop`, that the per-execution dispatch sequence #1028
+describes ships in 6.0.0.
 
 ## Files
 
 | File | Contents |
 |---|---|
-| `warp14.nsys-rep`, `cuda14.nsys-rep` | raw Nsight Systems traces |
-| `warp14-cuda_api_sum.csv`, `cuda14-…` | host-side CUDA API call time |
-| `*-cuda_gpu_kern_sum.csv` | kernel times |
-| `*-cuda_gpu_mem_time_sum.csv`, `*-mem_size_sum.csv` | transfer time and volume |
+| `DispatchOverhead.java` | minimal reproducer |
+| `repro-transfer-scaling.txt` | 256-byte counts vs n, executions, `max.events` |
+| `repro-api-executions-{10,40,100}.csv` | reproducer API sums |
+| `demo14-api-executions-{5,25}.csv` | demo 14 API sums |
+| `warp14.nsys-rep`, `cuda14.nsys-rep` | raw traces (20 executions) |
+| `warp14-*.csv`, `cuda14-*.csv` | API, kernel and transfer reports |
 | `transfer-size-histogram.txt` | per-size transfer counts, both implementations |
+
+## Still true from the original analysis
+
+The comparison against hand-written CUDA stands: for the same 40 launches
+TornadoVM makes 1,620 transfer calls against CUDA's 41, and 94.8% of those are
+the 256-byte start-up transfers. Hand-written CUDA does 1 H2D and 40 D2H, with
+no events and no stream synchronisation. And the kernel measurements are
+unaffected — in this steady-state trace TornadoVM's optimised kernel is
+**1.08x faster** than the hand-written one (3,941 vs 4,251 ns).

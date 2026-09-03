@@ -138,42 +138,47 @@ and within TornadoVM the optimisation is a **2.3x increase in instructions for
 an order-of-magnitude speedup**, because it moves 25.6x fewer sectors. Data:
 `results/raw/24-ncu-demo14-counters/`.
 
-### 4. The host-side dispatch cost is large, separable, and now itemised
+### 4. The host-side dispatch cost is large and separable
 
 Demo 14's TornadoVM *kernel* is 26.6x faster than its naive variant; its
-wall-clock is only 2.17x faster. Tracing the CUDA driver API rather than the
-kernels says exactly where the difference goes. Same 40 kernel launches, same
-work:
+wall-clock is only 2.17x faster. Differencing two execution counts under `nsys`
+(so fixed start-up cancels and the slope is the real per-execution cost) gives
+the driver-side breakdown:
 
-| | TornadoVM | hand-written CUDA |
+| CUDA API | per execution | ns per execution |
 |---|---|---|
-| memory-transfer calls | **1,620** (40.5/execution) | **41** (1.03/execution) |
-| `cuStreamSynchronize` | 1,656 | 0 |
-| event create/record/destroy | 6,392 | 0 |
-| kernel launches | 40 | 40 |
+| `cuStreamSynchronize` | 3 | 54,446 |
+| `cuLaunchKernel` | 1 | 2,414 |
+| `cuMemcpyDtoHAsync_v2` | 1 | 2,407 |
+| `cuMemcpyHtoDAsync_v2` | 1 | 1,654 |
+| `cuEventCreate` / `Record` / `SetCurrent` | 3 each | 1,843 combined |
 
-**1,536 of those 1,620 transfers — 94.8% — are exactly 256 bytes**, 768 in each
-direction, for a task graph with one kernel and one real output. And the cost
-lands precisely on the missing time:
+The 54,446 ns of `cuStreamSynchronize` is genuine device wait, not overhead —
+the two kernels average 54,792 ns. **Excluding it, per-execution CUDA API
+overhead is ~8.3 µs**, and two items in it are already-diagnosed upstream
+issues: the single H2D is a 24-byte kernel-argument stack frame re-uploaded on
+every launch although it never changes, and three `cuStreamSynchronize` where
+one would do.
 
-```
-cuMemcpyDtoHAsync_v2   total 3,999,593 ns / 40 executions = 100.0 us per execution
-```
+Call volume against hand-written CUDA is still the striking number — 1,620
+memory-transfer calls versus 41 for the same 40 launches, plus 1,656 stream
+synchronisations and 6,392 event calls against zero of each. But 94.8% of
+TornadoVM's transfers are 256-byte **start-up** traffic, constant regardless of
+data size or execution count and complete before the first kernel launches, so
+they are not a per-execution cost.
 
-It is per-call overhead, not bandwidth — each async D2H costs ~4,950 ns of
-*host* time to issue and ~873 ns on the device. `cuLaunchKernel` is not the
-problem (40 calls, median 2,362 ns).
+The CUDA driver API therefore explains only ~8–12 µs of demo 14's ~114 µs
+per-execution wall-clock gap. **The remainder is host-side runtime work that a
+CUDA-only trace cannot see.** Characterising it needs JFR, and that work has
+been done upstream — see
+[TornadoVM#1028](https://github.com/beehive-lab/TornadoVM/issues/1028), which
+measures the same dispatch sequence, attributes the remaining host time, and
+carries open PRs against it. Nothing is claimed here beyond the driver-side
+numbers above. Data: `results/raw/25-host-dispatch-breakdown/`, including a
+minimal reproducer.
 
-So the dispatch cost is roughly 40 small API round-trips per execution, ~19 of
-them 256-byte device-to-host copies that scale with executions rather than with
-data — i.e. control traffic, not payload. This is also why `withCUDAGraph()`
-buys TornadoVM 8–10x while buying raw CUDA 1.28x: graph capture removes exactly
-this. Data: `results/raw/25-host-dispatch-breakdown/`.
-
-**This is a runtime problem, not a code-generation problem**, and it is the
-largest single number in this repo. It is called out separately so it is not
-confused with the code-generation results above — and because it is the part
-most likely to be worth fixing first.
+**This is a runtime problem, not a code-generation problem**, and it is called
+out separately so it is not confused with the code-generation results above.
 
 Worth noting for calibration: in that same steady-state trace TornadoVM's
 optimised kernel is **1.08x faster** than the hand-written CUDA one (3,941 vs

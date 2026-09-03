@@ -158,7 +158,7 @@ RTX 4090, driver 565.57.01, CUDA 12.6.85, JDK 25.0.2. Not general claims.
 | 15-kernel-time-comparison | **Hardware counters** | every TornadoVM global access costs **5.00 sectors/request** vs CUDA's **4.00** — #1065, measured not inferred | `22-ncu-alignment-counters/` |
 | 14-warp-async-shared | **Hardware counters** | naive 32.00 sectors/request (3.12% bytes used) → optimised 5.00; **25.6x fewer sectors, 20,760x fewer bank conflicts, 2.3x _more_ instructions** | `24-ncu-demo14-counters/` |
 | 14-warp-async-shared | #1065 in a 3rd kernel class | optimised: TornadoVM 163,840 load sectors vs CUDA's 131,072 — **1.250x**, int8 via `cp.async` | `24-ncu-demo14-counters/` |
-| 14-warp-async-shared | **Host dispatch, itemised** | **1,620** transfer calls vs CUDA's **41** for the same 40 launches; 94.8% are exactly 256 bytes; `cuMemcpyDtoHAsync` host API = **100.0 µs/execution** | `25-host-dispatch-breakdown/` |
+| 14-warp-async-shared | **Host dispatch, itemised** | ~**8.3 µs/execution** of CUDA driver overhead (excl. genuine kernel wait); **1,620** transfer calls vs CUDA's **41**, but 94.8% of those are one-time start-up | `25-host-dispatch-breakdown/` |
 | 11-integrated-showcase | Mode comparison vs. baseline | concurrent 1.08–1.12x, graph 5.37–5.61x, combined 5.66–5.69x | `11-showcase-*.log` |
 | 12-cutlass-fused-epilogue | Fused vs. unfused epilogue, GPU kernel time | fused 16547 ns vs. unfused 16106 + 2125 = 18231 ns per execution (~9% less GPU time, one fewer kernel) | `19-…/12-cutlass-nsys-kernsum.csv` |
 | 13-cudnn-jit-convblock | Correctness of a 4-stage cuDNN+JIT graph | max abs err `0.000000` vs. the CPU reference | `19-…/13-cudnn-tornado.log` |
@@ -247,10 +247,11 @@ than hiding:
 1. **The gap is host-side dispatch overhead, not kernel quality.** Demo 14's
    TornadoVM *kernel* is 26.6x faster than its naive kernel; its wall-clock is
    only 2.17x faster, because ~100 µs per execution goes elsewhere. That ~100 µs
-   is now itemised: for the same 40 launches TornadoVM makes **1,620 memory-transfer
-   calls against hand-written CUDA's 41**, and **94.8% of them are exactly 256
-   bytes**. `cuMemcpyDtoHAsync` host-side API time alone is **100.0 µs per
-   execution** — per-call overhead, not bandwidth. Demo 08's MMA kernel is
+   breaks down as ~8.3 µs of per-execution CUDA driver overhead (measured by
+   differencing execution counts, so start-up cancels) plus host-side runtime
+   work a CUDA-only trace cannot see. For the same 40 launches TornadoVM makes
+   **1,620 memory-transfer calls against hand-written CUDA's 41**, though 94.8%
+   of those are one-time start-up traffic. Demo 08's MMA kernel is
    confirmed by hardware counter, not just generated code: TornadoVM and
    hand-written CUDA each execute **exactly 1 HMMA instruction and 16
    tensor-pipe cycles**, and the scalar control executes **0**.

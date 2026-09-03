@@ -1,0 +1,26 @@
+DispatchOverhead.java -- transfer counts by (n, executions)
+256-byte transfers are CONSTANT at 512 each way: they scale with neither.
+
+== n=1024   executions=10
+   HtoD         24 bytes x 10
+   HtoD        256 bytes x 512
+   HtoD       4112 bytes x 2
+   DtoH        256 bytes x 512
+   DtoH       4112 bytes x 10
+== n=1024   executions=40
+   HtoD         24 bytes x 40
+   HtoD        256 bytes x 512
+   HtoD       4112 bytes x 2
+   DtoH        256 bytes x 512
+   DtoH       4112 bytes x 40
+== n=1048576 executions=10
+   HtoD         24 bytes x 10
+   HtoD        256 bytes x 512
+   HtoD    4194320 bytes x 2
+   DtoH        256 bytes x 512
+   DtoH    4194320 bytes x 10
+
+-Dtornado.max.events sweep (n=1024, executions=10): 256-byte count is unaffected
+   max.events=32768  256B HtoD x512, DtoH x512
+   max.events=1024   256B HtoD x512, DtoH x512
+   max.events=256    256B HtoD x512, DtoH x512
