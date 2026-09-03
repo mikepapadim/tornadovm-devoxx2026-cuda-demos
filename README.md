@@ -7,6 +7,39 @@ CUDA-runtime behaviour (graph capture/replay, multi-stream concurrency) from
 
 No source build required — TornadoVM 6.0.0 installs from SDKMAN in one command.
 
+## Start here: how does the generated code actually compare?
+
+If you only read one demo, read
+**[15 — kernel-time comparison](demos/15-kernel-time-comparison/)**. Every other
+timed demo here reports wall-clock, which on TornadoVM is dominated by host-side
+dispatch. Demo 15 isolates **kernel time alone** across three kernels with
+deliberately different bottlenecks, and root-causes both directions of the
+result rather than leaving them as "the compiler is better/worse":
+
+| Kernel | TornadoVM | CUDA | |
+|---|---|---|---|
+| `elementwise` (memory-bound) | 13.94 µs | 10.62 µs | CUDA 1.31x faster |
+| `stencil` (memory-bound) | 14.32 µs | 11.55 µs | CUDA 1.24x faster |
+| `polynomial` (compute-bound) | 35.24 µs | 39.93 µs | **TornadoVM 1.13x faster** |
+
+- The memory-bound gap is a **data-layout bug, not code generation**: `FloatArray`'s
+  16-byte header misaligns every warp-wide access. Nsight Compute counts **5.00
+  sectors per request against hand-written CUDA's 4.00** — identical to the same
+  CUDA kernel forced to a 4-float offset. Filed as
+  [TornadoVM#1065](https://github.com/beehive-lab/TornadoVM/issues/1065).
+- The compute-bound win is **JIT specialisation**, not better arithmetic: `degree`
+  is a runtime value, so Graal unrolls on it. Give nvcc the same value as a
+  template parameter and it lands at 34.7 µs — equal.
+
+**Controlling for both, the generated arithmetic is equivalent.** Demo 08 makes
+the same point at the instruction level: TornadoVM and hand-written CUDA each
+execute exactly **1 HMMA instruction and 16 tensor-pipe cycles** for the same
+`M16N8K16` tile, by hardware counter.
+
+Reading this as a compiler engineer? **[`docs/NVIDIA-BRIEF.md`](docs/NVIDIA-BRIEF.md)**
+is the start-here page: the compilation pipeline, what is measured and how, and
+where the remaining gaps are.
+
 ## Quick install
 
 ```bash
@@ -101,7 +134,7 @@ profiler, not the wall clock, is what shows the effect at all.
 | [12](demos/12-cutlass-fused-epilogue/) | `CutlassFusedEpilogue.java` | CUTLASS fused epilogue (GEMM+bias+ReLU in one kernel) vs. GEMM + a separate JIT pass | `tornado --classpath . CutlassFusedEpilogue` |
 | [13](demos/13-cudnn-jit-convblock/) | `CuDnnConvBlockHybrid.java` | CNN block alternating vendor and JIT kernels: JIT scale → cuDNN conv2d → JIT bias → cuDNN relu | `tornado --classpath . CuDnnConvBlockHybrid` |
 | [14](demos/14-warp-async-shared/) | `WarpAsyncSharedReduce.java` | `cp.async` + shared memory + `__shfl_down_sync` from Java, verified in the generated CUDA | `tornado --classpath . WarpAsyncSharedReduce` |
-| [15](demos/15-kernel-time-comparison/) | `KernelTimeComparison.java` | **Kernel time only**, TornadoVM vs hand-written CUDA over 3 kernels, measured with `nsys` | `tornado --classpath . KernelTimeComparison` |
+| [15](demos/15-kernel-time-comparison/) | `KernelTimeComparison.java` | **Start here.** Kernel time only, TornadoVM vs hand-written CUDA over 3 kernels; both deltas root-caused with `nsys` + Nsight Compute counters | `tornado --classpath . KernelTimeComparison` |
 
 Every demo also runs as `java @$TORNADOVM_HOME/tornado-argfile -cp . <MainClass> [args]`.
 
@@ -121,6 +154,8 @@ RTX 4090, driver 565.57.01, CUDA 12.6.85, JDK 25.0.2. Not general claims.
 | 06-cuda-streams | Concurrency benefit | sequential 2174–2176 µs vs. concurrent 936–960 µs → **~2.3x** | `06-streams-*.log` |
 | 07-cuda-graph-benefit | Graph replay speedup | nograph 292–364 µs vs. graph 36 µs → **8.1x / 10.0x** across the two run paths | `07-graphbenefit-*.log` |
 | 08-tensor-core-mma | Generated code | exactly **1** `mma.sync.aligned.m16n8k16` PTX instruction; 0 in the scalar reference | `08-mma-printkernel.log` |
+| 08-tensor-core-mma | **Hardware counters** | **1** HMMA instruction + **16** tensor-pipe cycles, identical to hand-written CUDA; **0** in the scalar reference | `23-ncu-tensor-core-counters/` |
+| 15-kernel-time-comparison | **Hardware counters** | every TornadoVM global access costs **5.00 sectors/request** vs CUDA's **4.00** — #1065, measured not inferred | `22-ncu-alignment-counters/` |
 | 11-integrated-showcase | Mode comparison vs. baseline | concurrent 1.08–1.12x, graph 5.37–5.61x, combined 5.66–5.69x | `11-showcase-*.log` |
 | 12-cutlass-fused-epilogue | Fused vs. unfused epilogue, GPU kernel time | fused 16547 ns vs. unfused 16106 + 2125 = 18231 ns per execution (~9% less GPU time, one fewer kernel) | `19-…/12-cutlass-nsys-kernsum.csv` |
 | 13-cudnn-jit-convblock | Correctness of a 4-stage cuDNN+JIT graph | max abs err `0.000000` vs. the CPU reference | `19-…/13-cudnn-tornado.log` |
@@ -307,6 +342,7 @@ Track B on 6.0.0 is open work, not a result — nothing here claims it now works
 - `scripts/run-all-demos.sh` — compiles and runs all 12 demos both ways. Needs a GPU.
 - `scripts/run-all-cuda.sh` — builds and runs the hand-written CUDA equivalents. Needs a GPU and the CUDA toolkit, but no JDK.
 - `scripts/verify.sh` — validates deliverables and cited evidence paths. No GPU needed.
+- `docs/NVIDIA-BRIEF.md` — start-here page for compiler engineers: lowering path, measurements, ceiling.
 - `docs/` — talk drafts, runbook, claims ledger, supporting evidence documents.
 - `results/raw/` — immutable raw outputs. `results/failures/` — captured failures.
 - `env/versions.env` — the pinned environment. `STATE.md` — durable study state.
@@ -315,3 +351,10 @@ Track B on 6.0.0 is open work, not a result — nothing here claims it now works
 
 **CUDA only.** No OpenCL, Metal, the legacy PTX backend, Babylon, or another
 GPU framework anywhere in this repo (`scripts/verify.sh` enforces this).
+
+## License
+
+[Apache License 2.0](LICENSE). The demo sources here are original and do not
+copy TornadoVM source; Apache-2.0 matches TornadoVM's own primary license.
+TornadoVM itself is separately licensed (Apache-2.0, GPLv2-CE and MIT across
+its components) and is installed from SDKMAN, not vendored into this repo.
