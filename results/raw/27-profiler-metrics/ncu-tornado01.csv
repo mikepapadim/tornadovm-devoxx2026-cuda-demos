@@ -1,0 +1,16 @@
+==PROF== Connected to process 57584 (/home/michalis/.sdkman/candidates/java/25.0.2-open/bin/java)
+Result is correct
+Enable the profiler with: -Dtornado.profiler=True
+Total time: 0 ns
+==PROF== Disconnected from process 57584
+"ID","Process ID","Process Name","Host Name","Kernel Name","Context","Stream","Block Size","Grid Size","Device","CC","Section Name","Metric Name","Metric Unit","Metric Value"
+"0","57584","java","127.0.0.1","vectorAdd","1","14","(1024, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_read.sum","byte","134,238,336"
+"0","57584","java","127.0.0.1","vectorAdd","1","14","(1024, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_write.sum","byte","40,488,576"
+"0","57584","java","127.0.0.1","vectorAdd","1","14","(1024, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__throughput.avg.pct_of_peak_sustained_elapsed","%","94.63"
+"0","57584","java","127.0.0.1","vectorAdd","1","14","(1024, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","gpu__time_duration.sum","ns","187,840"
+"0","57584","java","127.0.0.1","vectorAdd","1","14","(1024, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","5"
+"0","57584","java","127.0.0.1","vectorAdd","1","14","(1024, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_st.ratio","sector/1","5"
+"0","57584","java","127.0.0.1","vectorAdd","1","14","(1024, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","5,242,880"
+"0","57584","java","127.0.0.1","vectorAdd","1","14","(1024, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum","sector","2,621,440"
+"0","57584","java","127.0.0.1","vectorAdd","1","14","(1024, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","55.66"
+"0","57584","java","127.0.0.1","vectorAdd","1","14","(1024, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","smsp__inst_executed.sum","inst","33,554,432"

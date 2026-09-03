@@ -130,6 +130,7 @@ RTX 4090, driver 565.57.01, CUDA 12.6.85, JDK 25.0.2. Not general claims.
 | 08-tensor-core-mma | **Hardware counters** | **1** HMMA instruction + **16** tensor-pipe cycles, identical to hand-written CUDA; **0** in the scalar reference | `23-ncu-tensor-core-counters/` |
 | 16-tensor-core-datatypes | All 4 remaining operand types | BF16, int8, FP8 e4m3, FP8 e5m2 each **PASSED, max abs err 0.00000** over 256 cells, Java and CUDA alike | `26-tensor-core-datatypes/` |
 | 16-tensor-core-datatypes | **Hardware counters** | counters match emitted PTX exactly; **int8 dispatches to IMMA**, BF16 and both FP8 formats to **HMMA** | `26-tensor-core-datatypes/` |
+| 01-first-cuda-kernel | Bandwidth-bound comparison | TornadoVM issues **4x the instructions** at 63% of CUDA's occupancy, yet is only **3.4% slower** — both at ~95% of peak DRAM bandwidth | `27-profiler-metrics/` |
 | 15-kernel-time-comparison | **Hardware counters** | every TornadoVM global access costs **5.00 sectors/request** vs CUDA's **4.00** — #1065, measured not inferred | `22-ncu-alignment-counters/` |
 | 14-warp-async-shared | **Hardware counters** | naive 32.00 sectors/request (3.12% bytes used) → optimised 5.00; **25.6x fewer sectors, 20,760x fewer bank conflicts, 2.3x _more_ instructions** | `24-ncu-demo14-counters/` |
 | 14-warp-async-shared | #1065 in a 3rd kernel class | optimised: TornadoVM 163,840 load sectors vs CUDA's 131,072 — **1.250x**, int8 via `cp.async` | `24-ncu-demo14-counters/` |
@@ -332,6 +333,7 @@ Track B on 6.0.0 is open work, not a result — nothing here claims it now works
 - `scripts/verify.sh` — validates deliverables and cited evidence paths. No GPU needed.
 - `docs/NVIDIA-BRIEF.md` — start-here page for compiler engineers: lowering path, measurements, ceiling.
 - `docs/compilation-pipeline.md` — the CUDA pipeline class by class, and where a second emitter would plug in.
+- `docs/PROFILER-METRICS.md` — every profiler measurement as chart-ready CSV, with what each metric means.
 - `docs/` — talk drafts, runbook, claims ledger, supporting evidence documents.
 - `results/raw/` — immutable raw outputs. `results/failures/` — captured failures.
 - `env/versions.env` — the pinned environment. `STATE.md` — durable study state.

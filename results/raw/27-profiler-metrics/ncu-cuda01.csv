@@ -1,0 +1,15 @@
+==PROF== Connected to process 57656 (/tmp/claude-1005/-home-michalis/32d9a071-8eab-4bd7-9e82-2ba5652d1717/scratchpad/d01/cuda01)
+Result is correct
+Kernel time: 280848192 ns
+==PROF== Disconnected from process 57656
+"ID","Process ID","Process Name","Host Name","Kernel Name","Context","Stream","Block Size","Grid Size","Device","CC","Section Name","Metric Name","Metric Unit","Metric Value"
+"0","57656","cuda01","127.0.0.1","vectorAdd(const float *, const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_read.sum","byte","134,220,416"
+"0","57656","cuda01","127.0.0.1","vectorAdd(const float *, const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_write.sum","byte","36,324,096"
+"0","57656","cuda01","127.0.0.1","vectorAdd(const float *, const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","8.9","Command line profiler metrics","dram__throughput.avg.pct_of_peak_sustained_elapsed","%","95.46"
+"0","57656","cuda01","127.0.0.1","vectorAdd(const float *, const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","8.9","Command line profiler metrics","gpu__time_duration.sum","ns","181,760"
+"0","57656","cuda01","127.0.0.1","vectorAdd(const float *, const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","4"
+"0","57656","cuda01","127.0.0.1","vectorAdd(const float *, const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_st.ratio","sector/1","4"
+"0","57656","cuda01","127.0.0.1","vectorAdd(const float *, const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","4,194,304"
+"0","57656","cuda01","127.0.0.1","vectorAdd(const float *, const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum","sector","2,097,152"
+"0","57656","cuda01","127.0.0.1","vectorAdd(const float *, const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","88.72"
+"0","57656","cuda01","127.0.0.1","vectorAdd(const float *, const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","8.9","Command line profiler metrics","smsp__inst_executed.sum","inst","8,388,608"
