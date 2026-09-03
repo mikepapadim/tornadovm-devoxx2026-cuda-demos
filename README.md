@@ -8,35 +8,6 @@ a line of JNI.
 
 No source build required — TornadoVM 6.0.0 installs from SDKMAN in one command.
 
-## Start here: how does the generated code actually compare?
-
-If you only read one demo, read
-**[15 — kernel-time comparison](demos/15-kernel-time-comparison/)**. Every other
-timed demo here reports wall-clock, which on TornadoVM is dominated by host-side
-dispatch. Demo 15 isolates **kernel time alone** across three kernels with
-deliberately different bottlenecks, and root-causes both directions of the
-result rather than leaving them as "the compiler is better/worse":
-
-| Kernel | TornadoVM | CUDA | |
-|---|---|---|---|
-| `elementwise` (memory-bound) | 13.94 µs | 10.62 µs | CUDA 1.31x faster |
-| `stencil` (memory-bound) | 14.32 µs | 11.55 µs | CUDA 1.24x faster |
-| `polynomial` (compute-bound) | 35.24 µs | 39.93 µs | **TornadoVM 1.13x faster** |
-
-- The memory-bound gap is a **data-layout bug, not code generation**: `FloatArray`'s
-  16-byte header misaligns every warp-wide access. Nsight Compute counts **5.00
-  sectors per request against hand-written CUDA's 4.00** — identical to the same
-  CUDA kernel forced to a 4-float offset. Filed as
-  [TornadoVM#1065](https://github.com/beehive-lab/TornadoVM/issues/1065).
-- The compute-bound win is **JIT specialisation**, not better arithmetic: `degree`
-  is a runtime value, so Graal unrolls on it. Give nvcc the same value as a
-  template parameter and it lands at 34.7 µs — equal.
-
-**Controlling for both, the generated arithmetic is equivalent.** Demo 08 makes
-the same point at the instruction level: TornadoVM and hand-written CUDA each
-execute exactly **1 HMMA instruction and 16 tensor-pipe cycles** for the same
-`M16N8K16` tile, by hardware counter.
-
 Reading this as a compiler engineer? **[`docs/NVIDIA-BRIEF.md`](docs/NVIDIA-BRIEF.md)**
 is the start-here page: the compilation pipeline, what is measured and how, and
 where the remaining gaps are.
