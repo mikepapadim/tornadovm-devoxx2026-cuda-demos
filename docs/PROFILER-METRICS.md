@@ -110,10 +110,45 @@ kernel; it only shows up in time when the kernel is bandwidth-bound.
 | `dram_throughput_pct_peak` | **94.63%** | **95.46%** | 0.99 |
 | `kernel_time_ncu` | 187,840 ns | 181,760 ns | **1.034** |
 
-TornadoVM issues **4× the instructions**, moves 1.25× the sectors, and reaches
-only 63% of CUDA's occupancy — and is **3.5% slower**, because both kernels sit
-at ~95% of peak DRAM bandwidth. A good slide for "measure the bottleneck, not
-the instruction count."
+TornadoVM issues **4× the instructions** at 63% of CUDA's occupancy and is only
+**3.4% slower**, because both kernels sit at ~95% of peak DRAM bandwidth. Once
+the bus is saturated, neither instruction count nor spare occupancy can buy
+time back.
+
+**The 3.4% is fully accounted for, and none of it is the instructions.** Time on
+a bandwidth-bound kernel is `bytes / bandwidth`:
+
+| | TornadoVM | CUDA | ratio |
+|---|---|---|---|
+| total DRAM bytes | 174,726,912 | 170,544,512 | 1.0245 |
+| achieved bandwidth | 94.63% | 95.46% | 0.9913 |
+| **predicted time ratio** | | | **1.0335** |
+| **measured time ratio** | 187,840 ns | 181,760 ns | **1.0335** |
+
+Exact to four decimals. So the gap is ~2.4% from moving more DRAM bytes and
+~0.9% from marginally lower achieved bandwidth. The 4× instruction count
+contributes nothing measurable — it hides under memory latency.
+
+The extra DRAM bytes are on the **write** side (40.5 MB vs 36.3 MB). That is
+consistent with the misaligned stores, since a partially covered 32-byte sector
+has to be read before it can be written back; it is not proven here, and both
+figures sit below the 67 MB the kernel actually writes, because write-back is
+not fully captured inside the kernel window.
+
+> **Do not read the occupancy row as a code-generation result.** It is a launch
+> configuration difference. TornadoVM ran **1024 threads per block**, the CUDA
+> version **256**. On sm_89 an SM holds 1536 threads, so a 1024-thread block
+> tiles only once — 32 of 48 warps, a 66.7% ceiling before register pressure is
+> even considered (`launch__occupancy_limit_warps` = 1). At 256 threads, six
+> blocks fit: 1536 threads, 48 warps, a 100% ceiling
+> (`launch__occupancy_limit_warps` = 6). Register use is close (24 vs 16 per
+> thread) and is not the limiter.
+>
+> Demo 15 pins both sides to 256 deliberately so that only code generation
+> differs. **Demo 01 does not**, so use it for the bandwidth-saturation point,
+> not for an occupancy comparison. The useful observation is the other one:
+> 55.84% achieved occupancy is already enough memory-level parallelism to reach
+> 94.6% of peak bandwidth.
 
 ### 4. Tensor cores: every operand type — demo 16
 

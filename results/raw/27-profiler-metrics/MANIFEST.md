@@ -25,9 +25,33 @@ comparisons, because it is cleanly DRAM-bandwidth-bound on both sides.
 | `dram_throughput_pct_peak` | 94.63% | 95.46% | 0.99 |
 | `kernel_time_ncu` | 187,840 ns | 181,760 ns | **1.034** |
 
-TornadoVM issues **4x the instructions**, moves 1.25x the sectors and reaches
-63% of CUDA's occupancy — and lands **3.4% slower**, because both kernels are
-at ~95% of peak DRAM bandwidth. Nothing else can matter while that is true.
+TornadoVM issues **4x the instructions** and lands **3.4% slower**, because
+both kernels are at ~95% of peak DRAM bandwidth. Nothing else can matter while
+that is true.
+
+The 3.4% closes exactly. On a bandwidth-bound kernel, time is `bytes / bandwidth`:
+
+| | TornadoVM | CUDA | ratio |
+|---|---|---|---|
+| total DRAM bytes | 174,726,912 | 170,544,512 | 1.0245 |
+| achieved bandwidth | 94.63% | 95.46% | 0.9913 |
+| **predicted time ratio** | | | **1.0335** |
+| **measured time ratio** | 187,840 ns | 181,760 ns | **1.0335** |
+
+~2.4% from extra DRAM bytes, ~0.9% from lower achieved bandwidth, and nothing
+from the 4x instruction count. The extra bytes are on the write side and are
+consistent with the misaligned stores forcing partial-sector read-modify-write,
+though that is not proven here — both write figures are below the 67 MB the
+kernel writes, since write-back is not fully captured in the kernel window.
+
+**The occupancy row is a launch-configuration artefact, not a codegen result.**
+TornadoVM ran 1024 threads/block against the CUDA version's 256. On sm_89 an SM
+holds 1536 threads, so a 1024-thread block tiles once — 32 of 48 warps, a 66.7%
+ceiling (`launch__occupancy_limit_warps` = 1) before registers matter (24 vs 16
+per thread). At 256 threads six blocks fit: 48 warps, 100% ceiling
+(`launch__occupancy_limit_warps` = 6). Demo 15 pins both sides to 256 so only
+code generation differs; **demo 01 does not**. Use it for the
+bandwidth-saturation point, not for an occupancy comparison.
 
 This is also a **fourth kernel class** showing the exact 1.25x sector penalty
 of [#1065](https://github.com/beehive-lab/TornadoVM/issues/1065), after demos

@@ -1,0 +1,13 @@
+==PROF== Connected to process 58543 (/home/michalis/.sdkman/candidates/java/25.0.2-open/bin/java)
+Result is correct
+Enable the profiler with: -Dtornado.profiler=True
+Total time: 0 ns
+==PROF== Disconnected from process 58543
+"ID","Process ID","Process Name","Host Name","Kernel Name","Context","Stream","Block Size","Grid Size","Device","CC","Section Name","Metric Name","Metric Unit","Metric Value"
+"0","58543","java","127.0.0.1","vectorAdd","1","14","(1024, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","launch__block_size","","1,024"
+"0","58543","java","127.0.0.1","vectorAdd","1","14","(1024, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","launch__grid_size","","16,384"
+"0","58543","java","127.0.0.1","vectorAdd","1","14","(1024, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","launch__occupancy_limit_blocks","block","24"
+"0","58543","java","127.0.0.1","vectorAdd","1","14","(1024, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","launch__occupancy_limit_registers","block","2"
+"0","58543","java","127.0.0.1","vectorAdd","1","14","(1024, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","launch__occupancy_limit_warps","block","1"
+"0","58543","java","127.0.0.1","vectorAdd","1","14","(1024, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","launch__registers_per_thread","register/thread","24"
+"0","58543","java","127.0.0.1","vectorAdd","1","14","(1024, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","55.55"
