@@ -355,6 +355,7 @@ Track B on 6.0.0 is open work, not a result — nothing here claims it now works
 - `scripts/run-all-cuda.sh` — builds and runs the hand-written CUDA equivalents. Needs a GPU and the CUDA toolkit, but no JDK.
 - `scripts/verify.sh` — validates deliverables and cited evidence paths. No GPU needed.
 - `docs/NVIDIA-BRIEF.md` — start-here page for compiler engineers: lowering path, measurements, ceiling.
+- `docs/compilation-pipeline.md` — the CUDA pipeline class by class, and where a second emitter would plug in.
 - `docs/` — talk drafts, runbook, claims ledger, supporting evidence documents.
 - `results/raw/` — immutable raw outputs. `results/failures/` — captured failures.
 - `env/versions.env` — the pinned environment. `STATE.md` — durable study state.

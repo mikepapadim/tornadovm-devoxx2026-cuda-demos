@@ -18,23 +18,40 @@ Graal as a front end and emits **CUDA C**, then hands that to NVRTC:
 ```
 Java bytecode
   -> Graal IR                     (via JVMCI)
-  -> TornadoVM Graal phases       (parallelisation, memory-space assignment)
-  -> CUDA C source                uk.ac.manchester.tornado.drivers.cuda.graal.asm.CUDAAssembler
-  -> PTX                          NVRTC, at runtime
-  -> cubin                        ptxas, via the CUDA driver API
+  -> TornadoVM Graal phases       CUDAHighTier / CUDAMidTier / CUDALowTier
+                                  (parallelisation, memory-space assignment,
+                                   task specialisation on runtime arg values)
+  -> CUDA C source                ...cuda.graal.asm.CUDAAssembler
+                                  (inline PTX asm for MMA / cp.async)
+  -> cubin                        NVRTC at runtime, via the Java FFM API:
+                                  nvrtcGetCUBIN, --gpu-architecture=sm_<cc>
+     (fallback) -> PTX            nvrtcGetPTX, --gpu-architecture=compute_<cc>,
+                                  then JIT-compiled by the driver at load
+  -> cuModuleLoadDataEx -> cuLaunchKernel
 ```
 
-`CUDAProgram` (`uk.ac.manchester.tornado.drivers.cuda.CUDAProgram`) drives the
-NVRTC compile and module load. Both class names are current in the 6.0.0 SDK
-this repo pins.
+Worth being precise about the last step, since it is easy to assume otherwise:
+the common path is **CUDA C straight to cubin in a single NVRTC call** — there
+is no separate `ptxas` invocation. PTX is the fallback for when the installed
+toolkit cannot target the GPU directly.
+
+NVRTC is reached through `java.lang.foreign` (Panama FFM), not JNI:
+`...cuda.ffm.NVRTCAPI` binds `nvrtcCompileProgram`, `nvrtcGetCUBIN`,
+`nvrtcGetPTX` and `nvrtcGetSupportedArchs` with `SymbolLookup` and
+`MemorySegment`. `...cuda.ffm.CUDACompiler` drives compile-and-load.
+
+A full class-by-class walk of this pipeline, and an analysis of where a second
+emitter would plug in, is in [`compilation-pipeline.md`](compilation-pipeline.md).
 
 Two consequences worth naming, because they shape everything below:
 
-- **The IR handed to NVIDIA is C, not an IR.** Anything TornadoVM wants that C
+- **What is handed to NVIDIA is C, not an IR.** Anything TornadoVM wants that C
   cannot express — MMA, `cp.async` — is emitted as **inline PTX `asm volatile`**
   in that generated C. That works, and demo 08 and demo 14 both prove it works,
   but it means the interesting instruction selection is happening as string
-  emission rather than in a lowering pass with a type system behind it.
+  emission in a LIR statement rather than in a lowering pass with a type system
+  behind it. It is also why the reachable tensor-core instruction set is bounded
+  by two enums (below) rather than by the hardware.
 - **Compilation happens when the argument values are known.** That is a real
   and measurable advantage over AOT nvcc, quantified below.
 
