@@ -273,6 +273,7 @@ and reported upstream with minimal test cases:
 | [beehive-lab/TornadoVM#1064](https://github.com/beehive-lab/TornadoVM/issues/1064) | CUDA lowering crashes with `Node implementing Lowerable not handled: NewInstance` when a ternary precedes an allocation; `Math.max` compiles | demo 12's JIT `biasRelu` uses `Math.max`, not `v > 0 ? v : 0` |
 
 | [beehive-lab/TornadoVM#1065](https://github.com/beehive-lab/TornadoVM/issues/1065) | `FloatArray`'s 16-byte header misaligns warp-coalesced accesses, costing ~25–30% on bandwidth-bound kernels | quantified in demo 15 and measured with Nsight Compute counters (5.00 vs 4.00 sectors/request) |
+| [beehive-lab/TornadoVM#1067](https://github.com/beehive-lab/TornadoVM/issues/1067) | A `KernelContext` kernel that fails to compile silently falls back to a sequential run that returns **wrong results**; `execute()` raises nothing and the process exits 0 | found while adding demo 16's shape validation; minimal reproducer filed |
 
 One further problem was **observed but not filed**, because it could not be
 reduced to a reliable reproducer: an `@Parallel` reduction over a `ByteArray`
@@ -334,6 +335,7 @@ Track B on 6.0.0 is open work, not a result — nothing here claims it now works
 - `docs/NVIDIA-BRIEF.md` — start-here page for compiler engineers: lowering path, measurements, ceiling.
 - `docs/compilation-pipeline.md` — the CUDA pipeline class by class, and where a second emitter would plug in.
 - `docs/PROFILER-METRICS.md` — every profiler measurement as chart-ready CSV, with what each metric means.
+- `docs/PRESENTATION-BRIEF.md` — the argument in order, each claim with its data file and suggested chart.
 - `docs/` — talk drafts, runbook, claims ledger, supporting evidence documents.
 - `results/raw/` — immutable raw outputs. `results/failures/` — captured failures.
 - `env/versions.env` — the pinned environment. `STATE.md` — durable study state.
