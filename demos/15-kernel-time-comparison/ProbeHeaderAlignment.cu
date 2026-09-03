@@ -10,10 +10,22 @@
 //
 // Build & run:
 //   nvcc -arch=sm_89 -o probe_alignment ProbeHeaderAlignment.cu && ./probe_alignment
+//
+// `./probe_alignment --counters` launches each kernel exactly once per offset
+// and skips the timing loop, so Nsight Compute can attribute the effect to the
+// memory-transaction counters directly instead of inferring it from wall time:
+//   /opt/nvidia/nsight-compute/2024.3.2/ncu \
+//     --metrics l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum,\
+//   l1tex__t_requests_pipe_lsu_mem_global_op_ld.sum,\
+//   l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio,\
+//   l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_st.ratio,\
+//   dram__bytes_read.sum,dram__bytes_write.sum \
+//     ./probe_alignment --counters
 #include <cstdio>
 #include <vector>
 #include <algorithm>
 #include <chrono>
+#include <string>
 #define CK(c) do{cudaError_t e=(c); if(e){printf("err %s\n",cudaGetErrorString(e));exit(1);} }while(0)
 
 __global__ void elementwise(const float *in, float *out, int n) {
@@ -29,7 +41,8 @@ __global__ void stencil(const float *in, float *out, int n) {
     }
 }
 
-int main() {
+int main(int argc, char **argv) {
+    const bool counters = argc > 1 && std::string(argv[1]) == "--counters";
     const int n = 1 << 22, BLOCK = 256, reps = 30;
     float *a, *b;
     CK(cudaMalloc(&a, (size_t)(n + 8) * sizeof(float)));
@@ -39,6 +52,14 @@ int main() {
     for (int off = 0; off <= 4; off += 4) {
         for (int k = 0; k < 2; k++) {
             const char *name = k == 0 ? "elementwise" : "stencil";
+            if (counters) {
+                // One launch per configuration: ncu profiles it, nothing else.
+                k == 0 ? elementwise<<<blocks,BLOCK>>>(a+off, b+off, n)
+                       : stencil<<<blocks,BLOCK>>>(a+off, b+off, n);
+                CK(cudaDeviceSynchronize());
+                printf("%-12s offset=%d floats : launched\n", name, off);
+                continue;
+            }
             // warm-up
             for (int r = 0; r < 3; r++)
                 k == 0 ? elementwise<<<blocks,BLOCK>>>(a+off, b+off, n)

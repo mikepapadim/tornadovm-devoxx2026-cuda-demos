@@ -1,0 +1,15 @@
+==PROF== Connected to process 5535 (/tmp/claude-1005/-home-michalis/32d9a071-8eab-4bd7-9e82-2ba5652d1717/scratchpad/d08/cuda08)
+Single-tile Tensor Core (MMA) demo: C[16x8] = A[16x16] * B[16x8], fp16 -> f32
+  [scalar (no MMA)] validation PASSED (max abs err 0.00000, 0/128 cells out of tol)
+  [mma.sync (Tensor Core)] validation PASSED (max abs err 0.00000, 0/128 cells out of tol)
+Result is correct
+==PROF== Disconnected from process 5535
+"ID","Process ID","Process Name","Host Name","Kernel Name","Context","Stream","Block Size","Grid Size","Device","CC","Section Name","Metric Name","Metric Unit","Metric Value"
+"0","5535","cuda08","127.0.0.1","gemmScalarFp16(const __half *, const __half *, float *)","1","7","(16, 8, 1)","(1, 1, 1)","0","8.9","Command line profiler metrics","gpu__time_duration.sum","ns","2,592"
+"0","5535","cuda08","127.0.0.1","gemmScalarFp16(const __half *, const __half *, float *)","1","7","(16, 8, 1)","(1, 1, 1)","0","8.9","Command line profiler metrics","sm__inst_executed_pipe_tensor_op_hmma.sum","inst","0"
+"0","5535","cuda08","127.0.0.1","gemmScalarFp16(const __half *, const __half *, float *)","1","7","(16, 8, 1)","(1, 1, 1)","0","8.9","Command line profiler metrics","sm__pipe_tensor_op_hmma_cycles_active.sum","cycle","0"
+"0","5535","cuda08","127.0.0.1","gemmScalarFp16(const __half *, const __half *, float *)","1","7","(16, 8, 1)","(1, 1, 1)","0","8.9","Command line profiler metrics","smsp__inst_executed.sum","inst","400"
+"1","5535","cuda08","127.0.0.1","gemmMMASingleTile(const __half *, const __half *, float *)","1","7","(32, 1, 1)","(1, 1, 1)","0","8.9","Command line profiler metrics","gpu__time_duration.sum","ns","2,016"
+"1","5535","cuda08","127.0.0.1","gemmMMASingleTile(const __half *, const __half *, float *)","1","7","(32, 1, 1)","(1, 1, 1)","0","8.9","Command line profiler metrics","sm__inst_executed_pipe_tensor_op_hmma.sum","inst","1"
+"1","5535","cuda08","127.0.0.1","gemmMMASingleTile(const __half *, const __half *, float *)","1","7","(32, 1, 1)","(1, 1, 1)","0","8.9","Command line profiler metrics","sm__pipe_tensor_op_hmma_cycles_active.sum","cycle","16"
+"1","5535","cuda08","127.0.0.1","gemmMMASingleTile(const __half *, const __half *, float *)","1","7","(32, 1, 1)","(1, 1, 1)","0","8.9","Command line profiler metrics","smsp__inst_executed.sum","inst","40"

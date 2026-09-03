@@ -124,10 +124,45 @@ ul_7 =  ul_0 + l_6;
 f_8  =  *(( float *) ul_7);
 ```
 
-A warp reads 32 x 4 = 128 bytes. Offsetting by 16 bytes makes every warp-wide
-access straddle a 128-byte boundary, so each one costs two memory transactions
-instead of one. [`ProbeHeaderAlignment.cu`](ProbeHeaderAlignment.cu) runs the
-*identical* CUDA kernel at offset 0 and offset 4 floats:
+A warp reads 32 x 4 = 128 bytes, which is exactly **4 sectors** of 32 bytes when
+aligned. Offsetting by 16 bytes makes every warp-wide access straddle a fifth
+sector: **5 transactions for the same data, 1.25x.**
+
+That is measurable directly, and Nsight Compute measures it. Every global access
+in all three TornadoVM kernels reports 5.00 sectors per request, against 4.00
+for the hand-written CUDA:
+
+```bash
+/opt/nvidia/nsight-compute/2024.3.2/ncu --csv \
+  --metrics l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio,\
+l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum \
+  <binary>
+```
+
+| Kernel | metric | CUDA | TornadoVM | CUDA forced to offset 4 |
+|---|---|---|---|---|
+| `elementwise` | load sectors | 524,288 | **655,360** | 655,360 |
+| `elementwise` | store sectors | 524,288 | **655,360** | 655,360 |
+| `polynomial` | load sectors | 524,288 | **655,360** | — |
+| `stencil` | load sectors | 1,835,006 | **1,966,080** | 1,966,080 |
+| `stencil` | store sectors | 524,288 | **655,360** | 655,360 |
+
+The TornadoVM counts are **identical to the deliberately misaligned CUDA
+kernel** — exactly, not approximately. The mechanism is measured, not inferred.
+
+Two things fall out that the timing alone could not show:
+
+- **`polynomial` pays the same 1.25x penalty and it costs nothing.** It is the
+  kernel where TornadoVM *wins*. Being compute-bound, it hides the extra
+  transactions behind the FMA chain. So the header offset is in every kernel
+  TornadoVM generates; it only becomes visible in time when the kernel is
+  bandwidth-bound.
+- **DRAM traffic is unchanged** (~16.78 MB read on both sides, within 0.03%).
+  The cost is extra 32-byte sector transactions inside the cache hierarchy, not
+  extra memory traffic.
+
+For the wall-clock consequence, [`ProbeHeaderAlignment.cu`](ProbeHeaderAlignment.cu)
+runs the *identical* CUDA kernel at offset 0 and offset 4 floats:
 
 ```bash
 nvcc -arch=sm_89 -o probe_alignment ProbeHeaderAlignment.cu && ./probe_alignment
@@ -145,6 +180,14 @@ implementations. **The header offset accounts for essentially the whole
 memory-bound gap.** It is a data-layout property, not a code-generation one, and
 padding the payload to a 128-byte boundary would recover it. Reported upstream —
 see the repo README's "Upstream issues filed" section.
+
+Sector counts are the right evidence for the mechanism, but they are not a
+linear predictor of time: `stencil`'s total sectors rise 1.111x against a
+measured 1.24x. Use the counters for *why*, the timing loop for *how much*.
+Kernel durations reported under `ncu` itself are not comparable to either —
+single cold launches put all four probe configurations at ~19.5 µs.
+
+Full data: `results/raw/22-ncu-alignment-counters/`.
 
 ### Compute-bound: TornadoVM JIT-specialises on the runtime value
 

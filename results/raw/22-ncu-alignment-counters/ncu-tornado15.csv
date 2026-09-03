@@ -1,0 +1,61 @@
+==PROF== Connected to process 4777 (/home/michalis/.sdkman/candidates/java/25.0.2-open/bin/java)
+Kernel-time comparison: n=4194304, polynomial degree=256, 2 executions
+  block size 256 (identical to the CUDA version)
+  kernels: elementwise (memory-bound) -> polynomial (compute-bound) -> stencil (memory-bound)
+  NOTE: the wall-clock below includes host dispatch and transfers.
+        Compare kernel time with nsys -- see this demo's README.
+
+first execution (JIT compile): 618029 us
+steady-state median wall-clock (n=1): 340335 us
+validation PASSED (max abs err 0.0000001, 0/4194304 elements out of tol)
+Result is correct
+==PROF== Disconnected from process 4777
+"ID","Process ID","Process Name","Host Name","Kernel Name","Context","Stream","Block Size","Grid Size","Device","CC","Section Name","Metric Name","Metric Unit","Metric Value"
+"0","4777","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_read.sum","byte","16,780,288"
+"0","4777","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_write.sum","byte","0"
+"0","4777","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","5"
+"0","4777","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_st.ratio","sector/1","5"
+"0","4777","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_requests_pipe_lsu_mem_global_op_ld.sum","","131,072"
+"0","4777","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_requests_pipe_lsu_mem_global_op_st.sum","","131,072"
+"0","4777","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","655,360"
+"0","4777","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum","sector","655,360"
+"1","4777","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_read.sum","byte","16,784,256"
+"1","4777","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_write.sum","byte","0"
+"1","4777","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","5"
+"1","4777","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_st.ratio","sector/1","5"
+"1","4777","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_requests_pipe_lsu_mem_global_op_ld.sum","","131,072"
+"1","4777","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_requests_pipe_lsu_mem_global_op_st.sum","","131,072"
+"1","4777","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","655,360"
+"1","4777","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum","sector","655,360"
+"2","4777","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_read.sum","byte","16,780,928"
+"2","4777","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_write.sum","byte","256"
+"2","4777","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","5"
+"2","4777","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_st.ratio","sector/1","5"
+"2","4777","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_requests_pipe_lsu_mem_global_op_ld.sum","","393,216"
+"2","4777","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_requests_pipe_lsu_mem_global_op_st.sum","","131,072"
+"2","4777","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","1,966,080"
+"2","4777","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum","sector","655,360"
+"3","4777","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_read.sum","byte","16,780,672"
+"3","4777","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_write.sum","byte","0"
+"3","4777","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","5"
+"3","4777","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_st.ratio","sector/1","5"
+"3","4777","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_requests_pipe_lsu_mem_global_op_ld.sum","","131,072"
+"3","4777","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_requests_pipe_lsu_mem_global_op_st.sum","","131,072"
+"3","4777","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","655,360"
+"3","4777","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum","sector","655,360"
+"4","4777","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_read.sum","byte","16,784,768"
+"4","4777","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_write.sum","byte","0"
+"4","4777","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","5"
+"4","4777","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_st.ratio","sector/1","5"
+"4","4777","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_requests_pipe_lsu_mem_global_op_ld.sum","","131,072"
+"4","4777","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_requests_pipe_lsu_mem_global_op_st.sum","","131,072"
+"4","4777","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","655,360"
+"4","4777","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum","sector","655,360"
+"5","4777","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_read.sum","byte","16,781,312"
+"5","4777","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_write.sum","byte","896"
+"5","4777","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","5"
+"5","4777","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_st.ratio","sector/1","5"
+"5","4777","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_requests_pipe_lsu_mem_global_op_ld.sum","","393,216"
+"5","4777","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_requests_pipe_lsu_mem_global_op_st.sum","","131,072"
+"5","4777","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","1,966,080"
+"5","4777","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum","sector","655,360"

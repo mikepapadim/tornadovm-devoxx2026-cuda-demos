@@ -94,19 +94,34 @@ pin (logs unmodified in `results/raw/08-tensor-core-mma/`):
   compiled from the *same run* contains **zero** occurrences of `mma.sync`
   anywhere in its body — a direct source-backed comparison from one
   invocation, not an inference from timing.
-- **Nsight Compute hardware-counter evidence: blocked**, not fabricated.
-  `ncu` on `PATH` resolves to Nsight Compute `2026.2.1.0`, which cannot
-  connect to this driver (`565.57.01`) at all; the matching older install
-  (`2024.3.2`) connects but is refused with `ERR_NVGPUCTRPERM` (GPU
-  performance-counter access is admin-only on this driver, and no
-  passwordless `sudo` is available in this unattended run). Full repro
-  commands, exact errors, and the fix for a future invocation with counter
-  access are recorded in `results/failures/08-nsight-compute-permission.md`.
-  Per this task's own acceptance criterion ("profiler **or**
-  generated-code evidence"), the generated-code evidence above is
-  sufficient on its own to support the Tensor-Core-accelerated claim for
-  this kernel; no performance number is claimed from the Nsight Compute
-  path since it was never obtained.
+- **Nsight Compute hardware-counter evidence** (captured 2026-09-03, log
+  `results/raw/23-ncu-tensor-core-counters/`). This was blocked for a long
+  time — `ncu` on `PATH` resolves to `2026.2.1.0`, which cannot connect to
+  this driver (`565.57.01`) at all, and the matching `2024.3.2` install was
+  refused with `ERR_NVGPUCTRPERM`. Both causes are diagnosed and fixed in
+  `results/failures/08-nsight-compute-permission.md`. The counters now
+  confirm the generated-code evidence above at the hardware level:
+
+  | | `..._pipe_tensor_op_hmma.sum` | tensor-pipe cycles | total inst |
+  |---|---|---|---|
+  | TornadoVM `gemmScalarFp16` | **0** | **0** | 628 |
+  | TornadoVM `gemmMMASingleTile` | **1** | **16** | 183 |
+  | CUDA `gemmScalarFp16` | **0** | **0** | 400 |
+  | CUDA `gemmMMASingleTile` | **1** | **16** | 40 |
+
+  ```bash
+  /opt/nvidia/nsight-compute/2024.3.2/ncu --target-processes all \
+    --metrics sm__inst_executed_pipe_tensor_op_hmma.sum,sm__pipe_tensor_op_hmma_cycles_active.sum \
+    java @$TORNADOVM_HOME/tornado-argfile -cp . TensorCoreMMA
+  ```
+
+  The tensor-core work is **identical on both sides** — one HMMA, 16 active
+  tensor-pipe cycles — and the scalar control touches the tensor pipe zero
+  times. The honest delta is elsewhere: TornadoVM issues 183 instructions
+  around that one HMMA against hand-written CUDA's 40, i.e. the gap is in
+  scalar index arithmetic and fragment staging, not in tensor-core selection
+  or fragment layout. (Note: the metric names carrying a `_v2` suffix are
+  not accepted by the `2024.3.2` install; use the unsuffixed names above.)
 - No speedup claim is made for this single-tile demo: 128 output elements
   is far too small a workload to be anything but launch/dispatch-bound, so
   a scalar-vs-MMA wall-clock comparison at this size would not measure the

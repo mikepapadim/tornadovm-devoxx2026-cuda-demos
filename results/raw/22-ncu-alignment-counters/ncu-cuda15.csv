@@ -1,0 +1,37 @@
+==PROF== Connected to process 4744 (/tmp/claude-1005/-home-michalis/32d9a071-8eab-4bd7-9e82-2ba5652d1717/scratchpad/d15/cuda15)
+Kernel-time comparison: n=4194304, polynomial degree=256, 2 executions
+  block size 256 (identical to the TornadoVM version)
+  kernels: elementwise (memory-bound) -> polynomial (compute-bound) -> stencil (memory-bound)
+  NOTE: the wall-clock below includes host dispatch and transfers.
+        Compare kernel time with nsys -- see this demo's README.
+
+first execution: 430444 us
+steady-state median wall-clock (n=1): 1344 us
+validation PASSED (max abs err 0.0000001, 0/4194304 elements out of tol)
+Result is correct
+==PROF== Disconnected from process 4744
+"ID","Process ID","Process Name","Host Name","Kernel Name","Context","Stream","Block Size","Grid Size","Device","CC","Section Name","Metric Name","Metric Unit","Metric Value"
+"0","4744","cuda15","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_read.sum","byte","16,779,904"
+"0","4744","cuda15","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_write.sum","byte","0"
+"0","4744","cuda15","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","4"
+"0","4744","cuda15","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_st.ratio","sector/1","4"
+"0","4744","cuda15","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_requests_pipe_lsu_mem_global_op_ld.sum","","131,072"
+"0","4744","cuda15","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_requests_pipe_lsu_mem_global_op_st.sum","","131,072"
+"0","4744","cuda15","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","524,288"
+"0","4744","cuda15","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum","sector","524,288"
+"1","4744","cuda15","127.0.0.1","polynomial(const float *, float *, int, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_read.sum","byte","16,781,056"
+"1","4744","cuda15","127.0.0.1","polynomial(const float *, float *, int, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_write.sum","byte","0"
+"1","4744","cuda15","127.0.0.1","polynomial(const float *, float *, int, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","4"
+"1","4744","cuda15","127.0.0.1","polynomial(const float *, float *, int, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_st.ratio","sector/1","4"
+"1","4744","cuda15","127.0.0.1","polynomial(const float *, float *, int, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_requests_pipe_lsu_mem_global_op_ld.sum","","131,072"
+"1","4744","cuda15","127.0.0.1","polynomial(const float *, float *, int, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_requests_pipe_lsu_mem_global_op_st.sum","","131,072"
+"1","4744","cuda15","127.0.0.1","polynomial(const float *, float *, int, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","524,288"
+"1","4744","cuda15","127.0.0.1","polynomial(const float *, float *, int, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum","sector","524,288"
+"2","4744","cuda15","127.0.0.1","stencil(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_read.sum","byte","16,780,160"
+"2","4744","cuda15","127.0.0.1","stencil(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_write.sum","byte","0"
+"2","4744","cuda15","127.0.0.1","stencil(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","4.67"
+"2","4744","cuda15","127.0.0.1","stencil(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_st.ratio","sector/1","4"
+"2","4744","cuda15","127.0.0.1","stencil(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_requests_pipe_lsu_mem_global_op_ld.sum","","393,216"
+"2","4744","cuda15","127.0.0.1","stencil(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_requests_pipe_lsu_mem_global_op_st.sum","","131,072"
+"2","4744","cuda15","127.0.0.1","stencil(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","1,835,006"
+"2","4744","cuda15","127.0.0.1","stencil(const float *, float *, int)","1","7","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum","sector","524,288"

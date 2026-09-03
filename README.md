@@ -135,10 +135,15 @@ rose from 6.47–7.02x to 8.08–10.00x, and demo 06's concurrency benefit becam
 unambiguous (~2.3x). Demo 11's `concurrent` mode remains launch-overhead-bound
 and only marginally faster (1.08–1.12x), unchanged in character from 5.2.1.
 
-**Still blocked, system-wide:** Nsight Compute (`ncu`) hardware counters —
-`ERR_NVGPUCTRPERM`, `NVreg_RestrictProfilingToAdminUsers=1`, no passwordless
-sudo on this machine. Not a TornadoVM limitation.
-`results/failures/08-nsight-compute-permission.md`.
+**Previously blocked, now resolved (2026-09-03):** Nsight Compute (`ncu`)
+hardware counters. Two independent causes — the `ncu` on `PATH` resolves to
+`2026.2.1.0`, which cannot connect to this driver at all (use
+`/opt/nvidia/nsight-compute/2024.3.2/ncu`), and `ERR_NVGPUCTRPERM` from
+`NVreg_RestrictProfilingToAdminUsers=1`, fixed via `modprobe.d` and a reboot.
+Neither was a TornadoVM limitation. Diagnosis and fix:
+`results/failures/08-nsight-compute-permission.md`. Counter measurements this
+unblocked: `results/raw/22-ncu-alignment-counters/` (#1065) and
+`results/raw/23-ncu-tensor-core-counters/` (demo 08 Tensor Core).
 
 ## CUDA equivalents
 
@@ -185,9 +190,12 @@ Both differences were attributed to a specific cause with a standalone probe,
 rather than left as "the compiler is better/worse":
 
 - The memory-bound gap is **entirely** TornadoVM's 16-byte `FloatArray` header,
-  which misaligns warp-coalesced 128-byte accesses. Running the *identical* CUDA
-  kernel at a 4-float offset reproduces it (1.28x / 1.27x vs the measured
-  1.31x / 1.24x). Filed as
+  which misaligns warp-coalesced 128-byte accesses. Nsight Compute measures it
+  on the generated kernels directly: every global load and store reports **5.00
+  sectors per request against hand-written CUDA's 4.00**, a count identical to
+  the same CUDA kernel deliberately run at a 4-float offset. Running that
+  offset kernel also reproduces the wall-clock ratio (1.28x / 1.27x vs the
+  measured 1.31x / 1.24x). Filed as
   [#1065](https://github.com/beehive-lab/TornadoVM/issues/1065).
 - The compute-bound win is **entirely** JIT specialisation: `degree` is a task
   argument, so Graal unrolls the FMA chain on its actual value. Give nvcc the
@@ -200,8 +208,10 @@ than hiding:
 
 1. **The gap is host-side dispatch overhead, not kernel quality.** Demo 14's
    TornadoVM *kernel* is 26.6x faster than its naive kernel; its wall-clock is
-   only 2.17x faster, because ~100 µs per execution goes elsewhere. Demo 08
-   shows both versions emitting exactly one tensor-core instruction.
+   only 2.17x faster, because ~100 µs per execution goes elsewhere. Demo 08's
+   MMA kernel is confirmed by hardware counter, not just generated code:
+   TornadoVM and hand-written CUDA each execute **exactly 1 HMMA instruction
+   and 16 tensor-pipe cycles**, and the scalar control executes **0**.
 2. **That is why `withCUDAGraph()` is the highest-leverage call in the API.**
    CUDA graphs remove host dispatch cost. Raw CUDA has little to remove, so
    graphs buy it 1.28x — and on demo 11's small workload they actually cost it
@@ -242,7 +252,7 @@ and reported upstream with minimal test cases:
 | [beehive-lab/TornadoVM#1063](https://github.com/beehive-lab/TornadoVM/issues/1063) | `CuDnn.sdpaForward` launches no kernel and silently returns an all-zero result — the SDK's own `BenchmarkSdpa` fails, and Nsight Systems confirms zero cuDNN kernels are launched | demo 13 uses `cudnnConv2d`/`cudnnRelu` instead of SDPA; do not demo SDPA live |
 | [beehive-lab/TornadoVM#1064](https://github.com/beehive-lab/TornadoVM/issues/1064) | CUDA lowering crashes with `Node implementing Lowerable not handled: NewInstance` when a ternary precedes an allocation; `Math.max` compiles | demo 12's JIT `biasRelu` uses `Math.max`, not `v > 0 ? v : 0` |
 
-| [beehive-lab/TornadoVM#1065](https://github.com/beehive-lab/TornadoVM/issues/1065) | `FloatArray`'s 16-byte header misaligns warp-coalesced accesses, costing ~25–30% on bandwidth-bound kernels | quantified and attributed in demo 15 |
+| [beehive-lab/TornadoVM#1065](https://github.com/beehive-lab/TornadoVM/issues/1065) | `FloatArray`'s 16-byte header misaligns warp-coalesced accesses, costing ~25–30% on bandwidth-bound kernels | quantified in demo 15 and measured with Nsight Compute counters (5.00 vs 4.00 sectors/request) |
 
 One further problem was **observed but not filed**, because it could not be
 reduced to a reliable reproducer: an `@Parallel` reduction over a `ByteArray`

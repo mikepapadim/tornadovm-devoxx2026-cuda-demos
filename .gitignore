@@ -4,3 +4,6 @@ auto/logs/
 
 # Maven build output for demos with their own pom.xml.
 target/
+
+# Internal prep notes for the NVIDIA sync — not for the public repo.
+.claude/

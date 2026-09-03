@@ -1,6 +1,13 @@
-# Blocked — Nsight Compute (`ncu`) hardware counter access denied
+# RESOLVED (2026-09-03) — Nsight Compute (`ncu`) hardware counter access denied
 
 Date: 2026-08-20. Task: `auto/tasks/08.md`.
+**Resolved 2026-09-03.** Both blockers below were real and independent; the fix
+for each is in "Resolution" at the end. The measurement this document was
+written to record is now captured in
+`results/raw/23-ncu-tensor-core-counters/`, and the same unblocking produced
+`results/raw/22-ncu-alignment-counters/`. The analysis below is kept because
+the diagnosis — in particular that the "stub libcuda.so" message is a version
+mismatch, not a library-path problem — is what made the fix findable.
 
 ## What was attempted
 
@@ -109,3 +116,42 @@ performance numbers alone.
   that resolves to `2026.2.1.0` which cannot connect to this machine's
   driver at all — a separate, more fundamental blocker than the permission
   error).
+
+
+## Resolution (2026-09-03)
+
+Both blockers were fixed, in the order they were diagnosed.
+
+**Blocker 1 — wrong `ncu`.** `/usr/local/cuda/bin/ncu` selects `2026.2.1.0`,
+which cannot connect to driver `565.57.01` at all. Its error message
+("failed to connect to the CUDA driver (stub libcuda.so on path?)") is
+misleading: `LD_LIBRARY_PATH` was empty and `libcuda.so.1` resolved correctly
+to `/lib/x86_64-linux-gnu/libcuda.so.1` throughout. No library-path change was
+ever needed. **Fix: invoke `/opt/nvidia/nsight-compute/2024.3.2/ncu` by
+absolute path.**
+
+**Blocker 2 — counter permission.** `RmProfilingAdminOnly: 1` in
+`/proc/driver/nvidia/params` → `ERR_NVGPUCTRPERM`. Fixed system-wide:
+
+```bash
+echo 'options nvidia NVreg_RestrictProfilingToAdminUsers=0' \
+  | sudo tee /etc/modprobe.d/nvidia-profiling.conf
+sudo update-initramfs -u
+sudo reboot
+```
+
+Verified after reboot — `RmProfilingAdminOnly: 0`. This required an
+interactive `sudo` password (`sudo -n true` still reports a password is
+required), which is why the original autonomous run could not do it.
+
+```
+$ /opt/nvidia/nsight-compute/2024.3.2/ncu --metrics smsp__cycles_elapsed.avg ./01-first-cuda-kernel
+==PROF== Connected to process 3931
+  vectorAdd(const float *, const float *, float *, int) ... CC 8.9
+    smsp__cycles_elapsed.avg    cycle    5,028.50
+```
+
+**Note for a fresh machine:** the metric names in the "Next action" command
+above use the `_v2` suffix, which `2024.3.2` does not accept. The working
+names on this install are `sm__inst_executed_pipe_tensor_op_hmma.sum` and
+`sm__pipe_tensor_op_hmma_cycles_active.sum` (no suffix).

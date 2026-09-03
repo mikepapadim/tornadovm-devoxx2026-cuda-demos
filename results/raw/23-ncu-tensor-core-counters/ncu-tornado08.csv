@@ -1,0 +1,15 @@
+==PROF== Connected to process 5461 (/home/michalis/.sdkman/candidates/java/25.0.2-open/bin/java)
+Single-tile Tensor Core (MMA) demo: C[16x8] = A[16x16] * B[16x8], fp16 -> f32
+  [scalar (no MMA)] validation PASSED (max abs err 0.00000, 0/128 cells out of tol)
+  [mma.sync (Tensor Core)] validation PASSED (max abs err 0.00000, 0/128 cells out of tol)
+Result is correct
+==PROF== Disconnected from process 5461
+"ID","Process ID","Process Name","Host Name","Kernel Name","Context","Stream","Block Size","Grid Size","Device","CC","Section Name","Metric Name","Metric Unit","Metric Value"
+"0","5461","java","127.0.0.1","gemmScalarFp16","1","14","(16, 8, 1)","(1, 1, 1)","0","8.9","Command line profiler metrics","gpu__time_duration.sum","ns","2,688"
+"0","5461","java","127.0.0.1","gemmScalarFp16","1","14","(16, 8, 1)","(1, 1, 1)","0","8.9","Command line profiler metrics","sm__inst_executed_pipe_tensor_op_hmma.sum","inst","0"
+"0","5461","java","127.0.0.1","gemmScalarFp16","1","14","(16, 8, 1)","(1, 1, 1)","0","8.9","Command line profiler metrics","sm__pipe_tensor_op_hmma_cycles_active.sum","cycle","0"
+"0","5461","java","127.0.0.1","gemmScalarFp16","1","14","(16, 8, 1)","(1, 1, 1)","0","8.9","Command line profiler metrics","smsp__inst_executed.sum","inst","628"
+"1","5461","java","127.0.0.1","gemmMMASingleTile","1","15","(32, 1, 1)","(1, 1, 1)","0","8.9","Command line profiler metrics","gpu__time_duration.sum","ns","3,904"
+"1","5461","java","127.0.0.1","gemmMMASingleTile","1","15","(32, 1, 1)","(1, 1, 1)","0","8.9","Command line profiler metrics","sm__inst_executed_pipe_tensor_op_hmma.sum","inst","1"
+"1","5461","java","127.0.0.1","gemmMMASingleTile","1","15","(32, 1, 1)","(1, 1, 1)","0","8.9","Command line profiler metrics","sm__pipe_tensor_op_hmma_cycles_active.sum","cycle","16"
+"1","5461","java","127.0.0.1","gemmMMASingleTile","1","15","(32, 1, 1)","(1, 1, 1)","0","8.9","Command line profiler metrics","smsp__inst_executed.sum","inst","183"

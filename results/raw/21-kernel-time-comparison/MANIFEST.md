@@ -58,6 +58,13 @@ memory-bound gap** — a data-layout property, not code-generation quality.
 Filed upstream as
 [beehive-lab/TornadoVM#1065](https://github.com/beehive-lab/TornadoVM/issues/1065).
 
+**Superseded by direct measurement (2026-09-03).** The attribution above is an
+inference from wall-clock. `results/raw/22-ncu-alignment-counters/` measures the
+mechanism on the generated kernels with Nsight Compute: all three TornadoVM
+kernels report 5.00 sectors per request on every global access against
+hand-written CUDA's 4.00, matching the offset-4 kernel's counts exactly. It also
+shows `polynomial` carries the same penalty without paying for it in time.
+
 ## Cause 2 — JIT specialisation (compute-bound kernel)
 
 `degree` is a task argument, so TornadoVM compiles the kernel after its value is
