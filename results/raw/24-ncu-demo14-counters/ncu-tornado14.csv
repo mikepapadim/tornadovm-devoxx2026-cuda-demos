@@ -1,0 +1,50 @@
+==PROF== Connected to process 7221 (/home/michalis/.sdkman/candidates/java/25.0.2-open/bin/java)
+Warp-shuffle + cp.async + shared-memory row reduction: 4096 rows x 1024 int8 values
+  block = 128 threads (4 warps), one block per row
+  3 executions per kernel, steady-state median reported (first execution excluded)
+
+=== NAIVE (one thread per row, global memory only) ===
+  first execution (JIT compile): 362775 us
+  steady-state median wall-clock (n=2): 87239 us
+
+=== OPTIMISED (cp.async + shared + shuffle) ===
+  first execution (JIT compile): 114765 us
+  steady-state median wall-clock (n=2): 444 us
+
+  [naive    ] validation PASSED (max abs err 0.00000, 0/4096 rows out of tol)
+  [optimised] validation PASSED (max abs err 0.00000, 0/4096 rows out of tol)
+
+=== Summary (steady-state median us, this run/this GPU) ===
+naive     : 87239
+optimised : 444 (196.48x vs naive)
+Both kernels produce the same, correct result
+==PROF== Disconnected from process 7221
+"ID","Process ID","Process Name","Host Name","Kernel Name","Context","Stream","Block Size","Grid Size","Device","CC","Section Name","Metric Name","Metric Unit","Metric Value"
+"0","7221","java","127.0.0.1","rowSumNaive","1","14","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_read.sum","byte","4,199,552"
+"0","7221","java","127.0.0.1","rowSumNaive","1","14","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","gpu__time_duration.sum","ns","120,000"
+"0","7221","java","127.0.0.1","rowSumNaive","1","14","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","32"
+"0","7221","java","127.0.0.1","rowSumNaive","1","14","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","l1tex__data_bank_conflicts_pipe_lsu.sum","","3,944,337"
+"0","7221","java","127.0.0.1","rowSumNaive","1","14","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","4,194,304"
+"0","7221","java","127.0.0.1","rowSumNaive","1","14","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","smsp__inst_executed.sum","inst","487,040"
+"0","7221","java","127.0.0.1","rowSumNaive","1","14","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","smsp__sass_average_data_bytes_per_sector_mem_global_op_ld.pct","%","3.12"
+"1","7221","java","127.0.0.1","rowSumNaive","1","14","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_read.sum","byte","4,199,680"
+"1","7221","java","127.0.0.1","rowSumNaive","1","14","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","gpu__time_duration.sum","ns","119,936"
+"1","7221","java","127.0.0.1","rowSumNaive","1","14","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","32"
+"1","7221","java","127.0.0.1","rowSumNaive","1","14","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","l1tex__data_bank_conflicts_pipe_lsu.sum","","3,944,457"
+"1","7221","java","127.0.0.1","rowSumNaive","1","14","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","4,194,304"
+"1","7221","java","127.0.0.1","rowSumNaive","1","14","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","smsp__inst_executed.sum","inst","487,040"
+"1","7221","java","127.0.0.1","rowSumNaive","1","14","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","smsp__sass_average_data_bytes_per_sector_mem_global_op_ld.pct","%","3.12"
+"2","7221","java","127.0.0.1","rowSumNaive","1","14","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_read.sum","byte","4,715,776"
+"2","7221","java","127.0.0.1","rowSumNaive","1","14","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","gpu__time_duration.sum","ns","120,128"
+"2","7221","java","127.0.0.1","rowSumNaive","1","14","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","32"
+"2","7221","java","127.0.0.1","rowSumNaive","1","14","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","l1tex__data_bank_conflicts_pipe_lsu.sum","","3,944,363"
+"2","7221","java","127.0.0.1","rowSumNaive","1","14","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","4,194,304"
+"2","7221","java","127.0.0.1","rowSumNaive","1","14","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","smsp__inst_executed.sum","inst","487,040"
+"2","7221","java","127.0.0.1","rowSumNaive","1","14","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","smsp__sass_average_data_bytes_per_sector_mem_global_op_ld.pct","%","3.12"
+"3","7221","java","127.0.0.1","rowSumOptimised","1","15","(128, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_read.sum","byte","4,198,272"
+"3","7221","java","127.0.0.1","rowSumOptimised","1","15","(128, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","gpu__time_duration.sum","ns","7,200"
+"3","7221","java","127.0.0.1","rowSumOptimised","1","15","(128, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","5"
+"3","7221","java","127.0.0.1","rowSumOptimised","1","15","(128, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","l1tex__data_bank_conflicts_pipe_lsu.sum","","220"
+"3","7221","java","127.0.0.1","rowSumOptimised","1","15","(128, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","163,840"
+"3","7221","java","127.0.0.1","rowSumOptimised","1","15","(128, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","smsp__inst_executed.sum","inst","1,134,592"
+"3","7221","java","127.0.0.1","rowSumOptimised","1","15","(128, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","smsp__sass_average_data_bytes_per_sector_mem_global_op_ld.pct","%","0"

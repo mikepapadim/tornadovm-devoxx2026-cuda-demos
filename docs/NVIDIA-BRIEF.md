@@ -112,7 +112,33 @@ That is the more interesting number than "does it use tensor cores", and it is
 the kind of thing a lowering pass would attack. Data:
 `results/raw/23-ncu-tensor-core-counters/`.
 
-### 3. The host-side dispatch cost is large and separable
+### 3. The same defect appears in a third, unrelated kernel class
+
+[Demo 14](../demos/14-warp-async-shared/) is a per-row **int8** reduction using
+`cp.async` + shared memory + warp shuffle — a different element type reaching
+memory through a different instruction. It shows both halves of the story:
+
+| metric | TornadoVM naive | CUDA naive | TornadoVM opt | CUDA opt |
+|---|---|---|---|---|
+| sectors per request | 32.00 | 32.00 | **5.00** | **4.00** |
+| global load sectors | 4,194,304 | 4,194,304 | **163,840** | **131,072** |
+| bank conflicts | 3,944,216 | 3,678,799 | 190 | 270 |
+| instructions | 487,040 | 259,456 | **1,134,592** | 1,658,880 |
+
+**The naive kernels are identical to the byte** — same 32.00 sectors per
+request, same 4,194,304 sectors, kernel times within 0.05%. **The optimised
+kernels differ by exactly 1.250x**, which is #1065 again, in int8, through
+`cp.async`. The header offset is a property of the array layout, not of a kernel
+shape or an element type.
+
+Two secondary observations for a compiler audience: the optimised TornadoVM
+kernel executes **32% fewer instructions than the hand-written CUDA one** and is
+still marginally slower, so instruction count is not the lever on this workload;
+and within TornadoVM the optimisation is a **2.3x increase in instructions for
+an order-of-magnitude speedup**, because it moves 25.6x fewer sectors. Data:
+`results/raw/24-ncu-demo14-counters/`.
+
+### 4. The host-side dispatch cost is large and separable
 
 Demo 14's TornadoVM *kernel* is 26.6x faster than its naive variant; its
 wall-clock is only 2.17x faster, because ~100 µs per execution goes to host-side

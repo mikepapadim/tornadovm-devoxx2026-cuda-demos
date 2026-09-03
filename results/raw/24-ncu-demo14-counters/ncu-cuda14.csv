@@ -1,0 +1,50 @@
+==PROF== Connected to process 7317 (/tmp/claude-1005/-home-michalis/32d9a071-8eab-4bd7-9e82-2ba5652d1717/scratchpad/d14/cuda14)
+Warp-shuffle + cp.async + shared-memory row reduction: 4096 rows x 1024 int8 values
+  block = 128 threads (4 warps), one block per row
+  3 executions per kernel, steady-state median reported (first execution excluded)
+
+=== NAIVE (one thread per row, global memory only) ===
+  first execution: 271992 us
+  steady-state median wall-clock (n=2): 80647 us
+
+=== OPTIMISED (cp.async + shared + shuffle) ===
+  first execution: 79574 us
+  steady-state median wall-clock (n=2): 81 us
+
+  [naive    ] validation PASSED (max abs err 0.00000, 0/4096 rows out of tol)
+  [optimised] validation PASSED (max abs err 0.00000, 0/4096 rows out of tol)
+
+=== Summary (steady-state median us, this run/this GPU) ===
+naive     : 80647
+optimised : 81 (990.52x vs naive)
+Both kernels produce the same, correct result
+==PROF== Disconnected from process 7317
+"ID","Process ID","Process Name","Host Name","Kernel Name","Context","Stream","Block Size","Grid Size","Device","CC","Section Name","Metric Name","Metric Unit","Metric Value"
+"0","7317","cuda14","127.0.0.1","rowSumNaive(const signed char *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_read.sum","byte","4,198,784"
+"0","7317","cuda14","127.0.0.1","rowSumNaive(const signed char *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","gpu__time_duration.sum","ns","120,864"
+"0","7317","cuda14","127.0.0.1","rowSumNaive(const signed char *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","32"
+"0","7317","cuda14","127.0.0.1","rowSumNaive(const signed char *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","l1tex__data_bank_conflicts_pipe_lsu.sum","","3,680,255"
+"0","7317","cuda14","127.0.0.1","rowSumNaive(const signed char *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","4,194,304"
+"0","7317","cuda14","127.0.0.1","rowSumNaive(const signed char *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","smsp__inst_executed.sum","inst","259,456"
+"0","7317","cuda14","127.0.0.1","rowSumNaive(const signed char *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","smsp__sass_average_data_bytes_per_sector_mem_global_op_ld.pct","%","3.12"
+"1","7317","cuda14","127.0.0.1","rowSumNaive(const signed char *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_read.sum","byte","4,198,784"
+"1","7317","cuda14","127.0.0.1","rowSumNaive(const signed char *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","gpu__time_duration.sum","ns","120,736"
+"1","7317","cuda14","127.0.0.1","rowSumNaive(const signed char *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","32"
+"1","7317","cuda14","127.0.0.1","rowSumNaive(const signed char *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","l1tex__data_bank_conflicts_pipe_lsu.sum","","3,680,493"
+"1","7317","cuda14","127.0.0.1","rowSumNaive(const signed char *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","4,194,304"
+"1","7317","cuda14","127.0.0.1","rowSumNaive(const signed char *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","smsp__inst_executed.sum","inst","259,456"
+"1","7317","cuda14","127.0.0.1","rowSumNaive(const signed char *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","smsp__sass_average_data_bytes_per_sector_mem_global_op_ld.pct","%","3.12"
+"2","7317","cuda14","127.0.0.1","rowSumNaive(const signed char *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_read.sum","byte","4,198,784"
+"2","7317","cuda14","127.0.0.1","rowSumNaive(const signed char *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","gpu__time_duration.sum","ns","120,800"
+"2","7317","cuda14","127.0.0.1","rowSumNaive(const signed char *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","32"
+"2","7317","cuda14","127.0.0.1","rowSumNaive(const signed char *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","l1tex__data_bank_conflicts_pipe_lsu.sum","","3,696,007"
+"2","7317","cuda14","127.0.0.1","rowSumNaive(const signed char *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","4,194,304"
+"2","7317","cuda14","127.0.0.1","rowSumNaive(const signed char *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","smsp__inst_executed.sum","inst","259,456"
+"2","7317","cuda14","127.0.0.1","rowSumNaive(const signed char *, float *, int, int)","1","7","(256, 1, 1)","(16, 1, 1)","0","8.9","Command line profiler metrics","smsp__sass_average_data_bytes_per_sector_mem_global_op_ld.pct","%","3.12"
+"3","7317","cuda14","127.0.0.1","rowSumOptimised(const signed char *, float *, int)","1","7","(128, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","dram__bytes_read.sum","byte","4,199,552"
+"3","7317","cuda14","127.0.0.1","rowSumOptimised(const signed char *, float *, int)","1","7","(128, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","gpu__time_duration.sum","ns","7,040"
+"3","7317","cuda14","127.0.0.1","rowSumOptimised(const signed char *, float *, int)","1","7","(128, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","4"
+"3","7317","cuda14","127.0.0.1","rowSumOptimised(const signed char *, float *, int)","1","7","(128, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","l1tex__data_bank_conflicts_pipe_lsu.sum","","269"
+"3","7317","cuda14","127.0.0.1","rowSumOptimised(const signed char *, float *, int)","1","7","(128, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","131,072"
+"3","7317","cuda14","127.0.0.1","rowSumOptimised(const signed char *, float *, int)","1","7","(128, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","smsp__inst_executed.sum","inst","1,658,880"
+"3","7317","cuda14","127.0.0.1","rowSumOptimised(const signed char *, float *, int)","1","7","(128, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","smsp__sass_average_data_bytes_per_sector_mem_global_op_ld.pct","%","0"

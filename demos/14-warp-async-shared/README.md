@@ -136,6 +136,58 @@ Open it visually with `nsys-ui warp.nsys-rep`.
 Captured evidence: `results/raw/19-cutlass-cudnn-warp-demos/14-warp-nsys-kernsum.csv`,
 `14-warp.nsys-rep`, run logs `14-warp-tornado.log` / `14-warp-javaargfile.log`.
 
+## Why it is faster, in counters (Nsight Compute)
+
+`nsys` says the optimised kernel is faster. `ncu` says *why*, and the answer is
+not the one you would guess from the instruction count:
+
+```bash
+/opt/nvidia/nsight-compute/2024.3.2/ncu --csv --target-processes all \
+  --metrics l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio,\
+l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum,l1tex__data_bank_conflicts_pipe_lsu.sum,\
+smsp__inst_executed.sum \
+  java @$TORNADOVM_HOME/tornado-argfile -cp . WarpAsyncSharedReduce 4096 1024 3
+```
+
+| metric | naive | optimised | change |
+|---|---|---|---|
+| sectors per request | 32.00 | 5.00 | **6.4x fewer** |
+| global load sectors | 4,194,304 | 163,840 | **25.6x fewer** |
+| bank conflicts | 3,944,216 | 190 | **20,760x fewer** |
+| instructions executed | 487,040 | 1,134,592 | 2.3x **more** |
+
+**The optimised kernel executes 2.3x more instructions and runs an order of
+magnitude faster.** The naive kernel's 32.00 sectors per request is the worst
+possible number — one thread per row, each striding across a whole row, so a
+warp's 32 lanes land in 32 different sectors. Nsight Compute puts its useful
+bytes per fetched sector at **3.12%**, which is exactly 1/32: one useful byte
+per 32-byte sector.
+
+`cp.async` + shared memory converts a bandwidth-bound kernel into a
+compute-bound one. DRAM reads are ~4.2 MB either way — the data is read once
+regardless. The entire win is in the L1/sector path.
+
+### Two things the comparison with hand-written CUDA adds
+
+Profiling the CUDA equivalent the same way:
+
+- **The naive kernels are identical.** Both report 32.00 sectors per request and
+  exactly **4,194,304** load sectors, with kernel times matching to 0.05%. On
+  the memory path the generated code and the hand-written code are the same
+  kernel.
+- **The optimised kernels differ by exactly the header-offset ratio.**
+  TornadoVM 163,840 sectors against CUDA's 131,072 — **1.250x**, 5.00 vs 4.00
+  sectors per request. That is
+  [#1065](https://github.com/beehive-lab/TornadoVM/issues/1065) again, the same
+  defect demo 15 measures on float kernels, here in an int8 kernel reaching
+  memory through `cp.async`. It is a property of the array layout, not of a
+  kernel shape or an element type. It costs only 4.5% in time here, because
+  this kernel is no longer bandwidth-bound once optimised.
+
+Full data: `results/raw/24-ncu-demo14-counters/`. Kernel times measured *under*
+`ncu` are cold single launches and are not comparable to the `nsys` numbers
+above — quote the `nsys` 26.6x for timing.
+
 ## How the kernel works
 
 ```

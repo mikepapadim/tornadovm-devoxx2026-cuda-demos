@@ -156,6 +156,8 @@ RTX 4090, driver 565.57.01, CUDA 12.6.85, JDK 25.0.2. Not general claims.
 | 08-tensor-core-mma | Generated code | exactly **1** `mma.sync.aligned.m16n8k16` PTX instruction; 0 in the scalar reference | `08-mma-printkernel.log` |
 | 08-tensor-core-mma | **Hardware counters** | **1** HMMA instruction + **16** tensor-pipe cycles, identical to hand-written CUDA; **0** in the scalar reference | `23-ncu-tensor-core-counters/` |
 | 15-kernel-time-comparison | **Hardware counters** | every TornadoVM global access costs **5.00 sectors/request** vs CUDA's **4.00** — #1065, measured not inferred | `22-ncu-alignment-counters/` |
+| 14-warp-async-shared | **Hardware counters** | naive 32.00 sectors/request (3.12% bytes used) → optimised 5.00; **25.6x fewer sectors, 20,760x fewer bank conflicts, 2.3x _more_ instructions** | `24-ncu-demo14-counters/` |
+| 14-warp-async-shared | #1065 in a 3rd kernel class | optimised: TornadoVM 163,840 load sectors vs CUDA's 131,072 — **1.250x**, int8 via `cp.async` | `24-ncu-demo14-counters/` |
 | 11-integrated-showcase | Mode comparison vs. baseline | concurrent 1.08–1.12x, graph 5.37–5.61x, combined 5.66–5.69x | `11-showcase-*.log` |
 | 12-cutlass-fused-epilogue | Fused vs. unfused epilogue, GPU kernel time | fused 16547 ns vs. unfused 16106 + 2125 = 18231 ns per execution (~9% less GPU time, one fewer kernel) | `19-…/12-cutlass-nsys-kernsum.csv` |
 | 13-cudnn-jit-convblock | Correctness of a 4-stage cuDNN+JIT graph | max abs err `0.000000` vs. the CPU reference | `19-…/13-cudnn-tornado.log` |
