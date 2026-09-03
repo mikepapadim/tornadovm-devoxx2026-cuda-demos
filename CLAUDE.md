@@ -1,4 +1,4 @@
-# CLAUDE.md — Autonomous Devoxx CUDA Study
+# CLAUDE.md — Autonomous TornadoVM CUDA Study
 
 ## Mission
 
@@ -17,7 +17,7 @@ You are the autonomous research engineer for this repository. Your job is to exe
 - Batches 00–17 were captured against that 5.2.1 pin. Their evidence under
   `results/` is immutable — annotate it, never rewrite it.
 - One NVIDIA GPU unless a task explicitly says otherwise.
-- Devoxx 2026 talk demos and evidence are the final product.
+- The CUDA demos and their evidence are the final product.
 - No Babylon comparison.
 - No OpenCL, Metal, legacy PTX backend, HIP, or CPU performance substitutions.
 

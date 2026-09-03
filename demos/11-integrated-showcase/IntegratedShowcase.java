@@ -1,5 +1,5 @@
 /*
- * Devoxx 2026 CUDA demo — integrated showcase, combining every Hybrid-API
+ * TornadoVM CUDA demo — integrated showcase, combining every Hybrid-API
  * mechanism verified individually in demos 04/05/06/07/08 into one program:
  *
  *   - JIT-compiled @Parallel Java kernels running on the CUDA backend (all demos)

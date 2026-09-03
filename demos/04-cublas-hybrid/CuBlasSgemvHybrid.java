@@ -1,5 +1,5 @@
 /*
- * Devoxx 2026 CUDA demo — Java kernel + cuBLAS in one execution graph.
+ * TornadoVM CUDA demo — Java kernel + cuBLAS in one execution graph.
  *
  * One TaskGraph, three stages, all on the same device buffers:
  *   1. JIT-compiled @Parallel task ("scale")  — Java kernel on the GPU

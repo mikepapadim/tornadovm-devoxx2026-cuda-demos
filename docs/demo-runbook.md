@@ -1,4 +1,4 @@
-# Demo runbook — Devoxx 2026
+# Demo runbook — TornadoVM CUDA demos
 
 Exact live-demo sequence for both talks: what to type, what should appear on
 screen, what to say, and what to do if a stage fails. Built from

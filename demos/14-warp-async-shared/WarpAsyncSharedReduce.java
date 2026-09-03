@@ -1,5 +1,5 @@
 /*
- * Devoxx 2026 CUDA demo — three hand-tuned CUDA optimisations in one Java kernel:
+ * TornadoVM CUDA demo — three hand-tuned CUDA optimisations in one Java kernel:
  *
  *   1. ASYNCHRONOUS COPY  (cp.async)  ctx.asyncCopyToLocal / asyncCopyCommit /
  *                                     asyncCopyWaitGroup — stage a tile from

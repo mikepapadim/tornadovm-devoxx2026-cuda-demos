@@ -1,5 +1,5 @@
 /*
- * Devoxx 2026 CUDA demo — CUDA streams and async overlap from Java.
+ * TornadoVM CUDA demo — CUDA streams and async overlap from Java.
  *
  * TornadoExecutionPlan#withIntraPlanConcurrency() routes DAG-independent operations
  * within one execution plan to separate H2D / COMPUTE-pool / D2H role streams instead

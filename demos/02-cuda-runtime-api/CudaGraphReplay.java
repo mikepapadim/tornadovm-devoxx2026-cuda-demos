@@ -1,5 +1,5 @@
 /*
- * Devoxx 2026 CUDA demo — CUDA runtime API access from Java, outside library tasks.
+ * TornadoVM CUDA demo — CUDA runtime API access from Java, outside library tasks.
  *
  * TornadoExecutionPlan#withCUDAGraph() captures the whole task-graph (H2D copy,
  * kernel launch, D2H copy) as a single CUDA graph (cudaGraphCreate / cudaStreamBeginCapture

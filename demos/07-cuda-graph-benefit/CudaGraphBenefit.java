@@ -1,5 +1,5 @@
 /*
- * Devoxx 2026 CUDA demo — quantifying why CUDA Graph replay matters for repeated workloads.
+ * TornadoVM CUDA demo — quantifying why CUDA Graph replay matters for repeated workloads.
  *
  * Demo 02 (../02-cuda-runtime-api) already showed TornadoExecutionPlan#withCUDAGraph()
  * capturing a task-graph once (cuStreamBeginCapture/cuStreamEndCapture/cuGraphInstantiate,

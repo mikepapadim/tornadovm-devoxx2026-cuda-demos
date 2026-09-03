@@ -1,5 +1,5 @@
 /*
- * Devoxx 2026 CUDA demo — Java kernel + cuFFT in one execution graph.
+ * TornadoVM CUDA demo — Java kernel + cuFFT in one execution graph.
  *
  * One TaskGraph, four stages, all on the same device buffers, no host
  * round trip between them:

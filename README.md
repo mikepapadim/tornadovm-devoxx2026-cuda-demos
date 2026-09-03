@@ -1,9 +1,10 @@
-# TornadoVM Devoxx 2026 — CUDA Demos
+# TornadoVM on NVIDIA CUDA
 
-Java + NVIDIA CUDA demos for two Devoxx 2026 sessions, running on the
-**TornadoVM 6.0.0 CUDA release**. Write GPU kernels in plain Java, drive
-CUDA-runtime behaviour (graph capture/replay, multi-stream concurrency) from
-`TornadoExecutionPlan`, and call cuBLAS/cuFFT without writing a line of JNI.
+Java GPU kernels on the **TornadoVM 6.0.0 CUDA release**, each paired with a
+hand-written CUDA C++ equivalent and measured against it. Write GPU kernels in
+plain Java, drive CUDA-runtime behaviour (graph capture/replay, multi-stream
+concurrency) from `TornadoExecutionPlan`, and call cuBLAS/cuFFT without writing
+a line of JNI.
 
 No source build required — TornadoVM 6.0.0 installs from SDKMAN in one command.
 

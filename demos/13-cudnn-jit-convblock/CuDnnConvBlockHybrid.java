@@ -1,5 +1,5 @@
 /*
- * Devoxx 2026 CUDA demo — a CNN block built from cuDNN library tasks and Java
+ * TornadoVM CUDA demo — a CNN block built from cuDNN library tasks and Java
  * JIT kernels interleaved in ONE TaskGraph.
  *
  * The classic conv block is conv -> bias -> activation. cuDNN owns the hard

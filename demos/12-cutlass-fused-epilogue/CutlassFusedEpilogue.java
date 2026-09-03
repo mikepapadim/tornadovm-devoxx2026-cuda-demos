@@ -1,5 +1,5 @@
 /*
- * Devoxx 2026 CUDA demo — CUTLASS fused epilogues next to Java JIT kernels.
+ * TornadoVM CUDA demo — CUTLASS fused epilogues next to Java JIT kernels.
  *
  * CUTLASS's selling point over a plain GEMM library is the *epilogue*: the
  * bias add and the activation are folded into the GEMM kernel itself, so the

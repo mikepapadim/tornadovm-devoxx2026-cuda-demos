@@ -1,5 +1,5 @@
 /*
- * Devoxx 2026 CUDA demo — TornadoVM vs hand-written CUDA, kernel time only.
+ * TornadoVM CUDA demo — TornadoVM vs hand-written CUDA, kernel time only.
  *
  * Every other timed demo in this repo reports wall-clock, which on TornadoVM is
  * dominated by host-side dispatch. This one exists to answer the narrower and

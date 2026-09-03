@@ -8,7 +8,7 @@ set -uo pipefail
 
 TOPIC="${NTFY_TOPIC:-}"
 TOKEN="${NTFY_TOKEN:-}"
-TITLE="${NTFY_TITLE:-TornadoVM Devoxx CUDA Study}"
+TITLE="${NTFY_TITLE:-TornadoVM CUDA Study}"
 MESSAGE="${1:-}"
 
 [ -n "$TOPIC" ] || { echo 'NTFY_TOPIC is required' >&2; exit 2; }

@@ -1,5 +1,5 @@
 /*
- * Devoxx 2026 CUDA demo — first real CUDA kernel generated from Java.
+ * TornadoVM CUDA demo — first real CUDA kernel generated from Java.
  *
  * Element-wise vector addition. Run with `tornado --printKernel` to see the
  * actual generated CUDA source that TornadoVM compiles and launches on the

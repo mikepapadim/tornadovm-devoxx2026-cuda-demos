@@ -83,7 +83,7 @@ git config core.hooksPath .githooks
 MODEL_ARG=(); [ -n "$MODEL" ] && MODEL_ARG=(--model "$MODEL")
 iter=0; backoff=60; stall=0
 log "=== supervisor start === next=$(next_task || echo NONE)"
-notify "Devoxx CUDA study supervisor started"
+notify "TornadoVM CUDA study supervisor started"
 
 while (( iter < MAX_ITER )); do
   [ -f "$STOP_FILE" ] && break
@@ -140,4 +140,4 @@ while (( iter < MAX_ITER )); do
 done
 
 log "=== supervisor exit === iterations=$iter"
-notify "Devoxx CUDA study supervisor exited after $iter iterations"
+notify "TornadoVM CUDA study supervisor exited after $iter iterations"

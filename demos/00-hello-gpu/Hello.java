@@ -1,5 +1,5 @@
 /*
- * Devoxx 2026 CUDA demo — the smallest possible TornadoVM GPU program.
+ * TornadoVM CUDA demo — the smallest possible TornadoVM GPU program.
  *
  * Adds 1 to every element of an int array, on the GPU, using the pinned
  * TornadoVM CUDA backend (see env/versions.env for the exact SHA/GPU).
