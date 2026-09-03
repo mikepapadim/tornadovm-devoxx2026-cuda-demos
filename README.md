@@ -135,6 +135,7 @@ profiler, not the wall clock, is what shows the effect at all.
 | [12](demos/12-cutlass-fused-epilogue/) | `CutlassFusedEpilogue.java` | CUTLASS fused epilogue (GEMM+bias+ReLU in one kernel) vs. GEMM + a separate JIT pass | `tornado --classpath . CutlassFusedEpilogue` |
 | [13](demos/13-cudnn-jit-convblock/) | `CuDnnConvBlockHybrid.java` | CNN block alternating vendor and JIT kernels: JIT scale → cuDNN conv2d → JIT bias → cuDNN relu | `tornado --classpath . CuDnnConvBlockHybrid` |
 | [14](demos/14-warp-async-shared/) | `WarpAsyncSharedReduce.java` | `cp.async` + shared memory + `__shfl_down_sync` from Java, verified in the generated CUDA | `tornado --classpath . WarpAsyncSharedReduce` |
+| [16](demos/16-tensor-core-datatypes/) | `TensorCoreDataTypes.java` | **BF16, int8, FP8 e4m3 and FP8 e5m2** MMA from Java — every operand type the backend can emit, each validated and counted | `tornado --classpath . TensorCoreDataTypes` |
 | [15](demos/15-kernel-time-comparison/) | `KernelTimeComparison.java` | **Start here.** Kernel time only, TornadoVM vs hand-written CUDA over 3 kernels; both deltas root-caused with `nsys` + Nsight Compute counters | `tornado --classpath . KernelTimeComparison` |
 
 Every demo also runs as `java @$TORNADOVM_HOME/tornado-argfile -cp . <MainClass> [args]`.
@@ -156,6 +157,8 @@ RTX 4090, driver 565.57.01, CUDA 12.6.85, JDK 25.0.2. Not general claims.
 | 07-cuda-graph-benefit | Graph replay speedup | nograph 292–364 µs vs. graph 36 µs → **8.1x / 10.0x** across the two run paths | `07-graphbenefit-*.log` |
 | 08-tensor-core-mma | Generated code | exactly **1** `mma.sync.aligned.m16n8k16` PTX instruction; 0 in the scalar reference | `08-mma-printkernel.log` |
 | 08-tensor-core-mma | **Hardware counters** | **1** HMMA instruction + **16** tensor-pipe cycles, identical to hand-written CUDA; **0** in the scalar reference | `23-ncu-tensor-core-counters/` |
+| 16-tensor-core-datatypes | All 4 remaining operand types | BF16, int8, FP8 e4m3, FP8 e5m2 each **PASSED, max abs err 0.00000** over 256 cells, Java and CUDA alike | `26-tensor-core-datatypes/` |
+| 16-tensor-core-datatypes | **Hardware counters** | counters match emitted PTX exactly; **int8 dispatches to IMMA**, BF16 and both FP8 formats to **HMMA** | `26-tensor-core-datatypes/` |
 | 15-kernel-time-comparison | **Hardware counters** | every TornadoVM global access costs **5.00 sectors/request** vs CUDA's **4.00** — #1065, measured not inferred | `22-ncu-alignment-counters/` |
 | 14-warp-async-shared | **Hardware counters** | naive 32.00 sectors/request (3.12% bytes used) → optimised 5.00; **25.6x fewer sectors, 20,760x fewer bank conflicts, 2.3x _more_ instructions** | `24-ncu-demo14-counters/` |
 | 14-warp-async-shared | #1065 in a 3rd kernel class | optimised: TornadoVM 163,840 load sectors vs CUDA's 131,072 — **1.250x**, int8 via `cp.async` | `24-ncu-demo14-counters/` |
@@ -272,6 +275,7 @@ so — and on two demos it is *longer*:
 | Demo | Java | CUDA | | Demo | Java | CUDA |
 |---|---|---|---|---|---|---|
 | 00 hello | 33 | 48 | | 08 tensor-core | 129 | **121** |
+| | | | | 16 datatypes | 309 | **217** |
 | 01 vector-add | 42 | 65 | | 11 showcase | 266 | 298 |
 | 02 cuda-graph | 51 | 78 | | 12 cutlass | 163 | 187 |
 | 04 cublas | 100 | 108 | | 13 cudnn | 138 | 186 |

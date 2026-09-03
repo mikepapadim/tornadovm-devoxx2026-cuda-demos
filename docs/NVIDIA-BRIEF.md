@@ -230,6 +230,22 @@ of exactly five operand combinations in `MMAOperand`:
 with `MMAShape` being exactly `{M16N8K16, M16N8K32}` (`m16n8k16`, `m16n8k32`).
 So FP8 lands as `mma.sync.aligned.m16n8k32.row.col.f32.e4m3.e4m3.f32`.
 
+**All five are exercised on hardware, not just claimed.** Demo 08 covers fp16;
+[demo 16](../demos/16-tensor-core-datatypes/) covers the other four, each
+validated against a CPU reference at **max abs err 0.00000 over 256 cells**,
+with the emitted PTX and the tensor-pipe counters agreeing instruction for
+instruction:
+
+| Kernel | tensor inst | HMMA | IMMA |
+|---|---|---|---|
+| `gemmBF16` | 4 | **4** | 0 |
+| `gemmInt8` | 2 | 0 | **2** |
+| `gemmFP8E4M3` | 2 | **2** | 0 |
+| `gemmFP8E5M2` | 2 | **2** | 0 |
+
+int8 dispatches to the IMMA pipe; BF16 and both FP8 formats to HMMA. Data:
+`results/raw/26-tensor-core-datatypes/`.
+
 **Those two enums are the ceiling, and it is sm_89.** Every combination is
 `.row.col`; there is no `wgmma` (sm_90) and no `tcgen05` (sm_100) path, and
 nothing above `M16N8K32`. Everything measured on this page is therefore an Ada
