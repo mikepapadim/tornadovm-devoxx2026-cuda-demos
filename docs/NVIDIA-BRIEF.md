@@ -138,15 +138,48 @@ and within TornadoVM the optimisation is a **2.3x increase in instructions for
 an order-of-magnitude speedup**, because it moves 25.6x fewer sectors. Data:
 `results/raw/24-ncu-demo14-counters/`.
 
-### 4. The host-side dispatch cost is large and separable
+### 4. The host-side dispatch cost is large, separable, and now itemised
 
 Demo 14's TornadoVM *kernel* is 26.6x faster than its naive variant; its
-wall-clock is only 2.17x faster, because ~100 µs per execution goes to host-side
-dispatch. This is why `withCUDAGraph()` buys TornadoVM 8–10x while buying raw
-CUDA 1.28x — CUDA has little dispatch cost to remove.
+wall-clock is only 2.17x faster. Tracing the CUDA driver API rather than the
+kernels says exactly where the difference goes. Same 40 kernel launches, same
+work:
 
-This is a runtime problem, not a code-generation problem, and it is called out
-here so it is not confused with the numbers above.
+| | TornadoVM | hand-written CUDA |
+|---|---|---|
+| memory-transfer calls | **1,620** (40.5/execution) | **41** (1.03/execution) |
+| `cuStreamSynchronize` | 1,656 | 0 |
+| event create/record/destroy | 6,392 | 0 |
+| kernel launches | 40 | 40 |
+
+**1,536 of those 1,620 transfers — 94.8% — are exactly 256 bytes**, 768 in each
+direction, for a task graph with one kernel and one real output. And the cost
+lands precisely on the missing time:
+
+```
+cuMemcpyDtoHAsync_v2   total 3,999,593 ns / 40 executions = 100.0 us per execution
+```
+
+It is per-call overhead, not bandwidth — each async D2H costs ~4,950 ns of
+*host* time to issue and ~873 ns on the device. `cuLaunchKernel` is not the
+problem (40 calls, median 2,362 ns).
+
+So the dispatch cost is roughly 40 small API round-trips per execution, ~19 of
+them 256-byte device-to-host copies that scale with executions rather than with
+data — i.e. control traffic, not payload. This is also why `withCUDAGraph()`
+buys TornadoVM 8–10x while buying raw CUDA 1.28x: graph capture removes exactly
+this. Data: `results/raw/25-host-dispatch-breakdown/`.
+
+**This is a runtime problem, not a code-generation problem**, and it is the
+largest single number in this repo. It is called out separately so it is not
+confused with the code-generation results above — and because it is the part
+most likely to be worth fixing first.
+
+Worth noting for calibration: in that same steady-state trace TornadoVM's
+optimised kernel is **1.08x faster** than the hand-written CUDA one (3,941 vs
+4,251 ns), even carrying the #1065 penalty. Under Nsight Compute's cold
+single-launch conditions the ordering reverses. Both gaps are small; the two
+kernels are equivalent, and the dispatch path is where the real cost is.
 
 ## The API surface, and its ceiling
 

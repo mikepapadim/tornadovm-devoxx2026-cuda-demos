@@ -1,0 +1,4 @@
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+96.1,2117307,20,105865.4,105807.5,105696,106208,156.4,"rowSumNaive(const signed char *, float *, int, int)"
+3.9,85026,20,4251.3,4256.0,4223,4288,23.9,"rowSumOptimised(const signed char *, float *, int)"
+

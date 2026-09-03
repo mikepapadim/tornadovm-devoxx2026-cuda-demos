@@ -131,6 +131,45 @@ Quote the wall-clock when you talk about the application; quote the kernel time
 when you talk about the optimisation. Reading only the first would badly
 undersell the techniques; reading only the second would oversell the demo.
 
+### Where that ~100 µs actually goes
+
+Tracing the CUDA driver API rather than the kernels answers it exactly. For the
+same 40 kernel launches:
+
+| | TornadoVM | hand-written CUDA |
+|---|---|---|
+| memory-transfer calls | **1,620** (40.5/execution) | **41** (1.03/execution) |
+| `cuStreamSynchronize` | 1,656 | 0 |
+| event create/record/destroy | 6,392 | 0 |
+| kernel launches | 40 | 40 |
+
+**1,536 of those 1,620 transfers — 94.8% — are exactly 256 bytes**, 768 in each
+direction, for a task graph with one kernel and one real output:
+
+```
+HtoD        256 bytes  x 768        DtoH        256 bytes  x 768
+HtoD    4194320 bytes  x 2          DtoH      16400 bytes  x 40
+    (the actual input)                  (the actual output, 1/execution)
+```
+
+And the cost lands exactly where the README said it did:
+
+```
+cuMemcpyDtoHAsync_v2   total 3,999,593 ns / 40 executions = 100.0 us per execution
+```
+
+**100.0 µs per execution** against the ~100 µs above. It is per-call overhead,
+not bandwidth: each async D2H costs ~4,950 ns of *host* time to issue and only
+~873 ns on the device. `cuLaunchKernel` is not the problem — 40 calls, median
+2,362 ns.
+
+So the gap is roughly 40 small CUDA API round-trips per execution, ~19 of them
+256-byte device-to-host copies that look like internal control traffic. This is
+also why `withCUDAGraph()` buys TornadoVM 8–10x and raw CUDA only 1.28x: graph
+capture removes exactly this traffic.
+
+Full data: `results/raw/25-host-dispatch-breakdown/`.
+
 Open it visually with `nsys-ui warp.nsys-rep`.
 
 Captured evidence: `results/raw/19-cutlass-cudnn-warp-demos/14-warp-nsys-kernsum.csv`,

@@ -1,0 +1,10 @@
+== warp14
+   HtoD         256 bytes  x 768
+   HtoD          24 bytes  x 40
+   HtoD     4194320 bytes  x 2
+   HtoD       16400 bytes  x 2
+   DtoH         256 bytes  x 768
+   DtoH       16400 bytes  x 40
+== cuda14
+   HtoD     4194304 bytes  x 1
+   DtoH       16384 bytes  x 40
