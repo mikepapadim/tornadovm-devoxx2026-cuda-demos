@@ -131,11 +131,78 @@ Both are already diagnosed upstream —
 with PR [#1022](https://github.com/beehive-lab/TornadoVM/pull/1022) open and
 **not present in 6.0.0**. Raw: `results/raw/25-host-dispatch-breakdown/`.
 
-**Gaps:** CUDA Graph replay has wall-clock numbers from earlier batches but no
-per-execution API differencing; device-buffer reuse across graph nodes is not
-verified from the trace.
+### E1. Device-buffer reuse across `JIT → libraryTask → JIT` — verified
+
+Demo 13: `scale` (JIT) → `cudnnConv2d` (library) → `addBias` (JIT) →
+`cudnnRelu` (library), 20 executions, validation PASSED at max abs err 0.000000
+(0/65536 elements out of tolerance).
+
+Transfer histogram shows the 262,160-byte input crossing **once** and the output
+**once per execution**. The three intermediate tensors never appear.
+**Device buffers are reused across the JIT/libraryTask boundary; there is no
+unintended host round trip.** Raw: `task-E-graph-composition/d13-transfer-histogram.csv`.
+
+### E2. CUDA Graph replay — per-execution cost, differenced
+
+Six-stage chain, profiled at 10 and 100 executions per mode, delta/90.
+
+| | nograph | graph |
+|---|---|---|
+| `cuLaunchKernel` per execution | **6.00** | **0.00** |
+| `cuMemcpyHtoDAsync_v2` per execution | **7.00** | **0.00** |
+| event create/record/destroy | 42 | 3 |
+| `cuGraphLaunch` | — | 1.00 |
+| **host API ns/execution, excluding `cuStreamSynchronize`** | **33,774** | **6,283** |
+
+**Graph capture removes the entire per-execution dispatch sequence — 5.4x less
+host API time.** The seven H2D copies per execution in `nograph` are the
+per-launch 24-byte kernel-argument stack frames (#1028 finding 1); replay
+eliminates them because arguments are baked into the captured graph. This is the
+mechanism behind the graph speedup being large for TornadoVM and small for
+hand-written CUDA.
+
+`cuStreamSynchronize` is excluded above: it is largely genuine device wait, and
+is *higher* in graph mode (18,388 vs 3,669 ns/execution) because the host blocks
+once on the batched chain instead of interleaving with launch work. Treating
+that as a regression would be a misreading.
+
+Raw: `task-E-graph-composition/`.
 
 ---
+
+## F. Fused GEMM decision baseline — kernel-only
+
+CUTLASS v3.5.1, fp16, row-major, 20 executions. Fused and unfused CUTLASS
+kernels distinguished by epilogue template, not ordering.
+
+| Path | m=n=k=256 | m=n=k=1024 |
+|---|---|---|
+| TornadoVM fused | 11,077.5 ns | **34,675.9 ns** |
+| TornadoVM unfused | 11,810.4 ns | **39,296.8 ns** |
+| CUDA fused | 11,193.6 ns | 33,971.7 ns |
+| CUDA unfused | 11,778.9 ns | 37,331.8 ns |
+
+Fusion saves **11.8%** of GPU time at 1024 and 6.2% at 256, plus one kernel
+launch. The fused epilogue costs **+1.0%** on the GEMM itself against 4,924.9 ns
+as a separate pass.
+
+**Split by kernel origin at m=n=k=1024:**
+
+| Kernel | Origin | ratio TornadoVM/CUDA |
+|---|---|---|
+| `LinearCombinationRelu` | CUTLASS library | **1.00** |
+| `LinearCombination` | CUTLASS library | **1.01** |
+| `scale` | JIT vs hand-written | **1.23** |
+| `biasRelu` | JIT vs hand-written | **1.20** |
+
+The library kernels are identical, as they must be — both sides call the same
+CUTLASS kernel. **The entire difference is confined to the two small elementwise
+kernels, at 1.20–1.23x, the same ratio task B attributes to the 16-byte payload
+offset.** Task F corroborates task B on an independent workload and localises
+the gap to generated code rather than to library-task integration.
+
+m=n=k=4096 was still running when this was written and is recorded as pending
+rather than estimated. Raw: `task-F-fused-gemm/`.
 
 ## G. CUDA Tile feasibility — host facts
 
@@ -175,7 +242,8 @@ not, and `wgmma` is not reachable by extending that enum.
 
 | Item | Status |
 |---|---|
-| F. Fused GEMM baseline | **not measured** — demo 12's CUDA side needs a CUTLASS checkout not vendored here |
+| F. Fused GEMM baseline | **partially measured** — CUTLASS v3.5.1 cloned; shapes 256 and 1024 done, 4096 in progress |
+| F. TornadoVM fused slower end-to-end than unfused (342 vs 313 µs) while GPU time is 11.8% lower | **reported, not explained** — needs per-execution API differencing of both modes |
 | Cold vs warm compile time | **not separated anywhere** in this bundle |
 | TornadoVM-side SASS (task C) | **not capturable** — cubin produced in-process by NVRTC |
 | CUDA Graph per-execution API cost | **not differenced** |

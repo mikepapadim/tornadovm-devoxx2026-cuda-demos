@@ -227,7 +227,7 @@
     {
       "id": "E.host-dispatch",
       "task": "E",
-      "status": "partial",
+      "status": "measured",
       "claim": "Per-execution CUDA driver overhead is ~8.3 us for a one-kernel graph",
       "method": "difference two execution counts so fixed start-up cancels",
       "raw": [
@@ -238,12 +238,40 @@
         "cuStreamSynchronize_per_execution": 3,
         "h2d_24byte_stack_frame_per_launch": 1
       },
-      "gaps": [
-        "CUDA Graph replay not differenced",
-        "device-buffer reuse across graph nodes not verified from trace"
-      ],
+      "gaps": [],
       "conclusion": "Known upstream: TornadoVM#1028 findings 1 and 2; PR #1022 open, not in 6.0.0.",
-      "architecture": "sm_89"
+      "architecture": "sm_89",
+      "addenda": {
+        "E1_buffer_reuse": {
+          "graph": "scale(JIT) -> cudnnConv2d(library) -> addBias(JIT) -> cudnnRelu(library)",
+          "verdict": "device buffers reused across the JIT/libraryTask boundary; no unintended host round trip",
+          "evidence": "results/nvidia-meeting/task-E-graph-composition/d13-transfer-histogram.csv",
+          "input_h2d_262160B": 1,
+          "output_d2h_262160B": 20,
+          "intermediates_transferred": 0,
+          "correctness": "PASSED, max abs err 0.000000, 0/65536 elements out of tolerance"
+        },
+        "E2_cuda_graph_differencing": {
+          "method": "nsys cuda_api_sum at 10 and 100 executions, delta/90",
+          "workload": "CudaGraphBenefit 4096 6 <e> <mode>, 6-stage chain",
+          "nograph_per_exec": {
+            "cuLaunchKernel": 6,
+            "cuMemcpyHtoDAsync": 7,
+            "event_calls": 42,
+            "host_api_ns_excl_sync": 33774
+          },
+          "graph_per_exec": {
+            "cuGraphLaunch": 1,
+            "cuLaunchKernel": 0,
+            "cuMemcpyHtoDAsync": 0,
+            "event_calls": 3,
+            "host_api_ns_excl_sync": 6283
+          },
+          "host_api_reduction": "5.4x",
+          "note": "cuStreamSynchronize excluded from the comparison: it is largely device wait and is higher in graph mode because the host blocks once on the batched chain",
+          "evidence": "results/nvidia-meeting/task-E-graph-composition/"
+        }
+      }
     },
     {
       "id": "C.jit-specialisation",
@@ -268,17 +296,56 @@
     {
       "id": "F.fused-gemm",
       "task": "F",
-      "status": "gap",
-      "claim": null,
-      "reason": "demo 12's hand-written CUDA side requires a CUTLASS checkout (CUTLASS_DIR) not vendored in this repo",
+      "status": "partial",
+      "claim": "Fusion saves GPU time; the TornadoVM/CUDA gap is confined to JIT elementwise kernels",
+      "reason": null,
       "partial_raw": [
         "results/raw/19-cutlass-cudnn-warp-demos/"
       ],
       "gaps": [
-        "no counters for demo 12",
-        "cold vs warm compilation time not separated anywhere"
+        "m=n=k=4096 run still in progress at time of writing",
+        "cold vs warm compilation time not separated (acceptance criterion 8)",
+        "TornadoVM fused path is slower end-to-end than unfused (342 vs 313 us) while its GPU time is lower; reported, not explained"
       ],
-      "architecture": "sm_89"
+      "architecture": "sm_89",
+      "cutlass_version": "v3.5.1 (cloned; not vendored in this repo)",
+      "dtype": "fp16 in, fp16 out, row-major",
+      "warmup": 1,
+      "iterations": 20,
+      "statistic": "mean per-kernel avg from nsys",
+      "raw": [
+        "results/nvidia-meeting/task-F-fused-gemm/kernel-times.csv",
+        "results/nvidia-meeting/task-F-fused-gemm/README.md"
+      ],
+      "values": {
+        "m_n_k_1024": {
+          "tornadovm_fused_ns": 34675.9,
+          "tornadovm_unfused_ns": 39296.8,
+          "cuda_fused_ns": 33971.7,
+          "cuda_unfused_ns": 37331.8,
+          "fusion_saving_tornadovm_pct": 11.8
+        },
+        "m_n_k_256": {
+          "tornadovm_fused_ns": 11077.5,
+          "tornadovm_unfused_ns": 11810.4,
+          "cuda_fused_ns": 11193.6,
+          "cuda_unfused_ns": 11778.9,
+          "fusion_saving_tornadovm_pct": 6.2
+        },
+        "per_kernel_ratio_1024": {
+          "LinearCombinationRelu": 1.0,
+          "LinearCombination": 1.01,
+          "scale": 1.23,
+          "biasRelu": 1.2
+        },
+        "wall_clock_us_1024": {
+          "tornadovm_fused": 342,
+          "tornadovm_unfused": 313,
+          "cuda_fused": 236,
+          "cuda_unfused": 249
+        }
+      },
+      "conclusion": "Library kernels identical across implementations (1.00-1.01x); the gap is confined to JIT elementwise kernels at 1.20-1.23x, matching the task B alignment ratio on an independent workload."
     }
   ]
 }

@@ -1,0 +1,19 @@
+CUTLASS fused epilogue demo: C[1024x1024] = relu(scale(A[1024x1024]) * B[1024x1024] + bias), fp16
+  20 executions per mode, steady-state median reported (first execution excluded)
+
+=== FUSED (CUTLASS gemmBiasRelu — one kernel) ===
+
+  first execution (JIT compile + CUTLASS plan setup): 90133 us
+  steady-state median wall-clock (n=19): 342 us
+  [fused  ] validation PASSED (max abs err 0.00781, 0/1048576 cells out of tol)
+
+=== UNFUSED (CUTLASS hgemm + JIT bias/ReLU — two kernels) ===
+  first execution (JIT compile + CUTLASS plan setup): 23108 us
+  steady-state median wall-clock (n=19): 313 us
+  [unfused] validation PASSED (max abs err 0.00781, 0/1048576 cells out of tol)
+
+=== Summary (steady-state median us, this run/this GPU) ===
+fused   : 342
+unfused : 313 (0.92x the fused time)
+Both modes produce the same, correct result
+Generated:

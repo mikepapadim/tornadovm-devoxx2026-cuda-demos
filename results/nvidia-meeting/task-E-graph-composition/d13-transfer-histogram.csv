@@ -1,0 +1,8 @@
+copyKind,bytes,count
+HtoD,24,40
+HtoD,80,1
+HtoD,256,512
+HtoD,9232,1
+HtoD,262160,1
+DtoH,256,512
+DtoH,262160,20
