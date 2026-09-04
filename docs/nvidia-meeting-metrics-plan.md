@@ -191,5 +191,6 @@ claim**. Evidence: `results/nvidia-meeting/tile-feasibility/inventory.txt`.
 | 5 | Tensor-core claims backed by counters **and** emitted PTX | met (D) |
 | 6 | Tile feasibility stated as host facts with command output | met (G) |
 | 7 | Failures recorded, not hidden | met (`results/failures/`, F and C gaps) |
-| 8 | Cold vs warm compile time separated | **not met** (F) |
-| 9 | Device-buffer reuse across graph nodes verified from trace | **not met** (E) |
+| 8 | Cold vs warm compile time separated | met (F) |
+| 9 | Device-buffer reuse across graph nodes verified from trace | met (E1) |
+| 10 | Launch geometry controlled before attributing any ratio to code generation | met (B2) |

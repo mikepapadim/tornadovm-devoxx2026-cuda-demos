@@ -46,6 +46,51 @@ sectors, identical to offset 0, at one quarter of the padding. A residual
 ~2.5% timing difference remains between 32/64 B (12.0 µs) and 0/128 B (11.7 µs)
 which the sector counts do not explain; it is reported, not explained.
 
+### B2. Alignment separated from launch geometry — resolves the iteration-3 retraction
+
+2×2 over {implementation} × {block size}; TornadoVM's block pinned with a
+`GridScheduler`. `n=16777216` float32, `out = in*0.25f + 0.1f`, both sides
+validate. Counters under `ncu`; ratios valid within that mode only.
+
+| run | ld sec/req | occupancy | regs | DRAM % peak | kernel ns |
+|---|---|---|---|---|---|
+| TornadoVM @256 | **5.00** | 78.15% | 16 | 93.55 | 105,056 |
+| TornadoVM @1024 | **5.00** | 51.26% | 16 | 88.46 | 118,848 |
+| CUDA @256 | **4.00** | 79.87% | 16 | 94.53 | 97,760 |
+| CUDA @1024 | **4.00** | 50.80% | 16 | 91.29 | 113,312 |
+
+| Effect | Comparison | Ratio |
+|---|---|---|
+| alignment + codegen, geometry controlled | TVM@256 / CUDA@256 | **1.075** |
+| block size, within TornadoVM | @1024 / @256 | **1.131** |
+| block size, within CUDA | @1024 / @256 | **1.159** |
+| uncontrolled (what demo 12 measured) | TVM@1024 / CUDA@256 | **1.216** |
+| product of the first two | 1.075 × 1.131 | **1.216** |
+
+**The two effects multiply out to the uncontrolled figure exactly**, and 1.216
+matches the 1.20–1.23 demo 12 reported. The iteration-3 retraction is confirmed
+quantitatively.
+
+Three conclusions:
+
+- **Alignment is real and geometry-independent** — 5.00 vs 4.00 sectors/request
+  at *both* block sizes, as sector arithmetic predicts — but costs only
+  **1.075×** in time, because both kernels run at 93–95% of peak DRAM bandwidth.
+- **The block-size penalty is not a TornadoVM property.** 256→1024 costs 1.131×
+  on TornadoVM and **1.159× on hand-written CUDA**. Occupancy falls 78→51% and
+  80→51%, with registers identical at 16 in all four runs. Anyone choosing
+  block=1024 pays this, in any language.
+- **The residual codegen difference is instruction count**: 9,437,184 vs
+  7,864,320 (**1.20×**) at matched geometry, from bounds checks and index
+  arithmetic, largely hidden by the bandwidth bound.
+
+**Statement for the meeting:** with geometry controlled, on this host and this
+kernel, TornadoVM's generated elementwise code is **~1.075× slower** than
+hand-written CUDA, and the entire memory-side component is a fixable data-layout
+choice (#1065). The larger ratios elsewhere in this bundle are launch-config
+artefacts of the default worker grid — a runtime policy question, not compiler
+quality. Raw: `task-B2-geometry-controlled/`.
+
 ### A. Baseline code quality — kernel time, nsys
 
 Launch geometry held constant at block=256 on both sides.
@@ -278,7 +323,7 @@ not, and `wgmma` is not reachable by extending that enum.
 | Item | Status |
 |---|---|
 | F. Fused GEMM baseline | **measured** — CUTLASS v3.5.1; shapes 256, 1024, 4096 |
-| F. JIT-kernel ratios confounded by launch geometry (1024 vs 256 block) | **not isolated** — needs a re-run with GridScheduler pinned to 256 |
+| F. JIT-kernel ratios confounded by launch geometry | **now isolated** — see task B2: 1.075x alignment/codegen x 1.131x block size = 1.216x |
 | F. TornadoVM fused slower end-to-end than unfused (342 vs 313 µs) while GPU time is 11.8% lower | **reported, not explained** — needs per-execution API differencing of both modes |
 | Cold vs warm compile time | **measured** — 42.2 ms Graal + 16.3 ms NVRTC = 58.5 ms of an 87.1 ms cold execution; warm ~0.4 ms |
 | TornadoVM-side SASS (task C) | **not capturable** — cubin produced in-process by NVRTC |
