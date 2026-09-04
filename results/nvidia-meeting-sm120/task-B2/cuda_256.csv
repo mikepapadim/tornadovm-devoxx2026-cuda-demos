@@ -1,0 +1,20 @@
+==PROF== Connected to process 6527 (/home/michalis/tornadovm-devoxx2026-cuda-demos/results/nvidia-meeting/task-B2-geometry-controlled/geom)
+n=16777216 block=256 executions=2 sampled-mismatches=0 PASSED
+==PROF== Disconnected from process 6527
+"ID","Process ID","Process Name","Host Name","Kernel Name","Context","Stream","Block Size","Grid Size","Device","CC","Section Name","Metric Name","Metric Unit","Metric Value"
+"0","6527","geom","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","dram__throughput.avg.pct_of_peak_sustained_elapsed","%","86.27"
+"0","6527","geom","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","gpu__time_duration.sum","ns","145,952"
+"0","6527","geom","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","4"
+"0","6527","geom","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","2,097,152"
+"0","6527","geom","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","launch__block_size","","256"
+"0","6527","geom","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","launch__registers_per_thread","register/thread","16"
+"0","6527","geom","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","79.78"
+"0","6527","geom","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","smsp__inst_executed.sum","inst","9,437,184"
+"1","6527","geom","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","dram__throughput.avg.pct_of_peak_sustained_elapsed","%","86.40"
+"1","6527","geom","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","gpu__time_duration.sum","ns","145,696"
+"1","6527","geom","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","4"
+"1","6527","geom","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","2,097,152"
+"1","6527","geom","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","launch__block_size","","256"
+"1","6527","geom","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","launch__registers_per_thread","register/thread","16"
+"1","6527","geom","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","sm__warps_active.avg.pct_of_peak_sustained_active","%","79.77"
+"1","6527","geom","127.0.0.1","elementwise(const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","smsp__inst_executed.sum","inst","9,437,184"

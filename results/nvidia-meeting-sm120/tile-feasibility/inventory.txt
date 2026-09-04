@@ -1,0 +1,157 @@
+=== Step 7 CUDA Tile inventory — sm_120 host, CUDA 13.0.88 ===
+Baseline for comparison: sm_89 host, CUDA 12.6.85, all four counts 0.
+
+--- toolkits present ---
+/usr/local/cuda/
+/usr/local/cuda-13/
+/usr/local/cuda-13.0/
+
+[1] include headers matching *tile* (maxdepth 2)
+    COUNT = 0
+
+[2] lib64/bin entries matching *tile* (maxdepth 1)
+    COUNT = 0
+
+[3] nvcc --help mentions of 'tile'
+    COUNT = 0
+
+[4] libnvrtc dynamic symbols matching 'tile'
+    NOTE: doc hardcodes libnvrtc.so.12; substituted the .13 soname on this host.
+    lib: /usr/local/cuda-13.0/lib64/libnvrtc.so.13
+    COUNT = 0
+    lib: /usr/local/cuda-13.0/lib64/libnvrtc.so.13.0.88
+    COUNT = 0
+
+=== Additional (beyond doc) — widened search, to make the zero trustworthy ===
+The doc's maxdepth-2 find could miss a Tile path shipped deeper in CCCL.
+
+[5] full-depth find for *tile* under the whole CUDA 13.0 tree
+    /usr/local/cuda-13.0/targets/x86_64-linux/include/cccl/cuda/std/__type_traits/add_volatile.h
+    /usr/local/cuda-13.0/targets/x86_64-linux/include/cccl/cuda/std/__type_traits/is_volatile.h
+    /usr/local/cuda-13.0/targets/x86_64-linux/include/cccl/cuda/std/__type_traits/remove_volatile.h
+    /usr/local/cuda-13.0/targets/x86_64-linux/include/crt/cuda_tile.h
+    COUNT = 4
+
+[6] grep for cuTile / cutile / tile_ identifiers in all CUDA 13.0 headers
+    /usr/local/cuda-13.0/include/crt/host_defines.h
+    /usr/local/cuda-13.0/include/crt/cuda_tile.h
+    FILES = 2
+
+[7] any 'tile' in nvcc --list-gpu-arch / ptxas help
+    ptxas tile mentions = 0
+
+[8] NVRTC exported functions (nm -D, type T) — CUDA 13.0.88
+    nvrtcAddNameExpression@@libnvrtc.so.13
+    nvrtcCompileProgram@@libnvrtc.so.13
+    __nvrtcCPEx@@libnvrtc.so.13
+    nvrtcCreateProgram@@libnvrtc.so.13
+    nvrtcDestroyProgram@@libnvrtc.so.13
+    nvrtcGetCUBIN@@libnvrtc.so.13
+    nvrtcGetCUBINSize@@libnvrtc.so.13
+    nvrtcGetErrorString@@libnvrtc.so.13
+    nvrtcGetLoweredName@@libnvrtc.so.13
+    nvrtcGetLTOIR@@libnvrtc.so.13
+    nvrtcGetLTOIRSize@@libnvrtc.so.13
+    nvrtcGetNumSupportedArchs@@libnvrtc.so.13
+    nvrtcGetOptiXIR@@libnvrtc.so.13
+    nvrtcGetOptiXIRSize@@libnvrtc.so.13
+    nvrtcGetPCHCreateStatus@@libnvrtc.so.13
+    nvrtcGetPCHHeapSize@@libnvrtc.so.13
+    nvrtcGetPCHHeapSizeRequired@@libnvrtc.so.13
+    nvrtcGetProgramLog@@libnvrtc.so.13
+    nvrtcGetProgramLogSize@@libnvrtc.so.13
+    nvrtcGetPTX@@libnvrtc.so.13
+    nvrtcGetPTXSize@@libnvrtc.so.13
+    nvrtcGetSupportedArchs@@libnvrtc.so.13
+    nvrtcSetFlowCallback@@libnvrtc.so.13
+    nvrtcSetPCHHeapSize@@libnvrtc.so.13
+    nvrtcVersion@@libnvrtc.so.13
+
+    sm_89 baseline (CUDA 12.6.85) noted exports: nvrtcGetNVVM, nvrtcGetLTOIR
+
+================================================================
+FINDING 1 — the doc's Step 7 command produces a FALSE ZERO
+================================================================
+  find /usr/local/cuda*/include -maxdepth 2 -iname '*tile*'
+
+`find` defaults to -P and never follows symlinks, including the ones named
+as command-line arguments. In NVIDIA's standard CUDA 13 layout:
+
+  /usr/local/cuda-13.0/include -> targets/x86_64-linux/include
+  /usr/local/cuda-13.0/lib64   -> targets/x86_64-linux/lib
+
+so the traversal stops at the symlink itself and matches nothing.
+
+    find    /usr/local/cuda*/include -maxdepth 2 -iname '*tile*'  ->  0 hits
+    find -L /usr/local/cuda*/include -maxdepth 2 -iname '*tile*'  ->  3 hits
+        /usr/local/cuda-13.0/include/crt/cuda_tile.h
+        /usr/local/cuda-13/include/crt/cuda_tile.h
+        /usr/local/cuda/include/crt/cuda_tile.h
+
+FIX: use `find -L`. Counts [1] and [2] in the block above are unreliable as
+written and should be regarded as 0-by-artifact, not 0-by-absence.
+
+CONSEQUENCE FOR THE BASELINE: the sm_89 "all four counts were 0" was produced
+by this same command. If that host also had the symlinked layout, its zero is
+unverified too and should be re-run with -L before any comparison is drawn.
+
+================================================================
+FINDING 2 — CUDA 13.0 ships Tile-language plumbing; 12.0 does not
+================================================================
+Corrected inventory, using find -L:
+
+  [1] include headers matching *tile*        1   (crt/cuda_tile.h)
+  [2] lib64/bin entries matching *tile*      0
+  [3] nvcc --help mentions of 'tile'         0
+  [4] libnvrtc.so.13 symbols matching 'tile' 0
+
+crt/cuda_tile.h is 60 lines and declares exactly one entity:
+
+    namespace cuda { namespace cutile {
+      void __tile_builtin__ print(const char *, ...);
+    } }
+
+crt/host_defines.h (CUDA 13.0) additionally defines three location qualifiers
+that do not exist in 12.0:
+
+    __tile_global__   -> __location__(tile_global)
+    __tile__          -> __location__(tile)
+    __tile_builtin__  -> __location__(tile_builtin)
+
+Front-end recognition, by `strings`:
+
+    binary                        '__tile_builtin__'
+    nvcc 13.0.88                  0
+    cudafe++ 13.0.88              1      <-- CUDA C++ front end knows it
+    ptxas 13.0.88                 0
+    libnvrtc.so.13.0.88           1      <-- NVRTC knows it
+
+Same-machine A/B against the distro toolkit (nvidia-cuda-toolkit 12.0.140):
+
+    /usr/include/crt/host_defines.h            '__tile' occurrences:  0
+    /usr/lib/.../libnvrtc.so.12.0.140          '__tile_builtin__'  :  0
+
+So the qualifiers and the front-end handling are new in 13.0 on this host, not
+pre-existing.
+
+================================================================
+INTERPRETATION — deliberately narrow
+================================================================
+Per the doc: inventory only, no performance claim, no implementation.
+
+What is established:
+  - CUDA 13.0's compiler front end (cudafe++) and NVRTC both carry a
+    tile-language concept, expressed as location qualifiers plus a
+    `cuda::cutile` namespace.
+
+What is NOT established, and must not be implied:
+  - No user-facing Tile programming model ships in 13.0.88. The only declared
+    entity is `print`. No tile types, no tile ops, no tile algorithms.
+  - Nothing in the toolkit #includes cuda_tile.h -- it is unreachable from a
+    normal compile without naming it explicitly.
+  - No nvcc command-line surface (count [3] = 0).
+  - No claim is made that this is usable, supported, or performant.
+
+Reasonable characterisation: reserved plumbing for a Tile path that is not yet
+exposed. That is a real change from 12.x and worth reporting to NVIDIA as an
+open question, but it does not change feasibility today.

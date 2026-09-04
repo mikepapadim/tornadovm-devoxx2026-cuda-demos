@@ -1,0 +1,9 @@
+counters unlocked; using /usr/local/cuda-13.0/bin/ncu
+=== Step 2 — alignment sweep ===
+  -> alignment-sweep-ncu.csv
+=== Step 3 — geometry-controlled 2x2 ===
+  -> task-B2/{tvm,cuda}_256.csv
+  -> task-B2/{tvm,cuda}_1024.csv
+=== Step 5 — tensor cores, instruction counts ===
+  -> task-D/
+ALL BLOCKED STEPS ATTEMPTED

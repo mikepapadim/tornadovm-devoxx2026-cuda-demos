@@ -1,0 +1,82 @@
+sm__inst_executed_pipe_tensor                                               Counter         inst            # of warp instructions executed by tensor pipe                        
+sm__inst_executed_pipe_tensor_subpipe_hmma                                  Counter         inst            # of warp instructions executed by tensor pipe (HMMA/QMMA/OMMA ops)   
+sm__inst_executed_pipe_tensor_subpipe_hmma_op_hmma                          Counter         inst            # of warp instructions executed by tensor pipe (HMMA ops)             
+sm__inst_executed_pipe_tensor_subpipe_hmma_realtime                         Counter         inst            # of warp instructions executed by tensor pipe (HMMA/QMMA/OMMA ops)   
+sm__inst_executed_pipe_tensor_subpipe_imma                                  Counter         inst            # of warp instructions executed by tensor pipe (IMMA ops)             
+sm__inst_executed_pipe_tensor_subpipe_imma_op_imma                          Counter         inst            # of warp instructions executed by tensor pipe (IMMA ops)             
+sm__inst_executed_pipe_tensor_subpipe_imma_realtime                         Counter         inst            # of warp instructions executed by tensor pipe (IMMA ops)             
+sm__ops_path_tensor_op_hmma_src_bf16_dst_fp32                               Counter                         # of math ops executed in Tensor path by HMMA with source BF16 and    
+sm__ops_path_tensor_op_hmma_src_bf16_dst_fp32_realtime                      Counter                         # of math ops executed in Tensor path by op HMMA with source BF16 and 
+sm__ops_path_tensor_op_hmma_src_bf16_dst_fp32_sparsity_off                  Counter                         # of math ops executed in Tensor path by HMMA with source BF16 and    
+sm__ops_path_tensor_op_hmma_src_bf16_dst_fp32_sparsity_off_realtime         Counter                         # of math ops executed in Tensor path by op HMMA with source BF16 and 
+sm__ops_path_tensor_op_hmma_src_bf16_dst_fp32_sparsity_on                   Counter                         # of math ops executed in Tensor path by HMMA with source BF16 and    
+sm__ops_path_tensor_op_hmma_src_bf16_dst_fp32_sparsity_on_realtime          Counter                         # of math ops executed in Tensor path by op HMMA with source BF16 and 
+sm__ops_path_tensor_op_hmma_src_fp16_dst_fp16                               Counter                         # of math ops executed in Tensor path by HMMA with source FP16 and    
+sm__ops_path_tensor_op_hmma_src_fp16_dst_fp16_realtime                      Counter                         # of math ops executed in Tensor path by op HMMA with source FP16 and 
+sm__ops_path_tensor_op_hmma_src_fp16_dst_fp16_sparsity_off                  Counter                         # of math ops executed in Tensor path by op HMMA with source FP16 and 
+sm__ops_path_tensor_op_hmma_src_fp16_dst_fp16_sparsity_off_realtime         Counter                         # of math ops executed in Tensor path by op HMMA with source FP16 and 
+sm__ops_path_tensor_op_hmma_src_fp16_dst_fp16_sparsity_on                   Counter                         # of math ops executed in Tensor path by op HMMA with source FP16 and 
+sm__ops_path_tensor_op_hmma_src_fp16_dst_fp16_sparsity_on_realtime          Counter                         # of math ops executed in Tensor path by op HMMA with source FP16 and 
+sm__ops_path_tensor_op_hmma_src_fp16_dst_fp32                               Counter                         # of math ops executed in Tensor path by HMMA with source FP16 and    
+sm__ops_path_tensor_op_hmma_src_fp16_dst_fp32_realtime                      Counter                         # of math ops executed in Tensor path by op HMMA with source FP16 and 
+sm__ops_path_tensor_op_hmma_src_fp16_dst_fp32_sparsity_off                  Counter                         # of math ops executed in Tensor path by HMMA with source FP16 and    
+sm__ops_path_tensor_op_hmma_src_fp16_dst_fp32_sparsity_off_realtime         Counter                         # of math ops executed in Tensor path by op HMMA with source FP16 and 
+sm__ops_path_tensor_op_hmma_src_fp16_dst_fp32_sparsity_on                   Counter                         # of math ops executed in Tensor path by HMMA with source FP16 and    
+sm__ops_path_tensor_op_hmma_src_fp16_dst_fp32_sparsity_on_realtime          Counter                         # of math ops executed in Tensor path by op HMMA with source FP16 and 
+sm__ops_path_tensor_op_hmma_src_tf32_dst_fp32                               Counter                         # of math ops executed in Tensor path by HMMA with source TF32 and    
+sm__ops_path_tensor_op_hmma_src_tf32_dst_fp32_realtime                      Counter                         # of math ops executed in Tensor path by op HMMA with source TF32 and 
+sm__ops_path_tensor_op_hmma_src_tf32_dst_fp32_sparsity_off                  Counter                         # of math ops executed in Tensor path by HMMA with source TF32 and    
+sm__ops_path_tensor_op_hmma_src_tf32_dst_fp32_sparsity_off_realtime         Counter                         # of math ops executed in Tensor path by op HMMA with source TF32 and 
+sm__ops_path_tensor_op_hmma_src_tf32_dst_fp32_sparsity_on                   Counter                         # of math ops executed in Tensor path by HMMA with source TF32 and    
+sm__ops_path_tensor_op_hmma_src_tf32_dst_fp32_sparsity_on_realtime          Counter                         # of math ops executed in Tensor path by op HMMA with source TF32 and 
+sm__ops_path_tensor_op_imma_src_int8                                        Counter                         # of math ops executed in Tensor path by IMMA with source INT8        
+sm__ops_path_tensor_op_imma_src_int8_realtime                               Counter                         # of math ops executed in Tensor path by op IMMA with source INT8     
+sm__ops_path_tensor_op_imma_src_int8_sparsity_off                           Counter                         # of math ops executed in Tensor path by IMMA with source INT8 with   
+sm__ops_path_tensor_op_imma_src_int8_sparsity_off_realtime                  Counter                         # of math ops executed in Tensor path by op IMMA with source INT8     
+sm__ops_path_tensor_op_imma_src_int8_sparsity_on                            Counter                         # of math ops executed in Tensor path by IMMA with source INT8 with   
+sm__ops_path_tensor_op_imma_src_int8_sparsity_on_realtime                   Counter                         # of math ops executed in Tensor path by op IMMA with source INT8     
+sm__ops_path_tensor_src_bf16_dst_fp32                                       Counter                         # of math ops executed in Tensor path with source BF16 and            
+sm__ops_path_tensor_src_bf16_dst_fp32_realtime                              Counter                         # of math ops executed in Tensor path with source BF16 and            
+sm__ops_path_tensor_src_fp16_dst_fp16                                       Counter                         # of math ops executed in Tensor path with source FP16 and            
+sm__ops_path_tensor_src_fp16_dst_fp16_realtime                              Counter                         # of math ops executed in Tensor path with source FP16 and            
+sm__ops_path_tensor_src_fp16_dst_fp32                                       Counter                         # of math ops executed in Tensor path with source FP16 and            
+sm__ops_path_tensor_src_fp16_dst_fp32_realtime                              Counter                         # of math ops executed in Tensor path with source FP16 and            
+sm__ops_path_tensor_src_fp4_dst_fp32                                        Counter                         # of math ops executed in Tensor path with source FP4 and destination 
+sm__ops_path_tensor_src_fp4_dst_fp32_realtime                               Counter                         # of math ops executed in Tensor path with source FP4 and destination 
+sm__ops_path_tensor_src_fp4_dst_fp32_sparsity_off                           Counter                         # of math ops executed in Tensor path with source FP4 and destination 
+sm__ops_path_tensor_src_fp4_dst_fp32_sparsity_on                            Counter                         # of math ops executed in Tensor path with source FP4 and destination 
+sm__ops_path_tensor_src_fp4_fp6_dst_fp16                                    Counter                         # of math ops executed in Tensor path with source FP4/FP6 destination 
+sm__ops_path_tensor_src_fp4_fp6_dst_fp16_realtime                           Counter                         # of math ops executed in Tensor path with source FP4/FP6 and         
+sm__ops_path_tensor_src_fp4_fp6_dst_fp16_sparsity_off                       Counter                         # of math ops executed in Tensor path with source FP4/FP6 and         
+sm__ops_path_tensor_src_fp4_fp6_dst_fp16_sparsity_off_realtime              Counter                         # of math ops executed in Tensor path with source FP4/FP6 and         
+sm__ops_path_tensor_src_fp4_fp6_dst_fp16_sparsity_on                        Counter                         # of math ops executed in Tensor path with source FP4/FP6 and         
+sm__ops_path_tensor_src_fp4_fp6_dst_fp16_sparsity_on_realtime               Counter                         # of math ops executed in Tensor path with source FP4/FP6 and         
+sm__ops_path_tensor_src_fp4_fp6_dst_fp32                                    Counter                         # of math ops executed in Tensor path with source FP4/FP6 destination 
+sm__ops_path_tensor_src_fp4_fp6_dst_fp32_realtime                           Counter                         # of math ops executed in Tensor path with source FP4/FP6 and         
+sm__ops_path_tensor_src_fp4_fp6_dst_fp32_sparsity_off                       Counter                         # of math ops executed in Tensor path with source FP4/FP6 and         
+sm__ops_path_tensor_src_fp4_fp6_dst_fp32_sparsity_off_realtime              Counter                         # of math ops executed in Tensor path with source FP4/FP6 and         
+sm__ops_path_tensor_src_fp4_fp6_dst_fp32_sparsity_on                        Counter                         # of math ops executed in Tensor path with source FP4/FP6 and         
+sm__ops_path_tensor_src_fp4_fp6_dst_fp32_sparsity_on_realtime               Counter                         # of math ops executed in Tensor path with source FP4/FP6 and         
+sm__ops_path_tensor_src_fp64                                                Counter                         # of math ops executed in Tensor path with source FP64                
+sm__ops_path_tensor_src_fp8_dst_fp16                                        Counter                         # of math ops executed in Tensor path with one source FP8 and other   
+sm__ops_path_tensor_src_fp8_dst_fp16_realtime                               Counter                         # of math ops executed in Tensor path with one source FP8 and other   
+sm__ops_path_tensor_src_fp8_dst_fp16_sparsity_off                           Counter                         # of math ops executed in Tensor path with one source FP8 and other   
+sm__ops_path_tensor_src_fp8_dst_fp16_sparsity_off_realtime                  Counter                         # of math ops executed in Tensor path with one source FP8 and other   
+sm__ops_path_tensor_src_fp8_dst_fp16_sparsity_on                            Counter                         # of math ops executed in Tensor path with one source FP8 and other   
+sm__ops_path_tensor_src_fp8_dst_fp16_sparsity_on_realtime                   Counter                         # of math ops executed in Tensor path with one source FP8 and other   
+sm__ops_path_tensor_src_fp8_dst_fp32                                        Counter                         # of math ops executed in Tensor path with one source FP8 and other   
+sm__ops_path_tensor_src_fp8_dst_fp32_realtime                               Counter                         # of math ops executed in Tensor path with one source FP8 and other   
+sm__ops_path_tensor_src_fp8_dst_fp32_sparsity_off                           Counter                         # of math ops executed in Tensor path with one source FP8 and other   
+sm__ops_path_tensor_src_fp8_dst_fp32_sparsity_off_realtime                  Counter                         # of math ops executed in Tensor path with one source FP8 and other   
+sm__ops_path_tensor_src_fp8_dst_fp32_sparsity_on                            Counter                         # of math ops executed in Tensor path with one source FP8 and other   
+sm__ops_path_tensor_src_fp8_dst_fp32_sparsity_on_realtime                   Counter                         # of math ops executed in Tensor path with one source FP8 and other   
+sm__ops_path_tensor_src_int8                                                Counter                         # of math ops executed in Tensor path with source INT8                
+sm__ops_path_tensor_src_int8_realtime                                       Counter                         # of math ops executed in Tensor path with source INT8                
+sm__ops_path_tensor_src_tf32_dst_fp32                                       Counter                         # of math ops executed in Tensor path with source TF32 and            
+sm__ops_path_tensor_src_tf32_dst_fp32_realtime                              Counter                         # of math ops executed in Tensor path with source TF32 and            
+sm__pipe_tensor_cycles_active                                               Counter         cycle           # of cycles where tensor pipe was active                              
+sm__pipe_tensor_cycles_active_realtime                                      Counter         cycle           # of cycles where tensor pipe was active                              
+sm__pipe_tensor_subpipe_hmma_cycles_active                                  Counter         cycle           # of cycles where tensor pipe was active (HMMA/QMMA/OMMA ops)         
+sm__pipe_tensor_subpipe_hmma_cycles_active_realtime                         Counter         cycle           # of cycles where tensor pipe was active (HMMA/QMMA/OMMA ops)         
+sm__pipe_tensor_subpipe_imma_cycles_active                                  Counter         cycle           # of cycles where tensor pipe was active (IMMA ops)                   
+sm__pipe_tensor_subpipe_imma_cycles_active_realtime                         Counter         cycle           # of cycles where tensor pipe was active (IMMA ops)                   

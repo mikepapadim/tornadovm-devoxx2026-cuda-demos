@@ -1,0 +1,28 @@
+==PROF== Connected to process 8940 (/home/michalis/.sdkman/candidates/java/25.0.2-open/bin/java)
+Tensor-core operand types from Java: C[16x16] = A[16x32] * B[32x16], one warp
+  each result validated against a CPU reference over the same stored values
+
+  BF16     m16n8k16  f32.bf16.bf16.f32  PASSED (max abs err 0.00000, 0/256 cells out of tol)
+  int8     m16n8k32  s32.s8.s8.s32      PASSED (max abs err 0.00000, 0/256 cells out of tol)
+  FP8 e4m3 m16n8k32  f32.e4m3.e4m3.f32  PASSED (max abs err 0.00000, 0/256 cells out of tol)
+  FP8 e5m2 m16n8k32  f32.e5m2.e5m2.f32  PASSED (max abs err 0.00000, 0/256 cells out of tol)
+
+All four operand types produced correct results
+==PROF== Disconnected from process 8940
+"ID","Process ID","Process Name","Host Name","Kernel Name","Context","Stream","Block Size","Grid Size","Device","CC","Section Name","Metric Name","Metric Unit","Metric Value"
+"0","8940","java","127.0.0.1","gemmBF16","1","14","(32, 1, 1)","(1, 1, 1)","0","12.0","Command line profiler metrics","sm__inst_executed_pipe_tensor.sum","inst","4"
+"0","8940","java","127.0.0.1","gemmBF16","1","14","(32, 1, 1)","(1, 1, 1)","0","12.0","Command line profiler metrics","sm__inst_executed_pipe_tensor_subpipe_hmma_op_hmma.sum","inst","4"
+"0","8940","java","127.0.0.1","gemmBF16","1","14","(32, 1, 1)","(1, 1, 1)","0","12.0","Command line profiler metrics","sm__inst_executed_pipe_tensor_subpipe_imma_op_imma.sum","inst","0"
+"0","8940","java","127.0.0.1","gemmBF16","1","14","(32, 1, 1)","(1, 1, 1)","0","12.0","Command line profiler metrics","sm__pipe_tensor_cycles_active.sum","cycle","64"
+"1","8940","java","127.0.0.1","gemmInt8","1","15","(32, 1, 1)","(1, 1, 1)","0","12.0","Command line profiler metrics","sm__inst_executed_pipe_tensor.sum","inst","2"
+"1","8940","java","127.0.0.1","gemmInt8","1","15","(32, 1, 1)","(1, 1, 1)","0","12.0","Command line profiler metrics","sm__inst_executed_pipe_tensor_subpipe_hmma_op_hmma.sum","inst","0"
+"1","8940","java","127.0.0.1","gemmInt8","1","15","(32, 1, 1)","(1, 1, 1)","0","12.0","Command line profiler metrics","sm__inst_executed_pipe_tensor_subpipe_imma_op_imma.sum","inst","2"
+"1","8940","java","127.0.0.1","gemmInt8","1","15","(32, 1, 1)","(1, 1, 1)","0","12.0","Command line profiler metrics","sm__pipe_tensor_cycles_active.sum","cycle","32"
+"2","8940","java","127.0.0.1","gemmFP8E4M3","1","16","(32, 1, 1)","(1, 1, 1)","0","12.0","Command line profiler metrics","sm__inst_executed_pipe_tensor.sum","inst","2"
+"2","8940","java","127.0.0.1","gemmFP8E4M3","1","16","(32, 1, 1)","(1, 1, 1)","0","12.0","Command line profiler metrics","sm__inst_executed_pipe_tensor_subpipe_hmma_op_hmma.sum","inst","0"
+"2","8940","java","127.0.0.1","gemmFP8E4M3","1","16","(32, 1, 1)","(1, 1, 1)","0","12.0","Command line profiler metrics","sm__inst_executed_pipe_tensor_subpipe_imma_op_imma.sum","inst","0"
+"2","8940","java","127.0.0.1","gemmFP8E4M3","1","16","(32, 1, 1)","(1, 1, 1)","0","12.0","Command line profiler metrics","sm__pipe_tensor_cycles_active.sum","cycle","32"
+"3","8940","java","127.0.0.1","gemmFP8E5M2","1","17","(32, 1, 1)","(1, 1, 1)","0","12.0","Command line profiler metrics","sm__inst_executed_pipe_tensor.sum","inst","2"
+"3","8940","java","127.0.0.1","gemmFP8E5M2","1","17","(32, 1, 1)","(1, 1, 1)","0","12.0","Command line profiler metrics","sm__inst_executed_pipe_tensor_subpipe_hmma_op_hmma.sum","inst","0"
+"3","8940","java","127.0.0.1","gemmFP8E5M2","1","17","(32, 1, 1)","(1, 1, 1)","0","12.0","Command line profiler metrics","sm__inst_executed_pipe_tensor_subpipe_imma_op_imma.sum","inst","0"
+"3","8940","java","127.0.0.1","gemmFP8E5M2","1","17","(32, 1, 1)","(1, 1, 1)","0","12.0","Command line profiler metrics","sm__pipe_tensor_cycles_active.sum","cycle","32"

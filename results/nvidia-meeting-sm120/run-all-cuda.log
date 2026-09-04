@@ -1,0 +1,31 @@
+Building for sm_120
+OK   00-hello-gpu -- compile
+OK   00-hello-gpu -- run
+OK   01-first-cuda-kernel -- compile
+OK   01-first-cuda-kernel -- run
+OK   02-cuda-runtime-api -- compile
+OK   02-cuda-runtime-api -- run
+OK   04-cublas-hybrid -- compile
+OK   04-cublas-hybrid -- run
+OK   05-cufft-hybrid -- compile
+OK   05-cufft-hybrid -- run
+OK   06-cuda-streams -- compile
+OK   06-cuda-streams -- run
+OK   07-cuda-graph-benefit -- compile
+OK   07-cuda-graph-benefit -- run
+OK   08-tensor-core-mma -- compile
+OK   08-tensor-core-mma -- run
+OK   11-integrated-showcase -- compile
+OK   11-integrated-showcase -- run
+SKIP 12-cutlass-fused-epilogue -- set CUTLASS_DIR to a CUTLASS checkout to build this one
+OK   13-cudnn-jit-convblock -- compile
+OK   13-cudnn-jit-convblock -- run
+OK   14-warp-async-shared -- compile
+OK   14-warp-async-shared -- run
+OK   15-kernel-time-comparison -- compile
+OK   15-kernel-time-comparison -- run
+OK   15-kernel-time-comparison/ProbeHeaderAlignment
+OK   15-kernel-time-comparison/ProbeJitSpecialisation
+
+== Summary: 26 passed, 0 failed, 1 skipped ==
+   logs: /tmp/tmp.W59Ngf2u0g

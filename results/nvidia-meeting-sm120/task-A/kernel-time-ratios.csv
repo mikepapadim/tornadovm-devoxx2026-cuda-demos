@@ -1,0 +1,4 @@
+kernel,tvm_median_ns,cuda_median_ns,ratio_tvm_over_cuda,tvm_n,cuda_n,note
+elementwise,38819,38114,1.0185,19,19,first instance excluded (L2-resident artifact, present on both sides)
+polynomial,54979,60131,0.9143,19,19,first instance excluded (L2-resident artifact, present on both sides)
+stencil,17761,17665,1.0054,19,19,first instance excluded (L2-resident artifact, present on both sides)

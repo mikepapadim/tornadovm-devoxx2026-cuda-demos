@@ -1,0 +1,5 @@
+offset= 0 floats (  0 B) : median 17.7 us
+offset= 4 floats ( 16 B) : median 18.9 us
+offset= 8 floats ( 32 B) : median 18.2 us
+offset=16 floats ( 64 B) : median 18.2 us
+offset=32 floats (128 B) : median 17.9 us

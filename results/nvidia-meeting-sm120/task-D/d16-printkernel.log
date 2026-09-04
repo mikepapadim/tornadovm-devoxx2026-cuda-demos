@@ -1,0 +1,1081 @@
+WARNING: module-info.class ignored in patch: /home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda/share/java/jvmci/jvmci-21.0.2.jar
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess (file:/home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda/share/java/tornado/tornado-runtime-6.0.0.jar)
+WARNING: Please consider reporting this to the maintainers of class uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+Tensor-core operand types from Java: C[16x16] = A[16x32] * B[32x16], one warp
+  each result validated against a CPU reference over the same stored values
+
+extern "C" __global__ void gemmBF16(long long *_kernel_context, unsigned char *_constant_region, unsigned char *_local_region, int *_atomics, unsigned char *arg1, unsigned char *arg2, unsigned char *arg3)
+{
+  unsigned long long ul_0, ul_1, ul_2, ul_21, ul_27, ul_51, ul_57, ul_69, ul_75, ul_100, ul_106, ul_131, ul_137, ul_149, ul_155; 
+  int i_8, i_9, i_10, i_11, i_12, i_13, i_14, i_15, i_16, i_17, i_23, i_29, i_30, i_31, i_32, i_33, i_38, i_39, i_40, i_41, i_42, i_43, i_44, i_45, i_46, i_47, i_53, i_59, i_60, i_65, i_71, i_81, i_87, i_88, i_89, i_90, i_91, i_92, i_93, i_94, i_95, i_96, i_102, i_108, i_109, i_110, i_111, i_112, i_117, i_118, i_119, i_120, i_121, i_122, i_123, i_124, i_125, i_126, i_127, i_133, i_139, i_140, i_145, i_151, i_161; 
+  long long l_18, l_19, l_20, l_24, l_25, l_26, l_48, l_49, l_50, l_54, l_55, l_56, l_66, l_67, l_68, l_72, l_73, l_74, l_97, l_98, l_99, l_103, l_104, l_105, l_128, l_129, l_130, l_134, l_135, l_136, l_146, l_147, l_148, l_152, l_153, l_154; 
+  short sh_22, sh_28, sh_52, sh_58, sh_70, sh_76, sh_101, sh_107, sh_132, sh_138, sh_150, sh_156; 
+  unsigned int ui_34, ui_35, ui_36, ui_37, ui_61, ui_62, ui_63, ui_64, ui_77, ui_78, ui_79, ui_80, ui_113, ui_114, ui_115, ui_116, ui_141, ui_142, ui_143, ui_144, ui_157, ui_158, ui_159, ui_160; 
+
+  // BLOCK 0
+  ul_0  =  (unsigned long long) arg1;
+  ul_1  =  (unsigned long long) arg2;
+  ul_2  =  (unsigned long long) arg3;
+  __shared__ int adi_3[128];
+  __shared__ int adi_4[128];
+  __shared__ int adi_5[128];
+  float mma_acc_f_6[4];
+  mma_acc_f_6[0] = 0.0F;
+  mma_acc_f_6[1] = 0.0F;
+  mma_acc_f_6[2] = 0.0F;
+  mma_acc_f_6[3] = 0.0F;
+  float mma_acc_f_7[4];
+  mma_acc_f_7[0] = 0.0F;
+  mma_acc_f_7[1] = 0.0F;
+  mma_acc_f_7[2] = 0.0F;
+  mma_acc_f_7[3] = 0.0F;
+  i_8  =  (threadIdx.x);
+  // BLOCK 1 MERGES [0 2 ]
+  i_9  =  i_8;
+  for(;i_9 < 128;)
+  {
+    // BLOCK 2
+    i_10  =  i_9 << 1;
+    i_11  =  i_10 >> 31;
+    i_12  =  i_11 >> 28;
+    i_13  =  i_12 + i_10;
+    i_14  =  i_13 >> 4;
+    i_15  =  i_14 << 5;
+    i_16  =  i_10 % 16;
+    i_17  =  i_15 + i_16;
+    l_18  =  (long long) i_17;
+    l_19  =  l_18 + 8L;
+    l_20  =  l_19 << 1;
+    ul_21  =  ul_0 + l_20;
+    sh_22  =  *(( short *) ul_21);
+    i_23  =  i_17 + 1;
+    l_24  =  (long long) i_23;
+    l_25  =  l_24 + 8L;
+    l_26  =  l_25 << 1;
+    ul_27  =  ul_0 + l_26;
+    sh_28  =  *(( short *) ul_27);
+    i_29  =  i_16 >> 31;
+    i_30  =  i_29 + i_16;
+    i_31  =  i_30 >> 1;
+    i_32  =  i_14 << 3;
+    i_33  =  i_31 + i_32;
+    ui_34  =  sh_28 & 65535U;
+    ui_35  =  ui_34 << 16;
+    ui_36  =  sh_22 & 65535U;
+    ui_37  =  ui_35 | ui_36;
+    adi_3[i_33]  =  ui_37;
+    i_38  =  i_9 + 32;
+    i_9  =  i_38;
+  }  // B1
+  // BLOCK 3
+  // BLOCK 4 MERGES [3 5 ]
+  i_39  =  i_8;
+  for(;i_39 < 64;)
+  {
+    // BLOCK 5
+    i_40  =  i_39 % 4;
+    i_41  =  i_40 << 1;
+    i_42  =  i_39 >> 31;
+    i_43  =  i_42 >> 30;
+    i_44  =  i_43 + i_39;
+    i_45  =  i_44 >> 2;
+    i_46  =  i_45 << 4;
+    i_47  =  i_41 + i_46;
+    l_48  =  (long long) i_47;
+    l_49  =  l_48 + 8L;
+    l_50  =  l_49 << 1;
+    ul_51  =  ul_1 + l_50;
+    sh_52  =  *(( short *) ul_51);
+    i_53  =  i_47 + 1;
+    l_54  =  (long long) i_53;
+    l_55  =  l_54 + 8L;
+    l_56  =  l_55 << 1;
+    ul_57  =  ul_1 + l_56;
+    sh_58  =  *(( short *) ul_57);
+    i_59  =  i_44 & -4;
+    i_60  =  i_59 + i_40;
+    ui_61  =  sh_58 & 65535U;
+    ui_62  =  ui_61 << 16;
+    ui_63  =  sh_52 & 65535U;
+    ui_64  =  ui_62 | ui_63;
+    adi_4[i_60]  =  ui_64;
+    i_65  =  i_47 + 8;
+    l_66  =  (long long) i_65;
+    l_67  =  l_66 + 8L;
+    l_68  =  l_67 << 1;
+    ul_69  =  ul_1 + l_68;
+    sh_70  =  *(( short *) ul_69);
+    i_71  =  i_47 + 9;
+    l_72  =  (long long) i_71;
+    l_73  =  l_72 + 8L;
+    l_74  =  l_73 << 1;
+    ul_75  =  ul_1 + l_74;
+    sh_76  =  *(( short *) ul_75);
+    ui_77  =  sh_76 & 65535U;
+    ui_78  =  ui_77 << 16;
+    ui_79  =  sh_70 & 65535U;
+    ui_80  =  ui_78 | ui_79;
+    adi_5[i_60]  =  ui_80;
+    i_81  =  i_39 + 32;
+    i_39  =  i_81;
+  }  // B4
+  // BLOCK 6
+  __syncthreads();
+  unsigned mma_a_h_82[4];
+  {
+    unsigned __lane = threadIdx.x & 31u;
+    unsigned __rit  = __lane & 7u;
+    unsigned __grp  = __lane >> 3;
+    unsigned __bo;
+    unsigned __row = ((__grp & 1u) << 3) + __rit;
+    unsigned __col = (__grp >> 1) << 4;
+    __bo = (__row << 5) + __col;
+    unsigned __smem;
+    asm volatile("{ .reg .u64 u; cvta.to.shared.u64 u, %1; cvt.u32.u64 %0, u; }" : "=r"(__smem) : "l"((const char *) adi_3 + __bo));
+    asm volatile("ldmatrix.sync.aligned.m8n8.x4.shared.b16 {%0,%1,%2,%3}, [%4];" : "=r"(mma_a_h_82[0]), "=r"(mma_a_h_82[1]), "=r"(mma_a_h_82[2]), "=r"(mma_a_h_82[3]) : "r"(__smem));
+  }
+  unsigned mma_b_h_83[2];
+  {
+    unsigned __lane = threadIdx.x & 31u;
+    unsigned __rit  = __lane & 7u;
+    unsigned __grp  = __lane >> 3;
+    unsigned __bo;
+    unsigned __col = (__grp & 1u) << 7;
+    __bo = (__rit << 4) + __col;
+    unsigned __smem;
+    asm volatile("{ .reg .u64 u; cvta.to.shared.u64 u, %1; cvt.u32.u64 %0, u; }" : "=r"(__smem) : "l"((const char *) adi_4 + __bo));
+    asm volatile("ldmatrix.sync.aligned.m8n8.x2.trans.shared.b16 {%0,%1}, [%2];" : "=r"(mma_b_h_83[0]), "=r"(mma_b_h_83[1]) : "r"(__smem));
+  }
+  float mma_acc_f_84[4];
+  asm volatile("mma.sync.aligned.m16n8k16.row.col.f32.bf16.bf16.f32 {%0,%1,%2,%3}, {%4,%5,%6,%7}, {%8,%9}, {%10,%11,%12,%13};" : "=f"(mma_acc_f_84[0]), "=f"(mma_acc_f_84[1]), "=f"(mma_acc_f_84[2]), "=f"(mma_acc_f_84[3]) : "r"(mma_a_h_82[0]), "r"(mma_a_h_82[1]), "r"(mma_a_h_82[2]), "r"(mma_a_h_82[3]), "r"(mma_b_h_83[0]), "r"(mma_b_h_83[1]), "f"(mma_acc_f_6[0]), "f"(mma_acc_f_6[1]), "f"(mma_acc_f_6[2]), "f"(mma_acc_f_6[3]));
+  unsigned mma_b_h_85[2];
+  {
+    unsigned __lane = threadIdx.x & 31u;
+    unsigned __rit  = __lane & 7u;
+    unsigned __grp  = __lane >> 3;
+    unsigned __bo;
+    unsigned __col = (__grp & 1u) << 7;
+    __bo = (__rit << 4) + __col;
+    unsigned __smem;
+    asm volatile("{ .reg .u64 u; cvta.to.shared.u64 u, %1; cvt.u32.u64 %0, u; }" : "=r"(__smem) : "l"((const char *) adi_5 + __bo));
+    asm volatile("ldmatrix.sync.aligned.m8n8.x2.trans.shared.b16 {%0,%1}, [%2];" : "=r"(mma_b_h_85[0]), "=r"(mma_b_h_85[1]) : "r"(__smem));
+  }
+  float mma_acc_f_86[4];
+  asm volatile("mma.sync.aligned.m16n8k16.row.col.f32.bf16.bf16.f32 {%0,%1,%2,%3}, {%4,%5,%6,%7}, {%8,%9}, {%10,%11,%12,%13};" : "=f"(mma_acc_f_86[0]), "=f"(mma_acc_f_86[1]), "=f"(mma_acc_f_86[2]), "=f"(mma_acc_f_86[3]) : "r"(mma_a_h_82[0]), "r"(mma_a_h_82[1]), "r"(mma_a_h_82[2]), "r"(mma_a_h_82[3]), "r"(mma_b_h_85[0]), "r"(mma_b_h_85[1]), "f"(mma_acc_f_7[0]), "f"(mma_acc_f_7[1]), "f"(mma_acc_f_7[2]), "f"(mma_acc_f_7[3]));
+  __syncthreads();
+  // BLOCK 7 MERGES [6 8 ]
+  i_87  =  i_8;
+  for(;i_87 < 128;)
+  {
+    // BLOCK 8
+    i_88  =  i_87 << 1;
+    i_89  =  i_88 >> 31;
+    i_90  =  i_89 >> 28;
+    i_91  =  i_90 + i_88;
+    i_92  =  i_91 >> 4;
+    i_93  =  i_92 << 5;
+    i_94  =  i_88 % 16;
+    i_95  =  i_93 + i_94;
+    i_96  =  i_95 + 16;
+    l_97  =  (long long) i_96;
+    l_98  =  l_97 + 8L;
+    l_99  =  l_98 << 1;
+    ul_100  =  ul_0 + l_99;
+    sh_101  =  *(( short *) ul_100);
+    i_102  =  i_95 + 17;
+    l_103  =  (long long) i_102;
+    l_104  =  l_103 + 8L;
+    l_105  =  l_104 << 1;
+    ul_106  =  ul_0 + l_105;
+    sh_107  =  *(( short *) ul_106);
+    i_108  =  i_94 >> 31;
+    i_109  =  i_108 + i_94;
+    i_110  =  i_109 >> 1;
+    i_111  =  i_92 << 3;
+    i_112  =  i_110 + i_111;
+    ui_113  =  sh_107 & 65535U;
+    ui_114  =  ui_113 << 16;
+    ui_115  =  sh_101 & 65535U;
+    ui_116  =  ui_114 | ui_115;
+    adi_3[i_112]  =  ui_116;
+    i_117  =  i_87 + 32;
+    i_87  =  i_117;
+  }  // B7
+  // BLOCK 9
+  // BLOCK 10 MERGES [9 11 ]
+  i_118  =  i_8;
+  for(;i_118 < 64;)
+  {
+    // BLOCK 11
+    i_119  =  i_118 % 4;
+    i_120  =  i_119 << 1;
+    i_121  =  i_118 >> 31;
+    i_122  =  i_121 >> 30;
+    i_123  =  i_122 + i_118;
+    i_124  =  i_123 >> 2;
+    i_125  =  i_124 + 16;
+    i_126  =  i_125 << 4;
+    i_127  =  i_120 + i_126;
+    l_128  =  (long long) i_127;
+    l_129  =  l_128 + 8L;
+    l_130  =  l_129 << 1;
+    ul_131  =  ul_1 + l_130;
+    sh_132  =  *(( short *) ul_131);
+    i_133  =  i_127 + 1;
+    l_134  =  (long long) i_133;
+    l_135  =  l_134 + 8L;
+    l_136  =  l_135 << 1;
+    ul_137  =  ul_1 + l_136;
+    sh_138  =  *(( short *) ul_137);
+    i_139  =  i_123 & -4;
+    i_140  =  i_139 + i_119;
+    ui_141  =  sh_138 & 65535U;
+    ui_142  =  ui_141 << 16;
+    ui_143  =  sh_132 & 65535U;
+    ui_144  =  ui_142 | ui_143;
+    adi_4[i_140]  =  ui_144;
+    i_145  =  i_127 + 8;
+    l_146  =  (long long) i_145;
+    l_147  =  l_146 + 8L;
+    l_148  =  l_147 << 1;
+    ul_149  =  ul_1 + l_148;
+    sh_150  =  *(( short *) ul_149);
+    i_151  =  i_127 + 9;
+    l_152  =  (long long) i_151;
+    l_153  =  l_152 + 8L;
+    l_154  =  l_153 << 1;
+    ul_155  =  ul_1 + l_154;
+    sh_156  =  *(( short *) ul_155);
+    ui_157  =  sh_156 & 65535U;
+    ui_158  =  ui_157 << 16;
+    ui_159  =  sh_150 & 65535U;
+    ui_160  =  ui_158 | ui_159;
+    adi_5[i_140]  =  ui_160;
+    i_161  =  i_118 + 32;
+    i_118  =  i_161;
+  }  // B10
+  // BLOCK 12
+  __syncthreads();
+  unsigned mma_a_h_162[4];
+  {
+    unsigned __lane = threadIdx.x & 31u;
+    unsigned __rit  = __lane & 7u;
+    unsigned __grp  = __lane >> 3;
+    unsigned __bo;
+    unsigned __row = ((__grp & 1u) << 3) + __rit;
+    unsigned __col = (__grp >> 1) << 4;
+    __bo = (__row << 5) + __col;
+    unsigned __smem;
+    asm volatile("{ .reg .u64 u; cvta.to.shared.u64 u, %1; cvt.u32.u64 %0, u; }" : "=r"(__smem) : "l"((const char *) adi_3 + __bo));
+    asm volatile("ldmatrix.sync.aligned.m8n8.x4.shared.b16 {%0,%1,%2,%3}, [%4];" : "=r"(mma_a_h_162[0]), "=r"(mma_a_h_162[1]), "=r"(mma_a_h_162[2]), "=r"(mma_a_h_162[3]) : "r"(__smem));
+  }
+  unsigned mma_b_h_163[2];
+  {
+    unsigned __lane = threadIdx.x & 31u;
+    unsigned __rit  = __lane & 7u;
+    unsigned __grp  = __lane >> 3;
+    unsigned __bo;
+    unsigned __col = (__grp & 1u) << 7;
+    __bo = (__rit << 4) + __col;
+    unsigned __smem;
+    asm volatile("{ .reg .u64 u; cvta.to.shared.u64 u, %1; cvt.u32.u64 %0, u; }" : "=r"(__smem) : "l"((const char *) adi_4 + __bo));
+    asm volatile("ldmatrix.sync.aligned.m8n8.x2.trans.shared.b16 {%0,%1}, [%2];" : "=r"(mma_b_h_163[0]), "=r"(mma_b_h_163[1]) : "r"(__smem));
+  }
+  float mma_acc_f_164[4];
+  asm volatile("mma.sync.aligned.m16n8k16.row.col.f32.bf16.bf16.f32 {%0,%1,%2,%3}, {%4,%5,%6,%7}, {%8,%9}, {%10,%11,%12,%13};" : "=f"(mma_acc_f_164[0]), "=f"(mma_acc_f_164[1]), "=f"(mma_acc_f_164[2]), "=f"(mma_acc_f_164[3]) : "r"(mma_a_h_162[0]), "r"(mma_a_h_162[1]), "r"(mma_a_h_162[2]), "r"(mma_a_h_162[3]), "r"(mma_b_h_163[0]), "r"(mma_b_h_163[1]), "f"(mma_acc_f_84[0]), "f"(mma_acc_f_84[1]), "f"(mma_acc_f_84[2]), "f"(mma_acc_f_84[3]));
+  unsigned mma_b_h_165[2];
+  {
+    unsigned __lane = threadIdx.x & 31u;
+    unsigned __rit  = __lane & 7u;
+    unsigned __grp  = __lane >> 3;
+    unsigned __bo;
+    unsigned __col = (__grp & 1u) << 7;
+    __bo = (__rit << 4) + __col;
+    unsigned __smem;
+    asm volatile("{ .reg .u64 u; cvta.to.shared.u64 u, %1; cvt.u32.u64 %0, u; }" : "=r"(__smem) : "l"((const char *) adi_5 + __bo));
+    asm volatile("ldmatrix.sync.aligned.m8n8.x2.trans.shared.b16 {%0,%1}, [%2];" : "=r"(mma_b_h_165[0]), "=r"(mma_b_h_165[1]) : "r"(__smem));
+  }
+  float mma_acc_f_166[4];
+  asm volatile("mma.sync.aligned.m16n8k16.row.col.f32.bf16.bf16.f32 {%0,%1,%2,%3}, {%4,%5,%6,%7}, {%8,%9}, {%10,%11,%12,%13};" : "=f"(mma_acc_f_166[0]), "=f"(mma_acc_f_166[1]), "=f"(mma_acc_f_166[2]), "=f"(mma_acc_f_166[3]) : "r"(mma_a_h_162[0]), "r"(mma_a_h_162[1]), "r"(mma_a_h_162[2]), "r"(mma_a_h_162[3]), "r"(mma_b_h_165[0]), "r"(mma_b_h_165[1]), "f"(mma_acc_f_86[0]), "f"(mma_acc_f_86[1]), "f"(mma_acc_f_86[2]), "f"(mma_acc_f_86[3]));
+  __syncthreads();
+  {
+    unsigned __lane = threadIdx.x & 31u;
+    unsigned __rit0 = (__lane >> 2);
+    unsigned __cit0 = ((__lane & 3u) << 1);
+    unsigned __idx0 = (0 + __rit0) * 16 + (0 + __cit0);
+    ((float *) ((char *) ul_2 + 16u))[__idx0] = mma_acc_f_164[0];
+    unsigned __rit1 = (__lane >> 2);
+    unsigned __cit1 = ((__lane & 3u) << 1) + 1u;
+    unsigned __idx1 = (0 + __rit1) * 16 + (0 + __cit1);
+    ((float *) ((char *) ul_2 + 16u))[__idx1] = mma_acc_f_164[1];
+    unsigned __rit2 = (__lane >> 2) + 8u;
+    unsigned __cit2 = ((__lane & 3u) << 1);
+    unsigned __idx2 = (0 + __rit2) * 16 + (0 + __cit2);
+    ((float *) ((char *) ul_2 + 16u))[__idx2] = mma_acc_f_164[2];
+    unsigned __rit3 = (__lane >> 2) + 8u;
+    unsigned __cit3 = ((__lane & 3u) << 1) + 1u;
+    unsigned __idx3 = (0 + __rit3) * 16 + (0 + __cit3);
+    ((float *) ((char *) ul_2 + 16u))[__idx3] = mma_acc_f_164[3];
+  }
+  {
+    unsigned __lane = threadIdx.x & 31u;
+    unsigned __rit0 = (__lane >> 2);
+    unsigned __cit0 = ((__lane & 3u) << 1);
+    unsigned __idx0 = (0 + __rit0) * 16 + (8 + __cit0);
+    ((float *) ((char *) ul_2 + 16u))[__idx0] = mma_acc_f_166[0];
+    unsigned __rit1 = (__lane >> 2);
+    unsigned __cit1 = ((__lane & 3u) << 1) + 1u;
+    unsigned __idx1 = (0 + __rit1) * 16 + (8 + __cit1);
+    ((float *) ((char *) ul_2 + 16u))[__idx1] = mma_acc_f_166[1];
+    unsigned __rit2 = (__lane >> 2) + 8u;
+    unsigned __cit2 = ((__lane & 3u) << 1);
+    unsigned __idx2 = (0 + __rit2) * 16 + (8 + __cit2);
+    ((float *) ((char *) ul_2 + 16u))[__idx2] = mma_acc_f_166[2];
+    unsigned __rit3 = (__lane >> 2) + 8u;
+    unsigned __cit3 = ((__lane & 3u) << 1) + 1u;
+    unsigned __idx3 = (0 + __rit3) * 16 + (8 + __cit3);
+    ((float *) ((char *) ul_2 + 16u))[__idx3] = mma_acc_f_166[3];
+  }
+  return;
+}  //  kernel
+
+  BF16     m16n8k16  f32.bf16.bf16.f32  PASSED (max abs err 0.00000, 0/256 cells out of tol)
+extern "C" __global__ void gemmInt8(long long *_kernel_context, unsigned char *_constant_region, unsigned char *_local_region, int *_atomics, unsigned char *arg1, unsigned char *arg2, unsigned char *arg3)
+{
+  unsigned long long ul_0, ul_1, ul_2, ul_19, ul_24, ul_29, ul_34, ul_65, ul_73, ul_78, ul_83, ul_100, ul_105, ul_109, ul_114; 
+  int i_8, i_9, i_10, i_11, i_12, i_13, i_14, i_15, i_16, i_21, i_26, i_31, i_36, i_37, i_38, i_39, i_40, i_41, i_42, i_53, i_54, i_55, i_56, i_57, i_58, i_59, i_60, i_61, i_62, i_67, i_68, i_69, i_70, i_75, i_80, i_85, i_86, i_97, i_102, i_107, i_111, i_126; 
+  long long l_17, l_18, l_22, l_23, l_27, l_28, l_32, l_33, l_63, l_64, l_71, l_72, l_76, l_77, l_81, l_82, l_98, l_99, l_103, l_104, l_108, l_112, l_113; 
+  char ch_20, ch_25, ch_30, ch_35, ch_66, ch_74, ch_79, ch_84, ch_101, ch_106, ch_110, ch_115; 
+  unsigned int ui_43, ui_44, ui_45, ui_46, ui_47, ui_48, ui_49, ui_50, ui_51, ui_52, ui_87, ui_88, ui_89, ui_90, ui_91, ui_92, ui_93, ui_94, ui_95, ui_96, ui_116, ui_117, ui_118, ui_119, ui_120, ui_121, ui_122, ui_123, ui_124, ui_125; 
+
+  // BLOCK 0
+  ul_0  =  (unsigned long long) arg1;
+  ul_1  =  (unsigned long long) arg2;
+  ul_2  =  (unsigned long long) arg3;
+  __shared__ int adi_3[128];
+  __shared__ int adi_4[64];
+  __shared__ int adi_5[64];
+  int mma_acc_s_6[4];
+  mma_acc_s_6[0] = 0;
+  mma_acc_s_6[1] = 0;
+  mma_acc_s_6[2] = 0;
+  mma_acc_s_6[3] = 0;
+  int mma_acc_s_7[4];
+  mma_acc_s_7[0] = 0;
+  mma_acc_s_7[1] = 0;
+  mma_acc_s_7[2] = 0;
+  mma_acc_s_7[3] = 0;
+  i_8  =  (threadIdx.x);
+  // BLOCK 1 MERGES [0 2 ]
+  i_9  =  i_8;
+  for(;i_9 < 128;)
+  {
+    // BLOCK 2
+    i_10  =  i_9 << 2;
+    i_11  =  i_10 >> 31;
+    i_12  =  i_11 >> 27;
+    i_13  =  i_12 + i_10;
+    i_14  =  i_13 & -32;
+    i_15  =  i_10 % 32;
+    i_16  =  i_14 + i_15;
+    l_17  =  (long long) i_16;
+    l_18  =  l_17 + 16L;
+    ul_19  =  ul_0 + l_18;
+    ch_20  =  *(( char *) ul_19);
+    i_21  =  i_16 + 1;
+    l_22  =  (long long) i_21;
+    l_23  =  l_22 + 16L;
+    ul_24  =  ul_0 + l_23;
+    ch_25  =  *(( char *) ul_24);
+    i_26  =  i_16 + 2;
+    l_27  =  (long long) i_26;
+    l_28  =  l_27 + 16L;
+    ul_29  =  ul_0 + l_28;
+    ch_30  =  *(( char *) ul_29);
+    i_31  =  i_16 + 3;
+    l_32  =  (long long) i_31;
+    l_33  =  l_32 + 16L;
+    ul_34  =  ul_0 + l_33;
+    ch_35  =  *(( char *) ul_34);
+    i_36  =  i_15 >> 31;
+    i_37  =  i_36 >> 30;
+    i_38  =  i_37 + i_15;
+    i_39  =  i_38 >> 2;
+    i_40  =  i_13 >> 5;
+    i_41  =  i_40 << 3;
+    i_42  =  i_39 + i_41;
+    ui_43  =  ch_25 & 255U;
+    ui_44  =  ui_43 << 8;
+    ui_45  =  ch_20 & 255U;
+    ui_46  =  ui_44 | ui_45;
+    ui_47  =  ch_30 & 255U;
+    ui_48  =  ui_47 << 16;
+    ui_49  =  ui_46 | ui_48;
+    ui_50  =  ch_35 & 255U;
+    ui_51  =  ui_50 << 24;
+    ui_52  =  ui_49 | ui_51;
+    adi_3[i_42]  =  ui_52;
+    i_53  =  i_9 + 32;
+    i_9  =  i_53;
+  }  // B1
+  // BLOCK 3
+  // BLOCK 4 MERGES [3 5 ]
+  i_54  =  i_8;
+  for(;i_54 < 64;)
+  {
+    // BLOCK 5
+    i_55  =  i_54 % 4;
+    i_56  =  i_55 << 1;
+    i_57  =  i_54 >> 31;
+    i_58  =  i_57 >> 30;
+    i_59  =  i_58 + i_54;
+    i_60  =  i_59 >> 2;
+    i_61  =  i_60 << 5;
+    i_62  =  i_56 + i_61;
+    l_63  =  (long long) i_62;
+    l_64  =  l_63 + 16L;
+    ul_65  =  ul_1 + l_64;
+    ch_66  =  *(( char *) ul_65);
+    i_67  =  i_60 << 1;
+    i_68  =  i_67 + 1;
+    i_69  =  i_68 << 4;
+    i_70  =  i_69 + i_56;
+    l_71  =  (long long) i_70;
+    l_72  =  l_71 + 16L;
+    ul_73  =  ul_1 + l_72;
+    ch_74  =  *(( char *) ul_73);
+    i_75  =  i_62 + 1;
+    l_76  =  (long long) i_75;
+    l_77  =  l_76 + 16L;
+    ul_78  =  ul_1 + l_77;
+    ch_79  =  *(( char *) ul_78);
+    i_80  =  i_70 + 1;
+    l_81  =  (long long) i_80;
+    l_82  =  l_81 + 16L;
+    ul_83  =  ul_1 + l_82;
+    ch_84  =  *(( char *) ul_83);
+    i_85  =  i_59 & -4;
+    i_86  =  i_85 + i_55;
+    ui_87  =  ch_74 & 255U;
+    ui_88  =  ui_87 << 8;
+    ui_89  =  ch_66 & 255U;
+    ui_90  =  ui_88 | ui_89;
+    ui_91  =  ch_79 & 255U;
+    ui_92  =  ui_91 << 16;
+    ui_93  =  ui_90 | ui_92;
+    ui_94  =  ch_84 & 255U;
+    ui_95  =  ui_94 << 24;
+    ui_96  =  ui_93 | ui_95;
+    adi_4[i_86]  =  ui_96;
+    i_97  =  i_62 + 8;
+    l_98  =  (long long) i_97;
+    l_99  =  l_98 + 16L;
+    ul_100  =  ul_1 + l_99;
+    ch_101  =  *(( char *) ul_100);
+    i_102  =  i_70 + 8;
+    l_103  =  (long long) i_102;
+    l_104  =  l_103 + 16L;
+    ul_105  =  ul_1 + l_104;
+    ch_106  =  *(( char *) ul_105);
+    i_107  =  i_62 + 25;
+    l_108  =  (long long) i_107;
+    ul_109  =  ul_1 + l_108;
+    ch_110  =  *(( char *) ul_109);
+    i_111  =  i_70 + 9;
+    l_112  =  (long long) i_111;
+    l_113  =  l_112 + 16L;
+    ul_114  =  ul_1 + l_113;
+    ch_115  =  *(( char *) ul_114);
+    ui_116  =  ch_106 & 255U;
+    ui_117  =  ui_116 << 8;
+    ui_118  =  ch_101 & 255U;
+    ui_119  =  ui_117 | ui_118;
+    ui_120  =  ch_110 & 255U;
+    ui_121  =  ui_120 << 16;
+    ui_122  =  ui_119 | ui_121;
+    ui_123  =  ch_115 & 255U;
+    ui_124  =  ui_123 << 24;
+    ui_125  =  ui_122 | ui_124;
+    adi_5[i_86]  =  ui_125;
+    i_126  =  i_54 + 32;
+    i_54  =  i_126;
+  }  // B4
+  // BLOCK 6
+  __syncthreads();
+  unsigned mma_a_s8_127[4];
+  {
+    unsigned __lane = threadIdx.x & 31u;
+    unsigned __rit  = __lane & 7u;
+    unsigned __grp  = __lane >> 3;
+    unsigned __bo;
+    unsigned __row = ((__grp & 1u) << 3) + __rit;
+    unsigned __col = (__grp >> 1) << 4;
+    __bo = (__row << 5) + __col;
+    unsigned __smem;
+    asm volatile("{ .reg .u64 u; cvta.to.shared.u64 u, %1; cvt.u32.u64 %0, u; }" : "=r"(__smem) : "l"((const char *) adi_3 + __bo));
+    asm volatile("ldmatrix.sync.aligned.m8n8.x4.shared.b16 {%0,%1,%2,%3}, [%4];" : "=r"(mma_a_s8_127[0]), "=r"(mma_a_s8_127[1]), "=r"(mma_a_s8_127[2]), "=r"(mma_a_s8_127[3]) : "r"(__smem));
+  }
+  unsigned mma_b_s8_128[2];
+  {
+    unsigned __lane = threadIdx.x & 31u;
+    unsigned __rit  = __lane & 7u;
+    unsigned __grp  = __lane >> 3;
+    unsigned __bo;
+    unsigned __col = (__grp & 1u) << 7;
+    __bo = (__rit << 4) + __col;
+    unsigned __smem;
+    asm volatile("{ .reg .u64 u; cvta.to.shared.u64 u, %1; cvt.u32.u64 %0, u; }" : "=r"(__smem) : "l"((const char *) adi_4 + __bo));
+    asm volatile("ldmatrix.sync.aligned.m8n8.x2.trans.shared.b16 {%0,%1}, [%2];" : "=r"(mma_b_s8_128[0]), "=r"(mma_b_s8_128[1]) : "r"(__smem));
+  }
+  int mma_acc_s_129[4];
+  asm volatile("mma.sync.aligned.m16n8k32.row.col.s32.s8.s8.s32 {%0,%1,%2,%3}, {%4,%5,%6,%7}, {%8,%9}, {%10,%11,%12,%13};" : "=r"(mma_acc_s_129[0]), "=r"(mma_acc_s_129[1]), "=r"(mma_acc_s_129[2]), "=r"(mma_acc_s_129[3]) : "r"(mma_a_s8_127[0]), "r"(mma_a_s8_127[1]), "r"(mma_a_s8_127[2]), "r"(mma_a_s8_127[3]), "r"(mma_b_s8_128[0]), "r"(mma_b_s8_128[1]), "r"(mma_acc_s_6[0]), "r"(mma_acc_s_6[1]), "r"(mma_acc_s_6[2]), "r"(mma_acc_s_6[3]));
+  unsigned mma_b_s8_130[2];
+  {
+    unsigned __lane = threadIdx.x & 31u;
+    unsigned __rit  = __lane & 7u;
+    unsigned __grp  = __lane >> 3;
+    unsigned __bo;
+    unsigned __col = (__grp & 1u) << 7;
+    __bo = (__rit << 4) + __col;
+    unsigned __smem;
+    asm volatile("{ .reg .u64 u; cvta.to.shared.u64 u, %1; cvt.u32.u64 %0, u; }" : "=r"(__smem) : "l"((const char *) adi_5 + __bo));
+    asm volatile("ldmatrix.sync.aligned.m8n8.x2.trans.shared.b16 {%0,%1}, [%2];" : "=r"(mma_b_s8_130[0]), "=r"(mma_b_s8_130[1]) : "r"(__smem));
+  }
+  int mma_acc_s_131[4];
+  asm volatile("mma.sync.aligned.m16n8k32.row.col.s32.s8.s8.s32 {%0,%1,%2,%3}, {%4,%5,%6,%7}, {%8,%9}, {%10,%11,%12,%13};" : "=r"(mma_acc_s_131[0]), "=r"(mma_acc_s_131[1]), "=r"(mma_acc_s_131[2]), "=r"(mma_acc_s_131[3]) : "r"(mma_a_s8_127[0]), "r"(mma_a_s8_127[1]), "r"(mma_a_s8_127[2]), "r"(mma_a_s8_127[3]), "r"(mma_b_s8_130[0]), "r"(mma_b_s8_130[1]), "r"(mma_acc_s_7[0]), "r"(mma_acc_s_7[1]), "r"(mma_acc_s_7[2]), "r"(mma_acc_s_7[3]));
+  {
+    unsigned __lane = threadIdx.x & 31u;
+    unsigned __rit0 = (__lane >> 2);
+    unsigned __cit0 = ((__lane & 3u) << 1);
+    unsigned __idx0 = (0 + __rit0) * 16 + (0 + __cit0);
+    ((int *) ((char *) ul_2 + 16u))[__idx0] = mma_acc_s_129[0];
+    unsigned __rit1 = (__lane >> 2);
+    unsigned __cit1 = ((__lane & 3u) << 1) + 1u;
+    unsigned __idx1 = (0 + __rit1) * 16 + (0 + __cit1);
+    ((int *) ((char *) ul_2 + 16u))[__idx1] = mma_acc_s_129[1];
+    unsigned __rit2 = (__lane >> 2) + 8u;
+    unsigned __cit2 = ((__lane & 3u) << 1);
+    unsigned __idx2 = (0 + __rit2) * 16 + (0 + __cit2);
+    ((int *) ((char *) ul_2 + 16u))[__idx2] = mma_acc_s_129[2];
+    unsigned __rit3 = (__lane >> 2) + 8u;
+    unsigned __cit3 = ((__lane & 3u) << 1) + 1u;
+    unsigned __idx3 = (0 + __rit3) * 16 + (0 + __cit3);
+    ((int *) ((char *) ul_2 + 16u))[__idx3] = mma_acc_s_129[3];
+  }
+  {
+    unsigned __lane = threadIdx.x & 31u;
+    unsigned __rit0 = (__lane >> 2);
+    unsigned __cit0 = ((__lane & 3u) << 1);
+    unsigned __idx0 = (0 + __rit0) * 16 + (8 + __cit0);
+    ((int *) ((char *) ul_2 + 16u))[__idx0] = mma_acc_s_131[0];
+    unsigned __rit1 = (__lane >> 2);
+    unsigned __cit1 = ((__lane & 3u) << 1) + 1u;
+    unsigned __idx1 = (0 + __rit1) * 16 + (8 + __cit1);
+    ((int *) ((char *) ul_2 + 16u))[__idx1] = mma_acc_s_131[1];
+    unsigned __rit2 = (__lane >> 2) + 8u;
+    unsigned __cit2 = ((__lane & 3u) << 1);
+    unsigned __idx2 = (0 + __rit2) * 16 + (8 + __cit2);
+    ((int *) ((char *) ul_2 + 16u))[__idx2] = mma_acc_s_131[2];
+    unsigned __rit3 = (__lane >> 2) + 8u;
+    unsigned __cit3 = ((__lane & 3u) << 1) + 1u;
+    unsigned __idx3 = (0 + __rit3) * 16 + (8 + __cit3);
+    ((int *) ((char *) ul_2 + 16u))[__idx3] = mma_acc_s_131[3];
+  }
+  return;
+}  //  kernel
+
+  int8     m16n8k32  s32.s8.s8.s32      PASSED (max abs err 0.00000, 0/256 cells out of tol)
+extern "C" __global__ void gemmFP8E4M3(long long *_kernel_context, unsigned char *_constant_region, unsigned char *_local_region, int *_atomics, unsigned char *arg1, unsigned char *arg2, unsigned char *arg3)
+{
+  unsigned long long ul_0, ul_1, ul_2, ul_19, ul_24, ul_29, ul_34, ul_65, ul_73, ul_78, ul_83, ul_100, ul_105, ul_109, ul_114; 
+  int i_8, i_9, i_10, i_11, i_12, i_13, i_14, i_15, i_16, i_21, i_26, i_31, i_36, i_37, i_38, i_39, i_40, i_41, i_42, i_53, i_54, i_55, i_56, i_57, i_58, i_59, i_60, i_61, i_62, i_67, i_68, i_69, i_70, i_75, i_80, i_85, i_86, i_97, i_102, i_107, i_111, i_126; 
+  long long l_17, l_18, l_22, l_23, l_27, l_28, l_32, l_33, l_63, l_64, l_71, l_72, l_76, l_77, l_81, l_82, l_98, l_99, l_103, l_104, l_108, l_112, l_113; 
+  char ch_20, ch_25, ch_30, ch_35, ch_66, ch_74, ch_79, ch_84, ch_101, ch_106, ch_110, ch_115; 
+  unsigned int ui_43, ui_44, ui_45, ui_46, ui_47, ui_48, ui_49, ui_50, ui_51, ui_52, ui_87, ui_88, ui_89, ui_90, ui_91, ui_92, ui_93, ui_94, ui_95, ui_96, ui_116, ui_117, ui_118, ui_119, ui_120, ui_121, ui_122, ui_123, ui_124, ui_125; 
+
+  // BLOCK 0
+  ul_0  =  (unsigned long long) arg1;
+  ul_1  =  (unsigned long long) arg2;
+  ul_2  =  (unsigned long long) arg3;
+  __shared__ int adi_3[128];
+  __shared__ int adi_4[64];
+  __shared__ int adi_5[64];
+  float mma_acc_f_6[4];
+  mma_acc_f_6[0] = 0.0F;
+  mma_acc_f_6[1] = 0.0F;
+  mma_acc_f_6[2] = 0.0F;
+  mma_acc_f_6[3] = 0.0F;
+  float mma_acc_f_7[4];
+  mma_acc_f_7[0] = 0.0F;
+  mma_acc_f_7[1] = 0.0F;
+  mma_acc_f_7[2] = 0.0F;
+  mma_acc_f_7[3] = 0.0F;
+  i_8  =  (threadIdx.x);
+  // BLOCK 1 MERGES [0 2 ]
+  i_9  =  i_8;
+  for(;i_9 < 128;)
+  {
+    // BLOCK 2
+    i_10  =  i_9 << 2;
+    i_11  =  i_10 >> 31;
+    i_12  =  i_11 >> 27;
+    i_13  =  i_12 + i_10;
+    i_14  =  i_13 & -32;
+    i_15  =  i_10 % 32;
+    i_16  =  i_14 + i_15;
+    l_17  =  (long long) i_16;
+    l_18  =  l_17 + 16L;
+    ul_19  =  ul_0 + l_18;
+    ch_20  =  *(( char *) ul_19);
+    i_21  =  i_16 + 1;
+    l_22  =  (long long) i_21;
+    l_23  =  l_22 + 16L;
+    ul_24  =  ul_0 + l_23;
+    ch_25  =  *(( char *) ul_24);
+    i_26  =  i_16 + 2;
+    l_27  =  (long long) i_26;
+    l_28  =  l_27 + 16L;
+    ul_29  =  ul_0 + l_28;
+    ch_30  =  *(( char *) ul_29);
+    i_31  =  i_16 + 3;
+    l_32  =  (long long) i_31;
+    l_33  =  l_32 + 16L;
+    ul_34  =  ul_0 + l_33;
+    ch_35  =  *(( char *) ul_34);
+    i_36  =  i_15 >> 31;
+    i_37  =  i_36 >> 30;
+    i_38  =  i_37 + i_15;
+    i_39  =  i_38 >> 2;
+    i_40  =  i_13 >> 5;
+    i_41  =  i_40 << 3;
+    i_42  =  i_39 + i_41;
+    ui_43  =  ch_25 & 255U;
+    ui_44  =  ui_43 << 8;
+    ui_45  =  ch_20 & 255U;
+    ui_46  =  ui_44 | ui_45;
+    ui_47  =  ch_30 & 255U;
+    ui_48  =  ui_47 << 16;
+    ui_49  =  ui_46 | ui_48;
+    ui_50  =  ch_35 & 255U;
+    ui_51  =  ui_50 << 24;
+    ui_52  =  ui_49 | ui_51;
+    adi_3[i_42]  =  ui_52;
+    i_53  =  i_9 + 32;
+    i_9  =  i_53;
+  }  // B1
+  // BLOCK 3
+  // BLOCK 4 MERGES [3 5 ]
+  i_54  =  i_8;
+  for(;i_54 < 64;)
+  {
+    // BLOCK 5
+    i_55  =  i_54 % 4;
+    i_56  =  i_55 << 1;
+    i_57  =  i_54 >> 31;
+    i_58  =  i_57 >> 30;
+    i_59  =  i_58 + i_54;
+    i_60  =  i_59 >> 2;
+    i_61  =  i_60 << 5;
+    i_62  =  i_56 + i_61;
+    l_63  =  (long long) i_62;
+    l_64  =  l_63 + 16L;
+    ul_65  =  ul_1 + l_64;
+    ch_66  =  *(( char *) ul_65);
+    i_67  =  i_60 << 1;
+    i_68  =  i_67 + 1;
+    i_69  =  i_68 << 4;
+    i_70  =  i_69 + i_56;
+    l_71  =  (long long) i_70;
+    l_72  =  l_71 + 16L;
+    ul_73  =  ul_1 + l_72;
+    ch_74  =  *(( char *) ul_73);
+    i_75  =  i_62 + 1;
+    l_76  =  (long long) i_75;
+    l_77  =  l_76 + 16L;
+    ul_78  =  ul_1 + l_77;
+    ch_79  =  *(( char *) ul_78);
+    i_80  =  i_70 + 1;
+    l_81  =  (long long) i_80;
+    l_82  =  l_81 + 16L;
+    ul_83  =  ul_1 + l_82;
+    ch_84  =  *(( char *) ul_83);
+    i_85  =  i_59 & -4;
+    i_86  =  i_85 + i_55;
+    ui_87  =  ch_74 & 255U;
+    ui_88  =  ui_87 << 8;
+    ui_89  =  ch_66 & 255U;
+    ui_90  =  ui_88 | ui_89;
+    ui_91  =  ch_79 & 255U;
+    ui_92  =  ui_91 << 16;
+    ui_93  =  ui_90 | ui_92;
+    ui_94  =  ch_84 & 255U;
+    ui_95  =  ui_94 << 24;
+    ui_96  =  ui_93 | ui_95;
+    adi_4[i_86]  =  ui_96;
+    i_97  =  i_62 + 8;
+    l_98  =  (long long) i_97;
+    l_99  =  l_98 + 16L;
+    ul_100  =  ul_1 + l_99;
+    ch_101  =  *(( char *) ul_100);
+    i_102  =  i_70 + 8;
+    l_103  =  (long long) i_102;
+    l_104  =  l_103 + 16L;
+    ul_105  =  ul_1 + l_104;
+    ch_106  =  *(( char *) ul_105);
+    i_107  =  i_62 + 25;
+    l_108  =  (long long) i_107;
+    ul_109  =  ul_1 + l_108;
+    ch_110  =  *(( char *) ul_109);
+    i_111  =  i_70 + 9;
+    l_112  =  (long long) i_111;
+    l_113  =  l_112 + 16L;
+    ul_114  =  ul_1 + l_113;
+    ch_115  =  *(( char *) ul_114);
+    ui_116  =  ch_106 & 255U;
+    ui_117  =  ui_116 << 8;
+    ui_118  =  ch_101 & 255U;
+    ui_119  =  ui_117 | ui_118;
+    ui_120  =  ch_110 & 255U;
+    ui_121  =  ui_120 << 16;
+    ui_122  =  ui_119 | ui_121;
+    ui_123  =  ch_115 & 255U;
+    ui_124  =  ui_123 << 24;
+    ui_125  =  ui_122 | ui_124;
+    adi_5[i_86]  =  ui_125;
+    i_126  =  i_54 + 32;
+    i_54  =  i_126;
+  }  // B4
+  // BLOCK 6
+  __syncthreads();
+  unsigned mma_a_s8_127[4];
+  {
+    unsigned __lane = threadIdx.x & 31u;
+    unsigned __rit  = __lane & 7u;
+    unsigned __grp  = __lane >> 3;
+    unsigned __bo;
+    unsigned __row = ((__grp & 1u) << 3) + __rit;
+    unsigned __col = (__grp >> 1) << 4;
+    __bo = (__row << 5) + __col;
+    unsigned __smem;
+    asm volatile("{ .reg .u64 u; cvta.to.shared.u64 u, %1; cvt.u32.u64 %0, u; }" : "=r"(__smem) : "l"((const char *) adi_3 + __bo));
+    asm volatile("ldmatrix.sync.aligned.m8n8.x4.shared.b16 {%0,%1,%2,%3}, [%4];" : "=r"(mma_a_s8_127[0]), "=r"(mma_a_s8_127[1]), "=r"(mma_a_s8_127[2]), "=r"(mma_a_s8_127[3]) : "r"(__smem));
+  }
+  unsigned mma_b_s8_128[2];
+  {
+    unsigned __lane = threadIdx.x & 31u;
+    unsigned __rit  = __lane & 7u;
+    unsigned __grp  = __lane >> 3;
+    unsigned __bo;
+    unsigned __col = (__grp & 1u) << 7;
+    __bo = (__rit << 4) + __col;
+    unsigned __smem;
+    asm volatile("{ .reg .u64 u; cvta.to.shared.u64 u, %1; cvt.u32.u64 %0, u; }" : "=r"(__smem) : "l"((const char *) adi_4 + __bo));
+    asm volatile("ldmatrix.sync.aligned.m8n8.x2.trans.shared.b16 {%0,%1}, [%2];" : "=r"(mma_b_s8_128[0]), "=r"(mma_b_s8_128[1]) : "r"(__smem));
+  }
+  float mma_acc_f_129[4];
+  asm volatile("mma.sync.aligned.m16n8k32.row.col.f32.e4m3.e4m3.f32 {%0,%1,%2,%3}, {%4,%5,%6,%7}, {%8,%9}, {%10,%11,%12,%13};" : "=f"(mma_acc_f_129[0]), "=f"(mma_acc_f_129[1]), "=f"(mma_acc_f_129[2]), "=f"(mma_acc_f_129[3]) : "r"(mma_a_s8_127[0]), "r"(mma_a_s8_127[1]), "r"(mma_a_s8_127[2]), "r"(mma_a_s8_127[3]), "r"(mma_b_s8_128[0]), "r"(mma_b_s8_128[1]), "f"(mma_acc_f_6[0]), "f"(mma_acc_f_6[1]), "f"(mma_acc_f_6[2]), "f"(mma_acc_f_6[3]));
+  unsigned mma_b_s8_130[2];
+  {
+    unsigned __lane = threadIdx.x & 31u;
+    unsigned __rit  = __lane & 7u;
+    unsigned __grp  = __lane >> 3;
+    unsigned __bo;
+    unsigned __col = (__grp & 1u) << 7;
+    __bo = (__rit << 4) + __col;
+    unsigned __smem;
+    asm volatile("{ .reg .u64 u; cvta.to.shared.u64 u, %1; cvt.u32.u64 %0, u; }" : "=r"(__smem) : "l"((const char *) adi_5 + __bo));
+    asm volatile("ldmatrix.sync.aligned.m8n8.x2.trans.shared.b16 {%0,%1}, [%2];" : "=r"(mma_b_s8_130[0]), "=r"(mma_b_s8_130[1]) : "r"(__smem));
+  }
+  float mma_acc_f_131[4];
+  asm volatile("mma.sync.aligned.m16n8k32.row.col.f32.e4m3.e4m3.f32 {%0,%1,%2,%3}, {%4,%5,%6,%7}, {%8,%9}, {%10,%11,%12,%13};" : "=f"(mma_acc_f_131[0]), "=f"(mma_acc_f_131[1]), "=f"(mma_acc_f_131[2]), "=f"(mma_acc_f_131[3]) : "r"(mma_a_s8_127[0]), "r"(mma_a_s8_127[1]), "r"(mma_a_s8_127[2]), "r"(mma_a_s8_127[3]), "r"(mma_b_s8_130[0]), "r"(mma_b_s8_130[1]), "f"(mma_acc_f_7[0]), "f"(mma_acc_f_7[1]), "f"(mma_acc_f_7[2]), "f"(mma_acc_f_7[3]));
+  {
+    unsigned __lane = threadIdx.x & 31u;
+    unsigned __rit0 = (__lane >> 2);
+    unsigned __cit0 = ((__lane & 3u) << 1);
+    unsigned __idx0 = (0 + __rit0) * 16 + (0 + __cit0);
+    ((float *) ((char *) ul_2 + 16u))[__idx0] = mma_acc_f_129[0];
+    unsigned __rit1 = (__lane >> 2);
+    unsigned __cit1 = ((__lane & 3u) << 1) + 1u;
+    unsigned __idx1 = (0 + __rit1) * 16 + (0 + __cit1);
+    ((float *) ((char *) ul_2 + 16u))[__idx1] = mma_acc_f_129[1];
+    unsigned __rit2 = (__lane >> 2) + 8u;
+    unsigned __cit2 = ((__lane & 3u) << 1);
+    unsigned __idx2 = (0 + __rit2) * 16 + (0 + __cit2);
+    ((float *) ((char *) ul_2 + 16u))[__idx2] = mma_acc_f_129[2];
+    unsigned __rit3 = (__lane >> 2) + 8u;
+    unsigned __cit3 = ((__lane & 3u) << 1) + 1u;
+    unsigned __idx3 = (0 + __rit3) * 16 + (0 + __cit3);
+    ((float *) ((char *) ul_2 + 16u))[__idx3] = mma_acc_f_129[3];
+  }
+  {
+    unsigned __lane = threadIdx.x & 31u;
+    unsigned __rit0 = (__lane >> 2);
+    unsigned __cit0 = ((__lane & 3u) << 1);
+    unsigned __idx0 = (0 + __rit0) * 16 + (8 + __cit0);
+    ((float *) ((char *) ul_2 + 16u))[__idx0] = mma_acc_f_131[0];
+    unsigned __rit1 = (__lane >> 2);
+    unsigned __cit1 = ((__lane & 3u) << 1) + 1u;
+    unsigned __idx1 = (0 + __rit1) * 16 + (8 + __cit1);
+    ((float *) ((char *) ul_2 + 16u))[__idx1] = mma_acc_f_131[1];
+    unsigned __rit2 = (__lane >> 2) + 8u;
+    unsigned __cit2 = ((__lane & 3u) << 1);
+    unsigned __idx2 = (0 + __rit2) * 16 + (8 + __cit2);
+    ((float *) ((char *) ul_2 + 16u))[__idx2] = mma_acc_f_131[2];
+    unsigned __rit3 = (__lane >> 2) + 8u;
+    unsigned __cit3 = ((__lane & 3u) << 1) + 1u;
+    unsigned __idx3 = (0 + __rit3) * 16 + (8 + __cit3);
+    ((float *) ((char *) ul_2 + 16u))[__idx3] = mma_acc_f_131[3];
+  }
+  return;
+}  //  kernel
+
+  FP8 e4m3 m16n8k32  f32.e4m3.e4m3.f32  PASSED (max abs err 0.00000, 0/256 cells out of tol)
+extern "C" __global__ void gemmFP8E5M2(long long *_kernel_context, unsigned char *_constant_region, unsigned char *_local_region, int *_atomics, unsigned char *arg1, unsigned char *arg2, unsigned char *arg3)
+{
+  unsigned long long ul_0, ul_1, ul_2, ul_19, ul_24, ul_29, ul_34, ul_65, ul_73, ul_78, ul_83, ul_100, ul_105, ul_109, ul_114; 
+  int i_8, i_9, i_10, i_11, i_12, i_13, i_14, i_15, i_16, i_21, i_26, i_31, i_36, i_37, i_38, i_39, i_40, i_41, i_42, i_53, i_54, i_55, i_56, i_57, i_58, i_59, i_60, i_61, i_62, i_67, i_68, i_69, i_70, i_75, i_80, i_85, i_86, i_97, i_102, i_107, i_111, i_126; 
+  long long l_17, l_18, l_22, l_23, l_27, l_28, l_32, l_33, l_63, l_64, l_71, l_72, l_76, l_77, l_81, l_82, l_98, l_99, l_103, l_104, l_108, l_112, l_113; 
+  char ch_20, ch_25, ch_30, ch_35, ch_66, ch_74, ch_79, ch_84, ch_101, ch_106, ch_110, ch_115; 
+  unsigned int ui_43, ui_44, ui_45, ui_46, ui_47, ui_48, ui_49, ui_50, ui_51, ui_52, ui_87, ui_88, ui_89, ui_90, ui_91, ui_92, ui_93, ui_94, ui_95, ui_96, ui_116, ui_117, ui_118, ui_119, ui_120, ui_121, ui_122, ui_123, ui_124, ui_125; 
+
+  // BLOCK 0
+  ul_0  =  (unsigned long long) arg1;
+  ul_1  =  (unsigned long long) arg2;
+  ul_2  =  (unsigned long long) arg3;
+  __shared__ int adi_3[128];
+  __shared__ int adi_4[64];
+  __shared__ int adi_5[64];
+  float mma_acc_f_6[4];
+  mma_acc_f_6[0] = 0.0F;
+  mma_acc_f_6[1] = 0.0F;
+  mma_acc_f_6[2] = 0.0F;
+  mma_acc_f_6[3] = 0.0F;
+  float mma_acc_f_7[4];
+  mma_acc_f_7[0] = 0.0F;
+  mma_acc_f_7[1] = 0.0F;
+  mma_acc_f_7[2] = 0.0F;
+  mma_acc_f_7[3] = 0.0F;
+  i_8  =  (threadIdx.x);
+  // BLOCK 1 MERGES [0 2 ]
+  i_9  =  i_8;
+  for(;i_9 < 128;)
+  {
+    // BLOCK 2
+    i_10  =  i_9 << 2;
+    i_11  =  i_10 >> 31;
+    i_12  =  i_11 >> 27;
+    i_13  =  i_12 + i_10;
+    i_14  =  i_13 & -32;
+    i_15  =  i_10 % 32;
+    i_16  =  i_14 + i_15;
+    l_17  =  (long long) i_16;
+    l_18  =  l_17 + 16L;
+    ul_19  =  ul_0 + l_18;
+    ch_20  =  *(( char *) ul_19);
+    i_21  =  i_16 + 1;
+    l_22  =  (long long) i_21;
+    l_23  =  l_22 + 16L;
+    ul_24  =  ul_0 + l_23;
+    ch_25  =  *(( char *) ul_24);
+    i_26  =  i_16 + 2;
+    l_27  =  (long long) i_26;
+    l_28  =  l_27 + 16L;
+    ul_29  =  ul_0 + l_28;
+    ch_30  =  *(( char *) ul_29);
+    i_31  =  i_16 + 3;
+    l_32  =  (long long) i_31;
+    l_33  =  l_32 + 16L;
+    ul_34  =  ul_0 + l_33;
+    ch_35  =  *(( char *) ul_34);
+    i_36  =  i_15 >> 31;
+    i_37  =  i_36 >> 30;
+    i_38  =  i_37 + i_15;
+    i_39  =  i_38 >> 2;
+    i_40  =  i_13 >> 5;
+    i_41  =  i_40 << 3;
+    i_42  =  i_39 + i_41;
+    ui_43  =  ch_25 & 255U;
+    ui_44  =  ui_43 << 8;
+    ui_45  =  ch_20 & 255U;
+    ui_46  =  ui_44 | ui_45;
+    ui_47  =  ch_30 & 255U;
+    ui_48  =  ui_47 << 16;
+    ui_49  =  ui_46 | ui_48;
+    ui_50  =  ch_35 & 255U;
+    ui_51  =  ui_50 << 24;
+    ui_52  =  ui_49 | ui_51;
+    adi_3[i_42]  =  ui_52;
+    i_53  =  i_9 + 32;
+    i_9  =  i_53;
+  }  // B1
+  // BLOCK 3
+  // BLOCK 4 MERGES [3 5 ]
+  i_54  =  i_8;
+  for(;i_54 < 64;)
+  {
+    // BLOCK 5
+    i_55  =  i_54 % 4;
+    i_56  =  i_55 << 1;
+    i_57  =  i_54 >> 31;
+    i_58  =  i_57 >> 30;
+    i_59  =  i_58 + i_54;
+    i_60  =  i_59 >> 2;
+    i_61  =  i_60 << 5;
+    i_62  =  i_56 + i_61;
+    l_63  =  (long long) i_62;
+    l_64  =  l_63 + 16L;
+    ul_65  =  ul_1 + l_64;
+    ch_66  =  *(( char *) ul_65);
+    i_67  =  i_60 << 1;
+    i_68  =  i_67 + 1;
+    i_69  =  i_68 << 4;
+    i_70  =  i_69 + i_56;
+    l_71  =  (long long) i_70;
+    l_72  =  l_71 + 16L;
+    ul_73  =  ul_1 + l_72;
+    ch_74  =  *(( char *) ul_73);
+    i_75  =  i_62 + 1;
+    l_76  =  (long long) i_75;
+    l_77  =  l_76 + 16L;
+    ul_78  =  ul_1 + l_77;
+    ch_79  =  *(( char *) ul_78);
+    i_80  =  i_70 + 1;
+    l_81  =  (long long) i_80;
+    l_82  =  l_81 + 16L;
+    ul_83  =  ul_1 + l_82;
+    ch_84  =  *(( char *) ul_83);
+    i_85  =  i_59 & -4;
+    i_86  =  i_85 + i_55;
+    ui_87  =  ch_74 & 255U;
+    ui_88  =  ui_87 << 8;
+    ui_89  =  ch_66 & 255U;
+    ui_90  =  ui_88 | ui_89;
+    ui_91  =  ch_79 & 255U;
+    ui_92  =  ui_91 << 16;
+    ui_93  =  ui_90 | ui_92;
+    ui_94  =  ch_84 & 255U;
+    ui_95  =  ui_94 << 24;
+    ui_96  =  ui_93 | ui_95;
+    adi_4[i_86]  =  ui_96;
+    i_97  =  i_62 + 8;
+    l_98  =  (long long) i_97;
+    l_99  =  l_98 + 16L;
+    ul_100  =  ul_1 + l_99;
+    ch_101  =  *(( char *) ul_100);
+    i_102  =  i_70 + 8;
+    l_103  =  (long long) i_102;
+    l_104  =  l_103 + 16L;
+    ul_105  =  ul_1 + l_104;
+    ch_106  =  *(( char *) ul_105);
+    i_107  =  i_62 + 25;
+    l_108  =  (long long) i_107;
+    ul_109  =  ul_1 + l_108;
+    ch_110  =  *(( char *) ul_109);
+    i_111  =  i_70 + 9;
+    l_112  =  (long long) i_111;
+    l_113  =  l_112 + 16L;
+    ul_114  =  ul_1 + l_113;
+    ch_115  =  *(( char *) ul_114);
+    ui_116  =  ch_106 & 255U;
+    ui_117  =  ui_116 << 8;
+    ui_118  =  ch_101 & 255U;
+    ui_119  =  ui_117 | ui_118;
+    ui_120  =  ch_110 & 255U;
+    ui_121  =  ui_120 << 16;
+    ui_122  =  ui_119 | ui_121;
+    ui_123  =  ch_115 & 255U;
+    ui_124  =  ui_123 << 24;
+    ui_125  =  ui_122 | ui_124;
+    adi_5[i_86]  =  ui_125;
+    i_126  =  i_54 + 32;
+    i_54  =  i_126;
+  }  // B4
+  // BLOCK 6
+  __syncthreads();
+  unsigned mma_a_s8_127[4];
+  {
+    unsigned __lane = threadIdx.x & 31u;
+    unsigned __rit  = __lane & 7u;
+    unsigned __grp  = __lane >> 3;
+    unsigned __bo;
+    unsigned __row = ((__grp & 1u) << 3) + __rit;
+    unsigned __col = (__grp >> 1) << 4;
+    __bo = (__row << 5) + __col;
+    unsigned __smem;
+    asm volatile("{ .reg .u64 u; cvta.to.shared.u64 u, %1; cvt.u32.u64 %0, u; }" : "=r"(__smem) : "l"((const char *) adi_3 + __bo));
+    asm volatile("ldmatrix.sync.aligned.m8n8.x4.shared.b16 {%0,%1,%2,%3}, [%4];" : "=r"(mma_a_s8_127[0]), "=r"(mma_a_s8_127[1]), "=r"(mma_a_s8_127[2]), "=r"(mma_a_s8_127[3]) : "r"(__smem));
+  }
+  unsigned mma_b_s8_128[2];
+  {
+    unsigned __lane = threadIdx.x & 31u;
+    unsigned __rit  = __lane & 7u;
+    unsigned __grp  = __lane >> 3;
+    unsigned __bo;
+    unsigned __col = (__grp & 1u) << 7;
+    __bo = (__rit << 4) + __col;
+    unsigned __smem;
+    asm volatile("{ .reg .u64 u; cvta.to.shared.u64 u, %1; cvt.u32.u64 %0, u; }" : "=r"(__smem) : "l"((const char *) adi_4 + __bo));
+    asm volatile("ldmatrix.sync.aligned.m8n8.x2.trans.shared.b16 {%0,%1}, [%2];" : "=r"(mma_b_s8_128[0]), "=r"(mma_b_s8_128[1]) : "r"(__smem));
+  }
+  float mma_acc_f_129[4];
+  asm volatile("mma.sync.aligned.m16n8k32.row.col.f32.e5m2.e5m2.f32 {%0,%1,%2,%3}, {%4,%5,%6,%7}, {%8,%9}, {%10,%11,%12,%13};" : "=f"(mma_acc_f_129[0]), "=f"(mma_acc_f_129[1]), "=f"(mma_acc_f_129[2]), "=f"(mma_acc_f_129[3]) : "r"(mma_a_s8_127[0]), "r"(mma_a_s8_127[1]), "r"(mma_a_s8_127[2]), "r"(mma_a_s8_127[3]), "r"(mma_b_s8_128[0]), "r"(mma_b_s8_128[1]), "f"(mma_acc_f_6[0]), "f"(mma_acc_f_6[1]), "f"(mma_acc_f_6[2]), "f"(mma_acc_f_6[3]));
+  unsigned mma_b_s8_130[2];
+  {
+    unsigned __lane = threadIdx.x & 31u;
+    unsigned __rit  = __lane & 7u;
+    unsigned __grp  = __lane >> 3;
+    unsigned __bo;
+    unsigned __col = (__grp & 1u) << 7;
+    __bo = (__rit << 4) + __col;
+    unsigned __smem;
+    asm volatile("{ .reg .u64 u; cvta.to.shared.u64 u, %1; cvt.u32.u64 %0, u; }" : "=r"(__smem) : "l"((const char *) adi_5 + __bo));
+    asm volatile("ldmatrix.sync.aligned.m8n8.x2.trans.shared.b16 {%0,%1}, [%2];" : "=r"(mma_b_s8_130[0]), "=r"(mma_b_s8_130[1]) : "r"(__smem));
+  }
+  float mma_acc_f_131[4];
+  asm volatile("mma.sync.aligned.m16n8k32.row.col.f32.e5m2.e5m2.f32 {%0,%1,%2,%3}, {%4,%5,%6,%7}, {%8,%9}, {%10,%11,%12,%13};" : "=f"(mma_acc_f_131[0]), "=f"(mma_acc_f_131[1]), "=f"(mma_acc_f_131[2]), "=f"(mma_acc_f_131[3]) : "r"(mma_a_s8_127[0]), "r"(mma_a_s8_127[1]), "r"(mma_a_s8_127[2]), "r"(mma_a_s8_127[3]), "r"(mma_b_s8_130[0]), "r"(mma_b_s8_130[1]), "f"(mma_acc_f_7[0]), "f"(mma_acc_f_7[1]), "f"(mma_acc_f_7[2]), "f"(mma_acc_f_7[3]));
+  {
+    unsigned __lane = threadIdx.x & 31u;
+    unsigned __rit0 = (__lane >> 2);
+    unsigned __cit0 = ((__lane & 3u) << 1);
+    unsigned __idx0 = (0 + __rit0) * 16 + (0 + __cit0);
+    ((float *) ((char *) ul_2 + 16u))[__idx0] = mma_acc_f_129[0];
+    unsigned __rit1 = (__lane >> 2);
+    unsigned __cit1 = ((__lane & 3u) << 1) + 1u;
+    unsigned __idx1 = (0 + __rit1) * 16 + (0 + __cit1);
+    ((float *) ((char *) ul_2 + 16u))[__idx1] = mma_acc_f_129[1];
+    unsigned __rit2 = (__lane >> 2) + 8u;
+    unsigned __cit2 = ((__lane & 3u) << 1);
+    unsigned __idx2 = (0 + __rit2) * 16 + (0 + __cit2);
+    ((float *) ((char *) ul_2 + 16u))[__idx2] = mma_acc_f_129[2];
+    unsigned __rit3 = (__lane >> 2) + 8u;
+    unsigned __cit3 = ((__lane & 3u) << 1) + 1u;
+    unsigned __idx3 = (0 + __rit3) * 16 + (0 + __cit3);
+    ((float *) ((char *) ul_2 + 16u))[__idx3] = mma_acc_f_129[3];
+  }
+  {
+    unsigned __lane = threadIdx.x & 31u;
+    unsigned __rit0 = (__lane >> 2);
+    unsigned __cit0 = ((__lane & 3u) << 1);
+    unsigned __idx0 = (0 + __rit0) * 16 + (8 + __cit0);
+    ((float *) ((char *) ul_2 + 16u))[__idx0] = mma_acc_f_131[0];
+    unsigned __rit1 = (__lane >> 2);
+    unsigned __cit1 = ((__lane & 3u) << 1) + 1u;
+    unsigned __idx1 = (0 + __rit1) * 16 + (8 + __cit1);
+    ((float *) ((char *) ul_2 + 16u))[__idx1] = mma_acc_f_131[1];
+    unsigned __rit2 = (__lane >> 2) + 8u;
+    unsigned __cit2 = ((__lane & 3u) << 1);
+    unsigned __idx2 = (0 + __rit2) * 16 + (8 + __cit2);
+    ((float *) ((char *) ul_2 + 16u))[__idx2] = mma_acc_f_131[2];
+    unsigned __rit3 = (__lane >> 2) + 8u;
+    unsigned __cit3 = ((__lane & 3u) << 1) + 1u;
+    unsigned __idx3 = (0 + __rit3) * 16 + (8 + __cit3);
+    ((float *) ((char *) ul_2 + 16u))[__idx3] = mma_acc_f_131[3];
+  }
+  return;
+}  //  kernel
+
+  FP8 e5m2 m16n8k32  f32.e5m2.e5m2.f32  PASSED (max abs err 0.00000, 0/256 cells out of tol)
+
+All four operand types produced correct results

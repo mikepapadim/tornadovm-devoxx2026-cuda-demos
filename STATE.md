@@ -527,3 +527,83 @@ generated code rather than runtime overhead. Evidence:
 Nsight Compute hardware counters, which would show the transaction-count effect
 directly instead of by inference from timing, remain blocked on this machine
 (`ERR_NVGPUCTRPERM`). Re-confirmed unchanged.
+
+---
+
+## Batch 22 — sm_120 evidence pack completed: the three counter-blocked steps (2026-09-04)
+
+`NVreg_RestrictProfilingToAdminUsers=0` is now in `/etc/modprobe.d/nvidia-prof.conf`
+and `RmProfilingAdminOnly` reads **0** after reboot. The `ERR_NVGPUCTRPERM` block
+recorded since batch 21 is cleared. Steps 2, 3 and 5 of the sm_120 bundle ran;
+`results/nvidia-meeting-sm120/` is complete, 9 of 9 steps DONE.
+
+Re-runnable end to end via `results/nvidia-meeting-sm120/run-blocked-steps.sh`,
+which writes only into the sm_120 bundle — never into the sm_89 baseline.
+
+### Step 2 — alignment sweep
+
+Sector arithmetic reproduces sm_89 **value for value**: 4 sectors/request when
+32 B-aligned, 5 at a 16 B offset, 655,360 / 524,288 = 1.25x exactly, and DRAM
+traffic flat at ~16.78 MB across every offset on both hosts. The extra sectors are
+L1<->L2 and are absorbed before DRAM — as on Ada.
+
+The *time* cost of that same 1.25x differs: **+6.8% here against +28.2% on sm_89**.
+Five variables move between the hosts, so this is recorded, not attributed.
+Under `ncu` the penalty is invisible on both architectures — sector counts must
+come from `ncu`, the time cost must not.
+
+### Step 3 — geometry-controlled 2x2
+
+| Effect | sm_120 | sm_89 |
+|---|---|---|
+| alignment + codegen, geometry controlled | **1.047** | 1.075 |
+| block 256 -> 1024 within TornadoVM | 1.295 | 1.131 |
+| block 256 -> 1024 within CUDA | 1.364 | 1.159 |
+| uncontrolled | 1.356 | 1.216 |
+
+1.047 x 1.295 = 1.356 exactly, reproducing the sm_89 decomposition. The two
+structural conclusions hold: the alignment penalty is geometry-independent (5.00
+vs 4.00 sectors/request at both block sizes) and the block-size penalty is *not* a
+TornadoVM property (worse on hand-written CUDA, 1.364 vs 1.295).
+
+**TornadoVM's 1.20x instruction-count disadvantage has closed.** sm_89 measured
+9,437,184 against nvcc's 7,864,320 (18 vs 15 per warp); here both sides execute
+9,437,184. TornadoVM's count did not move — nvcc 13.0's rose to meet it. Toolkit
+and architecture change together, so this is credited to neither.
+
+### Step 5 — tensor cores
+
+Emitted PTX is unchanged from sm_89 (4x `m16n8k16` BF16, 2x `m16n8k32` for each of
+e4m3, e5m2, s8) and aggregate counters match it instruction for instruction
+(4/2/2/2, cycles 64/32/32/32).
+
+**FP8 issues as QMMA on Blackwell, not HMMA.** On sm_89 both FP8 formats counted
+as HMMA; on sm_120 they count in the HMMA/QMMA/OMMA umbrella subpipe but not in
+`subpipe_hmma_op_hmma`, and not in IMMA. Consequence: `op_hmma + op_imma` no longer
+sums to the tensor-pipe total on Blackwell — the umbrella `subpipe_hmma` /
+`subpipe_imma` pair does. BF16 -> HMMA and int8 -> IMMA are unchanged.
+No timing claim; one warp, 128-256 output elements.
+
+### Method correction that cost a full capture pass
+
+Four metric names in the reproduction doc were renamed in Nsight Compute
+2025.3.1.0 / CUDA 13.0:
+
+    sm__inst_executed_pipe_tensor_op_{hmma,imma}.sum
+      -> sm__inst_executed_pipe_tensor_subpipe_{hmma,imma}_op_{hmma,imma}.sum
+    dram__bytes_{read,write}.sum  ->  dram__bytes_op_{read,write}.sum
+
+**`ncu` does not fail on an unknown metric.** It emits the row with a value of
+`n/a`, writes nothing to stderr and **exits 0**. The first pass therefore recorded
+a column of `n/a` and reported success. `run-blocked-steps.sh` now uses the current
+names, always dumps `ncu --query-metrics` output into the bundle, and greps the
+produced CSVs for `n/a` rather than trusting the exit status. Anything reproducing
+this on another toolkit must check names against `--query-metrics`.
+
+### Next invocation
+
+- The sm_89 baseline's Step 7 count was produced by the same `find` without `-L`
+  (correction 1) and is still un-re-run; it remains the one open item in the
+  sm_89 bundle.
+- Untracked build outputs (`*.class`, `*.nsys-rep`, `*.sqlite`, `cuda15`, `geom`)
+  are still not ignored; only curated evidence is committed.

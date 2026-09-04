@@ -1,0 +1,11 @@
+2026-09-04T09:59:58Z
+demo-repo=82cbc9277212fb59be4cfb4de9d2f75a44160e1e
+name, compute_cap, driver_version, memory.total [MiB], clocks.max.sm [MHz], clocks.max.memory [MHz], power.limit [W], persistence_mode
+NVIDIA GeForce RTX 5070 Ti, 12.0, 580.142, 16303 MiB, 3090 MHz, 14001 MHz, 300.00 W, Disabled
+Cuda compilation tools, release 13.0, V13.0.88
+Build cuda_13.0.r13.0/compiler.36424714_0
+Ubuntu 23.10
+Linux 6.5.0-44-generic x86_64 GNU/Linux
+openjdk version "25.0.2" 2026-01-20
+TORNADOVM_HOME=/home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda
+RmProfilingAdminOnly: 1
