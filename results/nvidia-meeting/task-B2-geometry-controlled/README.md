@@ -69,17 +69,33 @@ At matched geometry TornadoVM executes 9,437,184 instructions against
 7,864,320 — **1.20×** — for identical arithmetic, from bounds checks and index
 computation. At 93% DRAM utilisation it contributes little to time.
 
-## Consequence for the meeting
+## Consequence for the meeting — with an important limit
 
-The honest statement about TornadoVM's generated elementwise code, with geometry
-controlled on this host and this kernel: **~1.075× slower than hand-written
-CUDA, of which the entire memory-side component is a fixable data-layout choice
-(#1065) and the rest is instruction count that the bandwidth bound hides.**
+> **The 1.075 figure is an `ncu`-condition number and must not be quoted as
+> "TornadoVM is 1.075× slower".** Every measurement in this 2×2 was taken under
+> Nsight Compute, which serialises launches, flushes caches and disallows clock
+> boost. Under those conditions the alignment penalty is largely hidden — the
+> same three demo 15 kernels give memory-bound ratios of 1.02–1.04 under `ncu`
+> against 1.24–1.31 under `nsys` at identical geometry. See
+> [`../measurement-mode/README.md`](../measurement-mode/README.md).
 
-The larger ratios reported elsewhere in this bundle for demo 12 and demo 01 are
-**launch-configuration artefacts of TornadoVM's default worker grid**, not
-compiler quality. That default is a runtime policy question, and a cheaper one
-to fix than anything in code generation.
+What this 2×2 establishes is **structural**, and holds regardless of mode:
+
+- the alignment penalty is real and **geometry-independent** (5.00 vs 4.00
+  sectors/request at both block sizes);
+- the 256→1024 block penalty is **not a TornadoVM property** (1.131 on
+  TornadoVM, 1.159 on hand-written CUDA);
+- the two effects **multiply to the uncontrolled ratio exactly**, which is what
+  retires demo 12's confounded comparison.
+
+For a realistic steady-state figure at matched geometry, quote **demo 15 under
+`nsys`**: 1.31 and 1.24 on the memory-bound kernels, 0.88 on the compute-bound
+one. Those were never geometry-confounded — demo 15 pins both sides to block=256
+and grid=16384, verified from `launch__block_size` rather than from source.
+
+The larger ratios reported for **demo 12** and **demo 01** are launch-config
+artefacts of TornadoVM's default worker grid — a runtime policy question, and a
+cheaper one to fix than anything in code generation.
 
 ## Files
 

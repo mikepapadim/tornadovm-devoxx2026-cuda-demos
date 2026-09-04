@@ -466,8 +466,38 @@
           "product_of_effects": 1.216
         }
       },
-      "caveat": "kernel times measured under ncu; ratios are valid within this measurement mode only",
-      "conclusion": "Sectors/request is 5.00 vs 4.00 at BOTH block sizes, so alignment is real and geometry-independent, but costs only 1.075x in time at 93-95% of peak DRAM. The 256->1024 penalty is 1.131x on TornadoVM and 1.159x on hand-written CUDA, so it is a launch-configuration effect, not a TornadoVM property. The residual codegen difference is instruction count (1.20x) which the bandwidth bound hides."
+      "caveat": "All four runs measured under ncu, which serialises launches and flushes caches. The 1.075 figure is ncu-conditioned and must NOT be quoted as a steady-state ratio: the same demo 15 kernels give 1.02-1.04 under ncu vs 1.24-1.31 under nsys at identical verified geometry. The structural conclusions (geometry-independence of the sector penalty, the block-size term not being TornadoVM-specific, and the exact multiplication) hold regardless of mode.",
+      "conclusion": "Sectors/request is 5.00 vs 4.00 at BOTH block sizes, so alignment is real and geometry-independent, but costs only 1.075x in time at 93-95% of peak DRAM. The 256->1024 penalty is 1.131x on TornadoVM and 1.159x on hand-written CUDA, so it is a launch-configuration effect, not a TornadoVM property. The residual codegen difference is instruction count (1.20x) which the bandwidth bound hides.",
+      "corrections": [
+        "An earlier revision framed 1.075 as 'the defensible number' replacing 1.20-1.31. Wrong twice: it mixed measurement modes, and it swept in demo 15's figures, which were never geometry-confounded. Only demo 12's 1.20-1.23 was confounded."
+      ]
+    },
+    {
+      "id": "M.measurement-mode",
+      "task": "methodology",
+      "status": "measured",
+      "architecture": "sm_89",
+      "claim": "ncu and nsys disagree on the RATIO, not only on absolute time",
+      "method": "same three demo 15 kernels, geometry verified identical (block=256, grid=16384) from launch__block_size",
+      "raw": [
+        "results/nvidia-meeting/measurement-mode/demo15-launch-geometry-and-ncu-times.csv",
+        "results/nvidia-meeting/measurement-mode/README.md"
+      ],
+      "values": {
+        "elementwise": {
+          "nsys_ratio": 1.31,
+          "ncu_ratio": 1.02
+        },
+        "stencil": {
+          "nsys_ratio": 1.24,
+          "ncu_ratio": 1.04
+        },
+        "polynomial": {
+          "nsys_ratio": 0.88,
+          "ncu_ratio": 0.92
+        }
+      },
+      "conclusion": "Memory-bound ratios collapse under ncu because serialised cold launches make both implementations DRAM-latency-bound and hide the extra L1<->L2 sector traffic. Compute-bound is insensitive. Ratios from one mode must not be compared with ratios from the other, even at matched geometry and problem size."
     }
   ]
 }

@@ -1,0 +1,13 @@
+implementation,kernel,block_size,grid_size,ncu_time_ns
+TornadoVM,elementwise,256,16384,20128
+TornadoVM,polynomial,256,16384,41056
+TornadoVM,stencil,256,16384,20096
+TornadoVM,elementwise,256,16384,19936
+TornadoVM,polynomial,256,16384,40640
+TornadoVM,stencil,256,16384,19584
+CUDA,elementwise,256,16384,19744
+CUDA,polynomial,256,16384,44832
+CUDA,stencil,256,16384,19456
+CUDA,elementwise,256,16384,19328
+CUDA,polynomial,256,16384,44832
+CUDA,stencil,256,16384,19392

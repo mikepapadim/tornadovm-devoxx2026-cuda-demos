@@ -84,12 +84,20 @@ Three conclusions:
   7,864,320 (**1.20×**) at matched geometry, from bounds checks and index
   arithmetic, largely hidden by the bandwidth bound.
 
-**Statement for the meeting:** with geometry controlled, on this host and this
-kernel, TornadoVM's generated elementwise code is **~1.075× slower** than
-hand-written CUDA, and the entire memory-side component is a fixable data-layout
-choice (#1065). The larger ratios elsewhere in this bundle are launch-config
-artefacts of the default worker grid — a runtime policy question, not compiler
-quality. Raw: `task-B2-geometry-controlled/`.
+> **The 1.075 figure is `ncu`-conditioned and is not the number to quote.** All
+> four runs above were taken under Nsight Compute, which serialises launches and
+> flushes caches; that hides most of the alignment penalty. The same demo 15
+> kernels give 1.02–1.04 under `ncu` against **1.24–1.31 under `nsys`** at
+> identical, verified geometry — see `measurement-mode/`. What the 2×2
+> establishes is structural (the penalty is geometry-independent; the block-size
+> term is not TornadoVM-specific; the two multiply out exactly), not a headline
+> ratio.
+
+For a steady-state figure at matched geometry, quote demo 15 under `nsys`:
+**1.31 / 1.24 memory-bound, 0.88 compute-bound**. Demo 15 pins both sides to
+block=256, grid=16384, verified from `launch__block_size`. The larger ratios for
+**demo 12** and **demo 01** are launch-config artefacts of the default worker
+grid. Raw: `task-B2-geometry-controlled/`, `measurement-mode/`.
 
 ### A. Baseline code quality — kernel time, nsys
 
