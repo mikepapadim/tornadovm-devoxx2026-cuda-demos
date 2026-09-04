@@ -681,13 +681,24 @@ driver, toolkit, gcc and OS, and sm_89 was not re-run.
   which nothing in the repository imports, and discards pip's error. On any PEP 668
   distribution `make BACKEND=cuda` dies with `ModuleNotFoundError: No module named
   'streamlit'`. This blocked the build for this batch.
-- **Open, not yet filed** — CUDA-backend profiler returns 0 for
-  `getDataTransferDispatchTime()`, `getKernelDispatchTime()` and
-  `getDeviceReadTime()`, failing three `TestProfiler` tests that are *not*
-  whitelisted. `CUDAEvent.clGetEventProfilingInfo` is a stub that zeroes its
-  buffer, so every absolute event timestamp on the backend is 0 and both dispatch
-  figures are structurally unobtainable. The zero read time is a third symptom with
-  a different, still-unexplained cause. Detail in `results/pr1066-sm120/TESTS.md`.
+- **Filed: [#1071](https://github.com/beehive-lab/TornadoVM/issues/1071)** (issue,
+  not a PR) — CUDA-backend profiler returns 0 for `getDataTransferDispatchTime()`,
+  `getKernelDispatchTime()` and `getDeviceReadTime()`, failing three `TestProfiler`
+  tests that are *not* whitelisted. Two independent causes, both traced:
+  `CUDAEvent.clGetEventProfilingInfo` is a stub that zeroes its buffer, so every
+  absolute event timestamp is 0 and both dispatch figures are structurally
+  unobtainable on CUDA; and a copy-out issued without a dependency list returns -1
+  from `XPUBuffer.read`, so `COPY_OUT_TIME` is never accumulated — the same shape
+  as the bug #1048 fixed for *bytes*, directly under the comment that PR left.
+  Filed as an issue rather than a PR deliberately: both fixes are design decisions
+  (host-side dispatch timing; timing copy-outs without changing execution under the
+  profiler) and guessing would put fabricated numbers into a profiler, which is
+  worse than the zeros. Detail in `results/pr1066-sm120/TESTS.md`.
+- **Filed: [#1072](https://github.com/beehive-lab/TornadoVM/pull/1072)** — the part
+  of #1071 that *was* safely fixable. `TestProfiler`'s twelve assertions carried no
+  messages, so all three failures reported `[REASON] null` and finding the zero
+  counter took a bisect. Now reports `getDataTransferDispatchTime() should be > 0,
+  was 0`. Same tests pass and fail before and after.
 
 ### Next invocation
 
