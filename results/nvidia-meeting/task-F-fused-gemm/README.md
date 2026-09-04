@@ -57,27 +57,66 @@ smaller fraction of a small GEMM.
 
 ### m=n=k=4096 (large, throughput-oriented)
 
-**Run in progress at the time of writing.** Recorded as pending rather than
-estimated.
+| Path | Kernels | Total GPU ns |
+|---|---|---|
+| TornadoVM fused | `scale` 87,937.4 + `LinearCombinationRelu` 858,509.7 | **946,447.1** |
+| TornadoVM unfused | 87,937.4 + `LinearCombination` 856,770.7 + `biasRelu` 82,977.4 | **1,027,685.5** |
+| CUDA fused | `scaleKernel` 66,388.2 + 853,759.4 | **920,147.6** |
+| CUDA unfused | 66,388.2 + 823,562.6 + `biasReluKernel` 58,897.7 | **948,848.5** |
 
-## The cross-check worth noting
+Fusion saves **7.9%** on TornadoVM, 3.0% on CUDA.
 
-Splitting the totals by kernel origin at m=n=k=1024:
+Fusion saving by shape, TornadoVM: 6.2% (256) → 11.8% (1024) → 7.9% (4096). It
+peaks at the middle shape; at 4096 the GEMM dominates so the epilogue is a
+smaller fraction, and at 256 the epilogue is cheap in absolute terms.
 
-| Kernel | Origin | TornadoVM | CUDA | ratio |
+## Splitting by kernel origin — and a launch-geometry confounder
+
+> **Correction.** An earlier revision of this file attributed the JIT-kernel
+> ratios below to the task B alignment effect. **That attribution was not
+> supported**: the JIT kernels do not share launch geometry between the two
+> implementations, so it is not a controlled comparison. Corrected here.
+
+| Kernel | Origin | grid × block, TornadoVM | grid × block, CUDA | same geometry? |
 |---|---|---|---|---|
-| `LinearCombinationRelu` | CUTLASS library | 30,359.8 | 30,466.9 | **1.00** |
-| `LinearCombination` | CUTLASS library | 30,055.8 | 29,734.2 | **1.01** |
-| `scale` | JIT / hand-written | 4,316.1 | 3,504.8 | **1.23** |
-| `biasRelu` | JIT / hand-written | 4,924.9 | 4,092.8 | **1.20** |
+| `LinearCombination{,Relu}` | CUTLASS | (32,32,1) × 128 | (32,32,1) × 128 | **yes** |
+| `scale`, `biasRelu` | JIT vs hand-written | 16384 × **1024** | 65536 × **256** | **no** |
 
-**The library kernels are identical because both sides call the same CUTLASS
-kernel** — as they must be. The difference is confined to the two small
-elementwise kernels, at **1.20–1.23x**, which is the same ratio the alignment
-sweep (task B) attributes to `FloatArray`'s 16-byte payload offset on
-bandwidth-bound kernels. Task F therefore corroborates task B on an independent
-workload, and localises the gap to TornadoVM-generated code rather than to the
-library-task integration.
+Total threads match (16384 × 1024 = 65536 × 256), but the block size does not.
+
+### Valid comparison — the library kernels
+
+Both sides invoke the same CUTLASS kernel, which picks its own launch
+configuration, so this *is* controlled:
+
+| Kernel | m=n=k=1024 | m=n=k=4096 | ratio (1024 / 4096) |
+|---|---|---|---|
+| `LinearCombinationRelu` | 30,359.8 / 30,466.9 | 858,509.7 / 853,759.4 | **1.00 / 1.01** |
+| `LinearCombination` | 30,055.8 / 29,734.2 | 856,770.7 / 823,562.6 | **1.01 / 1.04** |
+
+**Library-task integration costs essentially nothing.** TornadoVM reaches the
+same CUTLASS kernel at the same performance as a hand-written caller. That is a
+clean result and the one worth carrying into the meeting.
+
+### Not a controlled comparison — the JIT kernels
+
+| Kernel | 1024 | 4096 | ratio |
+|---|---|---|---|
+| `scale` | 4,316.1 / 3,504.8 | 87,937.4 / 66,388.2 | 1.23 / **1.32** |
+| `biasRelu` | 4,924.9 / 4,092.8 | 82,977.4 / 58,897.7 | 1.20 / **1.41** |
+
+These ratios **cannot be attributed to code generation or to alignment**, for
+two reasons. The block sizes differ (1024 vs 256). And the ratio *grows with
+problem size* (1.20 → 1.41), whereas the alignment penalty measured in task B is
+bounded at 1.25 by sector arithmetic and does not scale. The growth is the
+signature of the occupancy ceiling a 1024-thread block imposes on sm_89 — the
+same effect documented for demo 01, where a 1024-thread block tiles once into
+1536 threads/SM and caps occupancy at 66.7%.
+
+**What this actually shows is a runtime default, not a compiler defect:**
+TornadoVM's default worker grid selects 1024-thread blocks for these elementwise
+tasks. Isolating alignment from occupancy here would require re-running the JIT
+side with a `GridScheduler` pinned to 256 threads. Not done; recorded as a gap.
 
 ## End-to-end wall clock — and an anomaly
 
@@ -101,11 +140,29 @@ API differencing run of both modes, which has not been done. It is exactly the
 kind of end-to-end/kernel-only divergence this bundle separates by design, and
 no fusion recommendation should be drawn from wall clock alone here.
 
-## Gap still open
+## Cold vs warm compilation — acceptance criterion 8
 
-**Cold vs warm compilation time is not yet separated.** A profiler-enabled run
-was captured (`tvm_profiler_1024.log`) but the Graal/driver compile-time split
-has not been extracted. Task F's acceptance criterion 8 remains unmet.
+From `tvm_profiler_1024.log` (`-Dtornado.profiler=True`, m=n=k=1024). TornadoVM
+reports compile time per task graph:
+
+| Phase | First execution (cold) | Steady state (warm) |
+|---|---|---|
+| `TASK_COMPILE_GRAAL_TIME` | **42,230,354 ns (42.2 ms)** | 0 |
+| `TASK_COMPILE_DRIVER_TIME` (NVRTC) | **16,281,649 ns (16.3 ms)** | 0 |
+| `TOTAL_TASK_GRAPH_TIME` | 87,100,266 ns (87.1 ms) | 394,381–556,135 ns |
+| `TOTAL_KERNEL_TIME` | 464,892 ns | 62,397–91,488 ns |
+
+**Compilation is 58.5 ms of the 87.1 ms cold first execution — 67%.** Graal
+front-end work (42.2 ms) is 2.6x the NVRTC/driver back-end cost (16.3 ms).
+Steady-state execution is ~0.4 ms, so **cold is ~200x warm**.
+
+This is the price of the JIT specialisation advantage measured in task C, and it
+is paid once per task graph. Relevant to the CUDA Tile discussion: any
+Tile-based path would have to fit inside a comparable runtime compile budget.
+
+> The profiler perturbs the run it measures — steady-state `TOTAL_TASK_GRAPH_TIME`
+> here (~0.4 ms) is above the 0.342 ms wall clock measured without it. Use these
+> figures for the cold/warm *split*, not as absolute steady-state timings.
 
 ## Files
 

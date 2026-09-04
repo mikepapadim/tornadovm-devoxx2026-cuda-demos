@@ -186,23 +186,58 @@ Fusion saves **11.8%** of GPU time at 1024 and 6.2% at 256, plus one kernel
 launch. The fused epilogue costs **+1.0%** on the GEMM itself against 4,924.9 ns
 as a separate pass.
 
-**Split by kernel origin at m=n=k=1024:**
+Fusion saving by shape (TornadoVM): 6.2% at 256, **11.8% at 1024**, 7.9% at 4096.
+At 4096: TornadoVM fused 946,447.1 ns vs unfused 1,027,685.5 ns.
 
-| Kernel | Origin | ratio TornadoVM/CUDA |
+**Split by kernel origin — with a launch-geometry caveat:**
+
+| Kernel | Origin | same launch geometry? | ratio TornadoVM/CUDA (1024 / 4096) |
+|---|---|---|---|
+| `LinearCombinationRelu` | CUTLASS library | **yes** — (32,32,1)×128 both | **1.00 / 1.01** |
+| `LinearCombination` | CUTLASS library | **yes** | **1.01 / 1.04** |
+| `scale` | JIT vs hand-written | **no** — 1024 vs 256 block | 1.23 / 1.32 |
+| `biasRelu` | JIT vs hand-written | **no** | 1.20 / 1.41 |
+
+**The valid half:** both sides invoke the same CUTLASS kernel with the same
+launch configuration, and it performs identically (1.00–1.04x).
+**Library-task integration costs essentially nothing** — TornadoVM reaches
+CUTLASS at the same performance as a hand-written caller.
+
+**The invalid half:** the JIT kernels do not share block size (1024 vs 256), so
+those ratios are *not* a controlled comparison and **must not be attributed to
+code generation or to alignment**. An earlier revision of this bundle made that
+attribution; it is corrected here. Two facts contradict it: the block sizes
+differ, and the ratio grows with problem size (1.20 → 1.41) whereas the task B
+alignment penalty is bounded at 1.25 by sector arithmetic and does not scale.
+The growth matches the occupancy ceiling of a 1024-thread block on sm_89 — the
+same effect documented for demo 01.
+
+**What it does show is a runtime default, not a compiler defect:** TornadoVM's
+default worker grid picks 1024-thread blocks for these tasks. Separating
+alignment from occupancy needs a re-run with a `GridScheduler` pinned to 256.
+Not done; recorded as a gap.
+
+Raw: `task-F-fused-gemm/kernel-times.csv` (includes grid and block per kernel).
+
+## Cold vs warm compilation (task F, criterion 8)
+
+`-Dtornado.profiler=True`, m=n=k=1024:
+
+| Phase | Cold (first execution) | Warm (steady state) |
 |---|---|---|
-| `LinearCombinationRelu` | CUTLASS library | **1.00** |
-| `LinearCombination` | CUTLASS library | **1.01** |
-| `scale` | JIT vs hand-written | **1.23** |
-| `biasRelu` | JIT vs hand-written | **1.20** |
+| `TASK_COMPILE_GRAAL_TIME` | **42.2 ms** | 0 |
+| `TASK_COMPILE_DRIVER_TIME` (NVRTC) | **16.3 ms** | 0 |
+| `TOTAL_TASK_GRAPH_TIME` | 87.1 ms | 0.39–0.56 ms |
+| `TOTAL_KERNEL_TIME` | 0.46 ms | 0.062–0.091 ms |
 
-The library kernels are identical, as they must be — both sides call the same
-CUTLASS kernel. **The entire difference is confined to the two small elementwise
-kernels, at 1.20–1.23x, the same ratio task B attributes to the 16-byte payload
-offset.** Task F corroborates task B on an independent workload and localises
-the gap to generated code rather than to library-task integration.
+**Compilation is 58.5 ms of the 87.1 ms cold execution (67%); Graal front-end
+work is 2.6x the NVRTC back-end cost. Cold is ~200x warm.** This is the price of
+the task C specialisation advantage, paid once per task graph, and it bounds the
+runtime compile budget any Tile-based path would have to fit inside.
 
-m=n=k=4096 was still running when this was written and is recorded as pending
-rather than estimated. Raw: `task-F-fused-gemm/`.
+The profiler perturbs its own measurement — warm `TOTAL_TASK_GRAPH_TIME` here
+(~0.4 ms) exceeds the 0.342 ms wall clock measured without it. Use these for the
+cold/warm *split*, not as absolute steady-state timings.
 
 ## G. CUDA Tile feasibility — host facts
 
@@ -242,9 +277,10 @@ not, and `wgmma` is not reachable by extending that enum.
 
 | Item | Status |
 |---|---|
-| F. Fused GEMM baseline | **partially measured** — CUTLASS v3.5.1 cloned; shapes 256 and 1024 done, 4096 in progress |
+| F. Fused GEMM baseline | **measured** — CUTLASS v3.5.1; shapes 256, 1024, 4096 |
+| F. JIT-kernel ratios confounded by launch geometry (1024 vs 256 block) | **not isolated** — needs a re-run with GridScheduler pinned to 256 |
 | F. TornadoVM fused slower end-to-end than unfused (342 vs 313 µs) while GPU time is 11.8% lower | **reported, not explained** — needs per-execution API differencing of both modes |
-| Cold vs warm compile time | **not separated anywhere** in this bundle |
+| Cold vs warm compile time | **measured** — 42.2 ms Graal + 16.3 ms NVRTC = 58.5 ms of an 87.1 ms cold execution; warm ~0.4 ms |
 | TornadoVM-side SASS (task C) | **not capturable** — cubin produced in-process by NVRTC |
 | CUDA Graph per-execution API cost | **not differenced** |
 | Device-buffer reuse across graph nodes | **not verified from trace** |

@@ -1,0 +1,1346 @@
+WARNING: module-info.class ignored in patch: /home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda/share/java/jvmci/jvmci-21.0.2.jar
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess (file:/home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda/share/java/tornado/tornado-runtime-6.0.0.jar)
+WARNING: Please consider reporting this to the maintainers of class uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+CUTLASS fused epilogue demo: C[1024x1024] = relu(scale(A[1024x1024]) * B[1024x1024] + bias), fp16
+  20 executions per mode, steady-state median reported (first execution excluded)
+
+=== FUSED (CUTLASS gemmBiasRelu — one kernel) ===
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::loadLibrary has been called by uk.ac.manchester.tornado.cutlass.provider.CutlassNativeLib in module tornado.cutlass (file:/home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda/share/java/tornado/tornado-cutlass-6.0.0.jar)
+WARNING: Use --enable-native-access=tornado.cutlass to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+{
+    "fused": {
+        "TOTAL_TASK_GRAPH_TIME": "87100266",
+        "TOTAL_GRAAL_COMPILE_TIME": "42230354",
+        "TOTAL_CODE_GENERATION_TIME": "2959325",
+        "TOTAL_DRIVER_COMPILE_TIME": "16281649",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_BYTE_CODE_GENERATION": "3942157",
+        "TOTAL_KERNEL_TIME": "464892",
+        "COPY_IN_TIME": "240736",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_COPY_IN_SIZE_BYTES": "4196400",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "fused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_COMPILE_GRAAL_TIME": "42230354",
+            "TASK_CODE_GENERATION_TIME": "2959325",
+            "TASK_COMPILE_DRIVER_TIME": "16281649",
+            "TASK_KERNEL_TIME": "349184"
+        }, 
+        "fused.gemmBiasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassGemmBiasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "115708"
+        }
+    }
+}
+
+  first execution (JIT compile + CUTLASS plan setup): 88292 us
+{
+    "fused": {
+        "TOTAL_TASK_GRAPH_TIME": "556135",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "91488",
+        "COPY_IN_TIME": "6496",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "fused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "48832"
+        }, 
+        "fused.gemmBiasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassGemmBiasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "42656"
+        }
+    }
+}
+
+{
+    "fused": {
+        "TOTAL_TASK_GRAPH_TIME": "456377",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "67718",
+        "COPY_IN_TIME": "3776",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "fused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "27232"
+        }, 
+        "fused.gemmBiasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassGemmBiasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "40486"
+        }
+    }
+}
+
+{
+    "fused": {
+        "TOTAL_TASK_GRAPH_TIME": "443775",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "72062",
+        "COPY_IN_TIME": "3424",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "fused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "31232"
+        }, 
+        "fused.gemmBiasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassGemmBiasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "40830"
+        }
+    }
+}
+
+{
+    "fused": {
+        "TOTAL_TASK_GRAPH_TIME": "409444",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "63338",
+        "COPY_IN_TIME": "3296",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "fused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "23584"
+        }, 
+        "fused.gemmBiasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassGemmBiasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "39754"
+        }
+    }
+}
+
+{
+    "fused": {
+        "TOTAL_TASK_GRAPH_TIME": "423300",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "62397",
+        "COPY_IN_TIME": "3040",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "fused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "22560"
+        }, 
+        "fused.gemmBiasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassGemmBiasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "39837"
+        }
+    }
+}
+
+{
+    "fused": {
+        "TOTAL_TASK_GRAPH_TIME": "405641",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "66734",
+        "COPY_IN_TIME": "3200",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "fused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "26784"
+        }, 
+        "fused.gemmBiasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassGemmBiasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "39950"
+        }
+    }
+}
+
+{
+    "fused": {
+        "TOTAL_TASK_GRAPH_TIME": "404527",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "72555",
+        "COPY_IN_TIME": "3232",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "fused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "31840"
+        }, 
+        "fused.gemmBiasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassGemmBiasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "40715"
+        }
+    }
+}
+
+{
+    "fused": {
+        "TOTAL_TASK_GRAPH_TIME": "394381",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "65113",
+        "COPY_IN_TIME": "4896",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "fused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "24960"
+        }, 
+        "fused.gemmBiasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassGemmBiasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "40153"
+        }
+    }
+}
+
+{
+    "fused": {
+        "TOTAL_TASK_GRAPH_TIME": "399466",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "63695",
+        "COPY_IN_TIME": "2848",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "fused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "24352"
+        }, 
+        "fused.gemmBiasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassGemmBiasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "39343"
+        }
+    }
+}
+
+{
+    "fused": {
+        "TOTAL_TASK_GRAPH_TIME": "388055",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "62719",
+        "COPY_IN_TIME": "3072",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "fused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "22656"
+        }, 
+        "fused.gemmBiasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassGemmBiasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "40063"
+        }
+    }
+}
+
+{
+    "fused": {
+        "TOTAL_TASK_GRAPH_TIME": "385606",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "62393",
+        "COPY_IN_TIME": "3104",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "fused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "22944"
+        }, 
+        "fused.gemmBiasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassGemmBiasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "39449"
+        }
+    }
+}
+
+{
+    "fused": {
+        "TOTAL_TASK_GRAPH_TIME": "443236",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "63132",
+        "COPY_IN_TIME": "3104",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "fused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "22752"
+        }, 
+        "fused.gemmBiasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassGemmBiasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "40380"
+        }
+    }
+}
+
+{
+    "fused": {
+        "TOTAL_TASK_GRAPH_TIME": "391850",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "62189",
+        "COPY_IN_TIME": "3136",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "fused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "22368"
+        }, 
+        "fused.gemmBiasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassGemmBiasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "39821"
+        }
+    }
+}
+
+{
+    "fused": {
+        "TOTAL_TASK_GRAPH_TIME": "388537",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "63504",
+        "COPY_IN_TIME": "3008",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "fused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "23872"
+        }, 
+        "fused.gemmBiasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassGemmBiasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "39632"
+        }
+    }
+}
+
+{
+    "fused": {
+        "TOTAL_TASK_GRAPH_TIME": "436045",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "63110",
+        "COPY_IN_TIME": "3264",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "fused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "22496"
+        }, 
+        "fused.gemmBiasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassGemmBiasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "40614"
+        }
+    }
+}
+
+{
+    "fused": {
+        "TOTAL_TASK_GRAPH_TIME": "377924",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "65095",
+        "COPY_IN_TIME": "3072",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "fused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "25376"
+        }, 
+        "fused.gemmBiasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassGemmBiasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "39719"
+        }
+    }
+}
+
+{
+    "fused": {
+        "TOTAL_TASK_GRAPH_TIME": "537534",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "63730",
+        "COPY_IN_TIME": "3232",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "fused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "21184"
+        }, 
+        "fused.gemmBiasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassGemmBiasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "42546"
+        }
+    }
+}
+
+{
+    "fused": {
+        "TOTAL_TASK_GRAPH_TIME": "367617",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "64015",
+        "COPY_IN_TIME": "3136",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "fused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "24192"
+        }, 
+        "fused.gemmBiasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassGemmBiasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "39823"
+        }
+    }
+}
+
+{
+    "fused": {
+        "TOTAL_TASK_GRAPH_TIME": "383065",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "66618",
+        "COPY_IN_TIME": "3168",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "fused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "26848"
+        }, 
+        "fused.gemmBiasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassGemmBiasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "39770"
+        }
+    }
+}
+
+  steady-state median wall-clock (n=19): 470 us
+  [fused  ] validation PASSED (max abs err 0.00781, 0/1048576 cells out of tol)
+
+=== UNFUSED (CUTLASS hgemm + JIT bias/ReLU — two kernels) ===
+{
+    "unfused": {
+        "TOTAL_TASK_GRAPH_TIME": "27299198",
+        "TOTAL_GRAAL_COMPILE_TIME": "14970142",
+        "TOTAL_CODE_GENERATION_TIME": "1534458",
+        "TOTAL_DRIVER_COMPILE_TIME": "949734",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_BYTE_CODE_GENERATION": "405412",
+        "TOTAL_KERNEL_TIME": "122460",
+        "COPY_IN_TIME": "243200",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "TOTAL_COPY_IN_SIZE_BYTES": "4196400",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "unfused.biasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.biasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_COMPILE_GRAAL_TIME": "8985730",
+            "TASK_CODE_GENERATION_TIME": "767588",
+            "TASK_COMPILE_DRIVER_TIME": "484438",
+            "TASK_KERNEL_TIME": "25408"
+        }, 
+        "unfused.hgemm": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassHgemm",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "66876"
+        }, 
+        "unfused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_COMPILE_GRAAL_TIME": "5984412",
+            "TASK_CODE_GENERATION_TIME": "766870",
+            "TASK_COMPILE_DRIVER_TIME": "465296",
+            "TASK_KERNEL_TIME": "30176"
+        }
+    }
+}
+
+  first execution (JIT compile + CUTLASS plan setup): 27416 us
+{
+    "unfused": {
+        "TOTAL_TASK_GRAPH_TIME": "535618",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "92255",
+        "COPY_IN_TIME": "6912",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "unfused.biasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.biasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "22048"
+        }, 
+        "unfused.hgemm": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassHgemm",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "44767"
+        }, 
+        "unfused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "25440"
+        }
+    }
+}
+
+{
+    "unfused": {
+        "TOTAL_TASK_GRAPH_TIME": "428317",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "71541",
+        "COPY_IN_TIME": "5472",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "unfused.biasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.biasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "15424"
+        }, 
+        "unfused.hgemm": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassHgemm",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "40405"
+        }, 
+        "unfused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "15712"
+        }
+    }
+}
+
+{
+    "unfused": {
+        "TOTAL_TASK_GRAPH_TIME": "419337",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "70274",
+        "COPY_IN_TIME": "5344",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "unfused.biasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.biasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "15392"
+        }, 
+        "unfused.hgemm": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassHgemm",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "39490"
+        }, 
+        "unfused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "15392"
+        }
+    }
+}
+
+{
+    "unfused": {
+        "TOTAL_TASK_GRAPH_TIME": "434429",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "81837",
+        "COPY_IN_TIME": "5920",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "unfused.biasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.biasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "16480"
+        }, 
+        "unfused.hgemm": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassHgemm",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "48557"
+        }, 
+        "unfused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "16800"
+        }
+    }
+}
+
+{
+    "unfused": {
+        "TOTAL_TASK_GRAPH_TIME": "441747",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "75983",
+        "COPY_IN_TIME": "5472",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "unfused.biasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.biasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "15584"
+        }, 
+        "unfused.hgemm": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassHgemm",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "39887"
+        }, 
+        "unfused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "20512"
+        }
+    }
+}
+
+{
+    "unfused": {
+        "TOTAL_TASK_GRAPH_TIME": "424534",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "72122",
+        "COPY_IN_TIME": "5504",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "unfused.biasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.biasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "17728"
+        }, 
+        "unfused.hgemm": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassHgemm",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "38618"
+        }, 
+        "unfused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "15776"
+        }
+    }
+}
+
+{
+    "unfused": {
+        "TOTAL_TASK_GRAPH_TIME": "438560",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "70874",
+        "COPY_IN_TIME": "5152",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "unfused.biasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.biasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "15520"
+        }, 
+        "unfused.hgemm": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassHgemm",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "39386"
+        }, 
+        "unfused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "15968"
+        }
+    }
+}
+
+{
+    "unfused": {
+        "TOTAL_TASK_GRAPH_TIME": "509551",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "152877",
+        "COPY_IN_TIME": "5376",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "unfused.biasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.biasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "96896"
+        }, 
+        "unfused.hgemm": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassHgemm",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "38637"
+        }, 
+        "unfused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "17344"
+        }
+    }
+}
+
+{
+    "unfused": {
+        "TOTAL_TASK_GRAPH_TIME": "448518",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "76841",
+        "COPY_IN_TIME": "5824",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "unfused.biasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.biasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "18496"
+        }, 
+        "unfused.hgemm": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassHgemm",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "39049"
+        }, 
+        "unfused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "19296"
+        }
+    }
+}
+
+{
+    "unfused": {
+        "TOTAL_TASK_GRAPH_TIME": "746950",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "85426",
+        "COPY_IN_TIME": "8256",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "unfused.biasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.biasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "28480"
+        }, 
+        "unfused.hgemm": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassHgemm",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "42162"
+        }, 
+        "unfused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "14784"
+        }
+    }
+}
+
+{
+    "unfused": {
+        "TOTAL_TASK_GRAPH_TIME": "451105",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "77490",
+        "COPY_IN_TIME": "9024",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "unfused.biasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.biasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "12288"
+        }, 
+        "unfused.hgemm": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassHgemm",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "39314"
+        }, 
+        "unfused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "25888"
+        }
+    }
+}
+
+{
+    "unfused": {
+        "TOTAL_TASK_GRAPH_TIME": "414149",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "64128",
+        "COPY_IN_TIME": "5568",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "unfused.biasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.biasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "11904"
+        }, 
+        "unfused.hgemm": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassHgemm",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "39040"
+        }, 
+        "unfused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "13184"
+        }
+    }
+}
+
+{
+    "unfused": {
+        "TOTAL_TASK_GRAPH_TIME": "403394",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "61841",
+        "COPY_IN_TIME": "5984",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "unfused.biasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.biasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "11840"
+        }, 
+        "unfused.hgemm": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassHgemm",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "38769"
+        }, 
+        "unfused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "11232"
+        }
+    }
+}
+
+{
+    "unfused": {
+        "TOTAL_TASK_GRAPH_TIME": "415211",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "64835",
+        "COPY_IN_TIME": "7840",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "unfused.biasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.biasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "13792"
+        }, 
+        "unfused.hgemm": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassHgemm",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "38723"
+        }, 
+        "unfused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "12320"
+        }
+    }
+}
+
+{
+    "unfused": {
+        "TOTAL_TASK_GRAPH_TIME": "419530",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "66637",
+        "COPY_IN_TIME": "5696",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "unfused.biasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.biasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "12224"
+        }, 
+        "unfused.hgemm": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassHgemm",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "39085"
+        }, 
+        "unfused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "15328"
+        }
+    }
+}
+
+{
+    "unfused": {
+        "TOTAL_TASK_GRAPH_TIME": "465000",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "62989",
+        "COPY_IN_TIME": "13536",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "unfused.biasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.biasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "11648"
+        }, 
+        "unfused.hgemm": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassHgemm",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "38669"
+        }, 
+        "unfused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "12672"
+        }
+    }
+}
+
+{
+    "unfused": {
+        "TOTAL_TASK_GRAPH_TIME": "395030",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "61855",
+        "COPY_IN_TIME": "5984",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "unfused.biasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.biasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "11072"
+        }, 
+        "unfused.hgemm": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassHgemm",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "39039"
+        }, 
+        "unfused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "11744"
+        }
+    }
+}
+
+{
+    "unfused": {
+        "TOTAL_TASK_GRAPH_TIME": "389466",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "61997",
+        "COPY_IN_TIME": "7616",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "unfused.biasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.biasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "11424"
+        }, 
+        "unfused.hgemm": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassHgemm",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "38285"
+        }, 
+        "unfused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "12288"
+        }
+    }
+}
+
+{
+    "unfused": {
+        "TOTAL_TASK_GRAPH_TIME": "404287",
+        "TOTAL_DISPATCH_KERNEL_TIME": "0",
+        "TOTAL_KERNEL_TIME": "62396",
+        "COPY_IN_TIME": "5600",
+        "TOTAL_DISPATCH_DATA_TRANSFERS_TIME": "0",
+        "ALLOCATION_BYTES": "8390736",
+        "TOTAL_COPY_OUT_SIZE_BYTES": "2097168",
+        "unfused.biasRelu": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.biasRelu",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "11136"
+        }, 
+        "unfused.hgemm": {
+            "BACKEND": "CUDA",
+            "METHOD": "cutlassHgemm",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TASK_KERNEL_TIME": "38716"
+        }, 
+        "unfused.scale": {
+            "BACKEND": "CUDA",
+            "METHOD": "CutlassFusedEpilogue.scale",
+            "DEVICE_ID": "0:0",
+            "DEVICE": "NVIDIA GeForce RTX 4090",
+            "TOTAL_COPY_IN_SIZE_BYTES": "24",
+            "POWER_USAGE_mW": "57439",
+            "TASK_KERNEL_TIME": "12544"
+        }
+    }
+}
+
+  steady-state median wall-clock (n=19): 488 us
+  [unfused] validation PASSED (max abs err 0.00781, 0/1048576 cells out of tol)
+
+=== Summary (steady-state median us, this run/this GPU) ===
+fused   : 470
+unfused : 488 (1.04x the fused time)
+Both modes produce the same, correct result

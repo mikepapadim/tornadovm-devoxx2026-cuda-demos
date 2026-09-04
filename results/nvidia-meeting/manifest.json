@@ -296,16 +296,15 @@
     {
       "id": "F.fused-gemm",
       "task": "F",
-      "status": "partial",
+      "status": "measured",
       "claim": "Fusion saves GPU time; the TornadoVM/CUDA gap is confined to JIT elementwise kernels",
       "reason": null,
       "partial_raw": [
         "results/raw/19-cutlass-cudnn-warp-demos/"
       ],
       "gaps": [
-        "m=n=k=4096 run still in progress at time of writing",
-        "cold vs warm compilation time not separated (acceptance criterion 8)",
-        "TornadoVM fused path is slower end-to-end than unfused (342 vs 313 us) while its GPU time is lower; reported, not explained"
+        "JIT-kernel ratios (1.20-1.41x) are confounded by launch geometry (block 1024 vs 256) and are NOT attributable to codegen or alignment; needs a re-run with GridScheduler pinned to 256",
+        "TornadoVM fused path slower end-to-end than unfused at 1024 (342 vs 313 us) while GPU time is 11.8% lower; not explained. Does not reproduce at 4096 (fused 2875 vs unfused 2938 us)"
       ],
       "architecture": "sm_89",
       "cutlass_version": "v3.5.1 (cloned; not vendored in this repo)",
@@ -343,9 +342,41 @@
           "tornadovm_unfused": 313,
           "cuda_fused": 236,
           "cuda_unfused": 249
+        },
+        "m_n_k_4096": {
+          "tornadovm_fused_ns": 946447.1,
+          "tornadovm_unfused_ns": 1027685.5,
+          "cuda_fused_ns": 920147.6,
+          "cuda_unfused_ns": 948848.5,
+          "fusion_saving_tornadovm_pct": 7.9
+        },
+        "launch_geometry": {
+          "cutlass_kernels": {
+            "tornadovm": "grid=(32,32,1) block=128",
+            "cuda": "grid=(32,32,1) block=128",
+            "controlled": true
+          },
+          "jit_kernels": {
+            "tornadovm": "block=1024",
+            "cuda": "block=256",
+            "controlled": false
+          }
+        },
+        "compile_time_1024": {
+          "graal_ns": 42230354,
+          "driver_nvrtc_ns": 16281649,
+          "cold_total_task_graph_ns": 87100266,
+          "warm_total_task_graph_ns_range": [
+            394381,
+            556135
+          ],
+          "note": "profiler perturbs its own measurement; use for the split, not absolute warm timings"
         }
       },
-      "conclusion": "Library kernels identical across implementations (1.00-1.01x); the gap is confined to JIT elementwise kernels at 1.20-1.23x, matching the task B alignment ratio on an independent workload."
+      "conclusion": "Library-task integration costs essentially nothing: the same CUTLASS kernel at the same launch configuration performs identically (1.00-1.04x). Fusion saves 6.2-11.8% GPU time. The JIT-kernel gap is not isolated.",
+      "corrections": [
+        "An earlier revision attributed the JIT-kernel ratio to the task B alignment effect. Retracted: launch geometry differs, and the ratio grows with size (1.20->1.41) whereas the alignment penalty is bounded at 1.25 and does not scale."
+      ]
     }
   ]
 }
