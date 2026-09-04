@@ -276,23 +276,34 @@
     {
       "id": "C.jit-specialisation",
       "task": "C",
-      "status": "partial",
+      "status": "measured",
       "claim": "Compute-bound advantage is JIT specialisation on a runtime argument, not better arithmetic",
       "raw": [
-        "results/raw/21-kernel-time-comparison/probe-jit-specialisation.log",
+        "results/nvidia-meeting/task-C-jit-specialisation/tornadovm-polynomial-sass.txt",
+        "results/nvidia-meeting/task-C-jit-specialisation/tornadovm-polynomial.cubin",
         "results/raw/21-kernel-time-comparison/cuda-sass.log"
       ],
       "values": {
         "tornadovm_ns": 35236,
         "nvcc_runtime_arg_ns": 39500,
-        "nvcc_template_constant_ns": 34700
+        "nvcc_template_constant_ns": 34700,
+        "sass_tornadovm_polynomial": {
+          "instructions": 288,
+          "branch_class": 1,
+          "ffma": 256
+        },
+        "sass_cuda_runtime_scalar_branch_class": 13,
+        "cubin_location": "$TORNADOVM_HOME/var/cuda-codecache/device-0-0/<entry>-<key>.cubin"
       },
-      "gaps": [
-        "TornadoVM-side SASS not capturable on this host: the cubin is produced in-process by NVRTC and never written to disk. Not fixable locally; raised in open-questions.md section 5."
-      ],
-      "conclusion": "Given the same compile-time information, nvcc reaches parity (34.7 us vs 35.24 us).",
+      "gaps": [],
+      "conclusion": "degree=256 compiles to 256 FFMA and 1 branch-class instruction in SASS -- fully unrolled -- against 13 in the nvcc runtime-scalar variant. The advantage is the timing of compilation, not arithmetic quality: nvcc with a template constant reaches parity.",
       "architecture": "sm_89",
-      "gap_is_host_limitation": true
+      "corrections": [
+        "Earlier revisions recorded TornadoVM-side SASS as not capturable and raised it with NVIDIA as an open question. Wrong: tornado.cuda.codecache.enable defaults to True and every cubin is written to $TORNADOVM_HOME/var/cuda-codecache/device-0-0/. The open question has been withdrawn."
+      ],
+      "notes": [
+        "CUDACodeCache.resolveDirectory concatenates the configured dir onto $TORNADOVM_HOME, so an absolute -Dtornado.cuda.codecache.dir is not honoured as given."
+      ]
     },
     {
       "id": "F.fused-gemm",

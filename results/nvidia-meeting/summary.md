@@ -121,9 +121,20 @@ Raw: `results/raw/21-kernel-time-comparison/probe-jit-specialisation.log`.
 `cuobjdump -sass` shows 11 branch instructions in the nvcc runtime-scalar
 variant (`cuda-sass.log`).
 
-**Gap:** SASS for the TornadoVM side is not captured — its cubin is produced
-in-process by NVRTC and not written to disk. Task C is therefore asymmetric.
-Raised as an open question.
+**SASS, both sides.** TornadoVM writes every cubin to an on-disk module cache by
+default (`tornado.cuda.codecache.enable=True`, landing at
+`$TORNADOVM_HOME/var/cuda-codecache/device-0-0/`), so `cuobjdump -sass` reads it
+directly:
+
+| | SASS instructions | branch-class | FFMA |
+|---|---|---|---|
+| TornadoVM `polynomial` (`degree=256` as task arg) | 288 | **1** | **256** |
+| nvcc, `degree` as runtime scalar | — | **13** | — |
+
+**256 FFMA for degree=256 and a single branch — the loop is fully unrolled.** The
+mechanism is now shown in SASS rather than inferred. An earlier revision of this
+bundle recorded this as uncapturable and raised it with NVIDIA; that was a false
+premise and has been withdrawn. Raw: `task-C-jit-specialisation/`.
 
 ### D. Tensor-core path — code-generation validation only
 
@@ -325,16 +336,15 @@ not, and `wgmma` is not reachable by extending that enum.
 | A. Baseline code quality | measured | geometry held constant at block=256 |
 | B. Alignment isolation | measured | single binary, offset swept 0/16/32/64/128 B |
 | B2. Geometry-controlled isolation | measured | 2×2 separates alignment from block size |
-| C. JIT specialisation | **partial** | TornadoVM-side SASS not capturable on this host |
+| C. JIT specialisation | measured | SASS from both sides; cubin read from TornadoVM's module cache |
 | D. Tensor-core path | measured | code-generation validation only, no timing claim |
 | E. Runtime and graph composition | measured | buffer reuse verified; graph cost differenced |
 | F. Fused GEMM baseline | measured | 3 shapes; cold/warm compile split; inversion resolved |
 | G. CUDA Tile feasibility | measured | host inventory; no Tile code written or run |
 
-The single remaining gap (C) is a **host limitation, not an omission**:
-TornadoVM's cubin is produced in-process by NVRTC and never written to disk, so
-`cuobjdump` has nothing to read. It is raised with NVIDIA in
-`open-questions.md` §5 rather than left as a to-do.
+**All eight matrix entries are measured.** The last gap (task C's TornadoVM-side
+SASS) was closed by reading TornadoVM's on-disk module cache, which is enabled by
+default — an earlier revision wrongly recorded it as uncapturable.
 
 ## Failures and gaps — not hidden
 
@@ -344,7 +354,7 @@ TornadoVM's cubin is produced in-process by NVRTC and never written to disk, so
 | F. JIT-kernel ratios confounded by launch geometry | **now isolated** — see task B2: 1.075x alignment/codegen x 1.131x block size = 1.216x |
 | F. TornadoVM fused slower end-to-end than unfused (342 vs 313 µs) | **resolved** — execution-ordering artefact: the fused plan runs first and absorbs process start-up. `task-F-fused-gemm/wallclock-inversion-resolved.md` |
 | Cold vs warm compile time | **measured** — 42.2 ms Graal + 16.3 ms NVRTC = 58.5 ms of an 87.1 ms cold execution; warm ~0.4 ms |
-| TornadoVM-side SASS (task C) | **not capturable** — cubin produced in-process by NVRTC |
+| TornadoVM-side SASS (task C) | **resolved** — cubin is in TornadoVM's on-disk module cache, enabled by default |
 | CUDA Graph per-execution API cost | **not differenced** |
 | Device-buffer reuse across graph nodes | **not verified from trace** |
 | Nsight Compute on `PATH` | unusable (2026.2.1.0 vs driver 565.57.01) — `results/failures/08-nsight-compute-permission.md` |

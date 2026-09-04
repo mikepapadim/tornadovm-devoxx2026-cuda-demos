@@ -91,10 +91,11 @@ saturation, and execution-count differencing under `nsys` for host cost.
 
 - For judging **generated code quality** specifically, which counters would you
   put first, and which of the ones above would you consider misleading?
-- Is there a supported way to obtain **SASS for an NVRTC-compiled cubin held in
-  process memory**, without writing the cubin to disk? We can capture SASS for
-  the hand-written side via `cuobjdump`, but not for the JIT side, which leaves
-  an asymmetry in task C.
+- ~~Is there a supported way to obtain SASS for an NVRTC-compiled cubin held in
+  process memory?~~ **Withdrawn.** TornadoVM already writes every compiled cubin
+  to an on-disk module cache by default (`tornado.cuda.codecache.enable=True`),
+  so `cuobjdump -sass` works directly and task C now has SASS from both sides.
+  The question rested on a false premise on our side.
 - For tensor-core work, is `sm__pipe_tensor_cycles_active` the right utilisation
   proxy at small tile counts, or does it mislead below a certain occupancy?
 
