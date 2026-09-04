@@ -1,0 +1,18 @@
+==PROF== Connected to process 198823 (/home/michalis/.sdkman/candidates/java/25.0.2-open/bin/java)
+n=16777216 block=256 executions=2 sampled-mismatches=0 PASSED
+==PROF== Disconnected from process 198823
+"ID","Process ID","Process Name","Host Name","Kernel Name","Context","Stream","Block Size","Grid Size","Device","CC","Section Name","Metric Name","Metric Unit","Metric Value"
+"0","198823","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","dram__bytes_op_read.sum","byte","67,128,320"
+"0","198823","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","dram__bytes_op_write.sum","byte","45,930,752"
+"0","198823","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","dram__sectors_read.sum","","n/a"
+"0","198823","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","dram__sectors_write.sum","","n/a"
+"0","198823","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","gpu__time_duration.sum","ns","150,080"
+"0","198823","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","lts__t_sectors_op_read.sum","sector","2,164,510"
+"0","198823","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","lts__t_sectors_op_write.sum","sector","2,466,891"
+"1","198823","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","dram__bytes_op_read.sum","byte","67,132,160"
+"1","198823","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","dram__bytes_op_write.sum","byte","43,790,592"
+"1","198823","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","dram__sectors_read.sum","","n/a"
+"1","198823","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","dram__sectors_write.sum","","n/a"
+"1","198823","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","gpu__time_duration.sum","ns","146,400"
+"1","198823","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","lts__t_sectors_op_read.sum","sector","2,163,800"
+"1","198823","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","lts__t_sectors_op_write.sum","sector","2,467,201"

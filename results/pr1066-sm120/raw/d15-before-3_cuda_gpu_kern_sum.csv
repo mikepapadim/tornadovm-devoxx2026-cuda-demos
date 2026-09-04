@@ -1,0 +1,4 @@
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+49.8,1105817,20,55290.8,55295.0,55103,55488,117.1,polynomial
+34.0,755802,20,37790.1,38831.5,16287,39584,5066.9,elementwise
+16.2,358907,20,17945.3,17840.0,17695,19328,348.2,stencil

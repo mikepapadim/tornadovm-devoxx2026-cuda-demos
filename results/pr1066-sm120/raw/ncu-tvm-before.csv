@@ -1,0 +1,22 @@
+==PROF== Connected to process 105290 (/home/michalis/.sdkman/candidates/java/25.0.2-open/bin/java)
+n=16777216 block=256 executions=2 sampled-mismatches=0 PASSED
+==PROF== Disconnected from process 105290
+"ID","Process ID","Process Name","Host Name","Kernel Name","Context","Stream","Block Size","Grid Size","Device","CC","Section Name","Metric Name","Metric Unit","Metric Value"
+"0","105290","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","dram__throughput.avg.pct_of_peak_sustained_elapsed","%","85.65"
+"0","105290","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","gpu__time_duration.sum","ns","149,760"
+"0","105290","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","5"
+"0","105290","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_st.ratio","sector","5"
+"0","105290","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","2,621,440"
+"0","105290","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum","sector","2,621,440"
+"0","105290","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","launch__block_size","","256"
+"0","105290","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","launch__registers_per_thread","register/thread","16"
+"0","105290","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","smsp__inst_executed.sum","inst","9,437,184"
+"1","105290","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","dram__throughput.avg.pct_of_peak_sustained_elapsed","%","85.35"
+"1","105290","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","gpu__time_duration.sum","ns","149,984"
+"1","105290","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector","5"
+"1","105290","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_st.ratio","sector","5"
+"1","105290","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","2,621,440"
+"1","105290","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum","sector","2,621,440"
+"1","105290","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","launch__block_size","","256"
+"1","105290","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","launch__registers_per_thread","register/thread","16"
+"1","105290","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(65536, 1, 1)","0","12.0","Command line profiler metrics","smsp__inst_executed.sum","inst","9,437,184"

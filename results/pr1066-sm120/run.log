@@ -1,0 +1,29 @@
+SDK      = /home/michalis/TornadoVM/dist/tornadovm-6.0.1-jdk22plus-dev-cuda-linux-amd64/tornadovm-6.0.1-jdk22plus-dev-cuda
+argfile  = /home/michalis/TornadoVM/dist/tornadovm-6.0.1-jdk22plus-dev-cuda-linux-amd64/tornadovm-6.0.1-jdk22plus-dev-cuda/tornado-argfile
+=== 0. provenance ===
+date            : 2026-09-04T14:46:20+01:00
+gpu             : NVIDIA GeForce RTX 5070 Ti, 12.0, 580.142
+nvcc            : Build cuda_13.0.r13.0/compiler.36424714_0
+ncu             : 2025.3.1.0 (build 36398880) (public-release)
+nsys            : NVIDIA Nsight Systems version 2025.3.2.474-253236389321v0
+jdk             : openjdk version "25.0.2" 2026-01-20
+tornado sdk     : /home/michalis/TornadoVM/dist/tornadovm-6.0.1-jdk22plus-dev-cuda-linux-amd64/tornadovm-6.0.1-jdk22plus-dev-cuda
+tornado commit  : b0cc7f231 (cuda-align-array-payload)
+demos commit    : cad3215
+=== 1. generated code must be byte-identical between the two arms ===
+  OK - identical index offsets in both arms
+=== 2. sectors per request, before vs after (the robust measurement) ===
+  -> ncu-tvm-before.csv
+  -> ncu-tvm-after.csv
+  -> ncu-cuda.csv (hand-written reference)
+=== 3. kernel time, three kernels, before vs after vs hand-written CUDA ===
+  -> d15-before-{1,2,3}
+  -> d15-after-{1,2,3}
+  -> d15-cuda-{1,2,3}
+=== 4. buffer-size sweep, before vs after (the PR's headline table) ===
+  -> sweep n=262144
+  -> sweep n=1048576
+  -> sweep n=4194304
+  -> sweep n=16777216
+  -> sweep n=67108864
+ALL MEASUREMENTS DONE

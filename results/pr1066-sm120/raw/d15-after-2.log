@@ -1,0 +1,26 @@
+WARNING: CPU IP/backtrace sampling not supported, disabling.
+Try the 'nsys status --environment' command to learn more.
+
+WARNING: CPU context switch tracing not supported, disabling.
+Try the 'nsys status --environment' command to learn more.
+
+WARNING: module-info.class ignored in patch: /home/michalis/TornadoVM/dist/tornadovm-6.0.1-jdk22plus-dev-cuda-linux-amd64/tornadovm-6.0.1-jdk22plus-dev-cuda/share/java/jvmci/jvmci-21.0.2.jar
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess (file:/home/michalis/TornadoVM/dist/tornadovm-6.0.1-jdk22plus-dev-cuda-linux-amd64/tornadovm-6.0.1-jdk22plus-dev-cuda/share/java/tornado/tornado-runtime-6.0.1-jdk22plus-dev.jar)
+WARNING: Please consider reporting this to the maintainers of class uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+Kernel-time comparison: n=4194304, polynomial degree=256, 20 executions
+  block size 256 (identical to the CUDA version)
+  kernels: elementwise (memory-bound) -> polynomial (compute-bound) -> stencil (memory-bound)
+  NOTE: the wall-clock below includes host dispatch and transfers.
+        Compare kernel time with nsys -- see this demo's README.
+
+first execution (JIT compile): 107028 us
+steady-state median wall-clock (n=19): 706 us
+validation PASSED (max abs err 0.0000001, 0/4194304 elements out of tol)
+Result is correct
+Collecting data...
+Generating '/tmp/nsys-report-d718.qdstrm'
+[1/1] [0%                          ] d15-after-2.nsys-rep[1/1] [0%                          ] d15-after-2.nsys-rep[1/1] [9%                          ] d15-after-2.nsys-rep[1/1] [10%                         ] d15-after-2.nsys-rep[1/1] [=====================86%    ] d15-after-2.nsys-rep[1/1] [========================100%] d15-after-2.nsys-rep[1/1] [========================100%] d15-after-2.nsys-rep
+Generated:
+	/home/michalis/tornadovm-devoxx2026-cuda-demos/results/pr1066-sm120/raw/d15-after-2.nsys-rep

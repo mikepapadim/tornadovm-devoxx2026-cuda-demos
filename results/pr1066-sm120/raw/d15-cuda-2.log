@@ -1,0 +1,21 @@
+WARNING: CPU IP/backtrace sampling not supported, disabling.
+Try the 'nsys status --environment' command to learn more.
+
+WARNING: CPU context switch tracing not supported, disabling.
+Try the 'nsys status --environment' command to learn more.
+
+Kernel-time comparison: n=4194304, polynomial degree=256, 20 executions
+  block size 256 (identical to the TornadoVM version)
+  kernels: elementwise (memory-bound) -> polynomial (compute-bound) -> stencil (memory-bound)
+  NOTE: the wall-clock below includes host dispatch and transfers.
+        Compare kernel time with nsys -- see this demo's README.
+
+first execution: 1470 us
+steady-state median wall-clock (n=19): 1415 us
+validation PASSED (max abs err 0.0000001, 0/4194304 elements out of tol)
+Result is correct
+Collecting data...
+Generating '/tmp/nsys-report-7f0a.qdstrm'
+[1/1] [0%                          ] d15-cuda-2.nsys-rep[1/1] [0%                          ] d15-cuda-2.nsys-rep[1/1] [11%                         ] d15-cuda-2.nsys-rep[1/1] [=15%                        ] d15-cuda-2.nsys-rep[1/1] [==19%                       ] d15-cuda-2.nsys-rep[1/1] [===========53%              ] d15-cuda-2.nsys-rep[1/1] [=====================88%    ] d15-cuda-2.nsys-rep[1/1] [======================90%   ] d15-cuda-2.nsys-rep[1/1] [======================91%   ] d15-cuda-2.nsys-rep[1/1] [======================92%   ] d15-cuda-2.nsys-rep[1/1] [=======================94%  ] d15-cuda-2.nsys-rep[1/1] [=======================95%  ] d15-cuda-2.nsys-rep[1/1] [========================100%] d15-cuda-2.nsys-rep[1/1] [========================100%] d15-cuda-2.nsys-rep
+Generated:
+	/home/michalis/tornadovm-devoxx2026-cuda-demos/results/pr1066-sm120/raw/d15-cuda-2.nsys-rep

@@ -1,0 +1,4 @@
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+52.5,1206967,20,60348.3,60335.5,60064,60639,125.8,"polynomial(const float *, float *, int, int)"
+32.1,738875,20,36943.8,38239.5,16448,39200,4880.0,"elementwise(const float *, float *, int)"
+15.4,354812,20,17740.6,17728.0,17600,17952,80.6,"stencil(const float *, float *, int)"

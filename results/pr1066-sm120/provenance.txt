@@ -1,0 +1,9 @@
+date            : 2026-09-04T14:46:20+01:00
+gpu             : NVIDIA GeForce RTX 5070 Ti, 12.0, 580.142
+nvcc            : Build cuda_13.0.r13.0/compiler.36424714_0
+ncu             : 2025.3.1.0 (build 36398880) (public-release)
+nsys            : NVIDIA Nsight Systems version 2025.3.2.474-253236389321v0
+jdk             : openjdk version "25.0.2" 2026-01-20
+tornado sdk     : /home/michalis/TornadoVM/dist/tornadovm-6.0.1-jdk22plus-dev-cuda-linux-amd64/tornadovm-6.0.1-jdk22plus-dev-cuda
+tornado commit  : b0cc7f231 (cuda-align-array-payload)
+demos commit    : cad3215

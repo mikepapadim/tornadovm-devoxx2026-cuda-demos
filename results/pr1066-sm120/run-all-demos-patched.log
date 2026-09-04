@@ -1,0 +1,55 @@
+== 00-hello-gpu
+OK   00-hello-gpu -- compile
+OK   00-hello-gpu -- tornado launcher
+OK   00-hello-gpu -- java @argfile
+== 01-first-cuda-kernel
+OK   01-first-cuda-kernel -- compile
+OK   01-first-cuda-kernel -- tornado launcher
+OK   01-first-cuda-kernel -- java @argfile
+== 02-cuda-runtime-api
+OK   02-cuda-runtime-api -- compile
+OK   02-cuda-runtime-api -- tornado launcher
+OK   02-cuda-runtime-api -- java @argfile
+== 04-cublas-hybrid
+OK   04-cublas-hybrid -- compile
+OK   04-cublas-hybrid -- tornado launcher
+OK   04-cublas-hybrid -- java @argfile
+== 05-cufft-hybrid
+OK   05-cufft-hybrid -- compile
+OK   05-cufft-hybrid -- tornado launcher
+OK   05-cufft-hybrid -- java @argfile
+== 06-cuda-streams
+OK   06-cuda-streams -- compile
+OK   06-cuda-streams -- tornado launcher
+OK   06-cuda-streams -- java @argfile
+== 07-cuda-graph-benefit
+OK   07-cuda-graph-benefit -- compile
+OK   07-cuda-graph-benefit -- tornado launcher
+OK   07-cuda-graph-benefit -- java @argfile
+== 08-tensor-core-mma
+OK   08-tensor-core-mma -- compile
+OK   08-tensor-core-mma -- tornado launcher
+OK   08-tensor-core-mma -- java @argfile
+== 11-integrated-showcase
+OK   11-integrated-showcase -- compile
+OK   11-integrated-showcase -- tornado launcher
+OK   11-integrated-showcase -- java @argfile
+== 12-cutlass-fused-epilogue
+OK   12-cutlass-fused-epilogue -- compile
+OK   12-cutlass-fused-epilogue -- tornado launcher
+OK   12-cutlass-fused-epilogue -- java @argfile
+== 13-cudnn-jit-convblock
+OK   13-cudnn-jit-convblock -- compile
+OK   13-cudnn-jit-convblock -- tornado launcher
+OK   13-cudnn-jit-convblock -- java @argfile
+== 14-warp-async-shared
+OK   14-warp-async-shared -- compile
+OK   14-warp-async-shared -- tornado launcher
+OK   14-warp-async-shared -- java @argfile
+== 15-kernel-time-comparison
+OK   15-kernel-time-comparison -- compile
+OK   15-kernel-time-comparison -- tornado launcher
+OK   15-kernel-time-comparison -- java @argfile
+
+== Summary: 39 passed, 0 failed ==
+   logs: /tmp/tmp.uE2VWN0mH5

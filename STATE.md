@@ -607,3 +607,91 @@ this on another toolkit must check names against `--query-metrics`.
   sm_89 bundle.
 - Untracked build outputs (`*.class`, `*.nsys-rep`, `*.sqlite`, `cuda15`, `geom`)
   are still not ignored; only curated evidence is committed.
+
+---
+
+## Batch 23 — PR #1066 (payload alignment) re-measured on sm_120 (2026-09-04)
+
+[beehive-lab/TornadoVM#1066](https://github.com/beehive-lab/TornadoVM/pull/1066)
+pads CUDA device allocations so a native array's payload starts 32-byte aligned.
+Its numbers are sm_89. This batch reruns that analysis on Blackwell, against
+hand-written CUDA, from a source build of the PR
+(`b0cc7f231` = #1066 on `develop`). Evidence: `results/pr1066-sm120/`.
+
+**One build supplies both arms.** `-Dtornado.cuda.payloadAlignment=1` restores the
+pre-patch layout, so before/after differ in one property and nothing else. This is
+the method the PR itself used and it is what makes the comparison mean anything.
+
+### The mechanism reproduces exactly; the benefit does not
+
+Sectors per request go **5.00 -> 4.00**, sector totals 2,621,440 -> 2,097,152
+(1.25x exactly), landing on **the same values as hand-written CUDA** for both
+loads and stores. `--printKernel` confirms generated code is unchanged.
+
+Kernel time, interleaved sweep, run as two independent batches (one contended by
+an unrelated Jenkins job, one on a confirmed-idle GPU) that agree to within 0.001:
+
+| buffer | after/before | sm_89 (PR) |
+|---|---|---|
+| 1 MB | 1.000 | 1.02x gain |
+| 4 MB | 0.972 | 1.17x gain |
+| 16 MB | 0.974 | **1.29x gain** |
+| 64 MB | **1.021** | 1.11x gain |
+| 256 MB | 1.004 | 1.02x gain |
+
+The gain peaks at ~2.7% against the PR's 29% at 16 MB, and **inverts into a 2.1%
+regression at 64 MB**. Demo 15 at matched geometry splits the same way: `stencil`
+gains 3.7%, `elementwise` loses 3.3% (and loses ground against hand-written CUDA,
+1.017x -> 1.050x).
+
+### Why: L2 traffic falls as designed, DRAM write traffic rises
+
+At 64 MB, `lts__t_sectors_op_write` falls **15%** — the patch does exactly what it
+targets — while `dram__bytes_op_write` rises **2.4%**. The kernel runs at ~86% of
+peak DRAM bandwidth, so time follows DRAM traffic, not L1<->L2 sector count. The
+regression shows up independently under `ncu` (+0.90%) and `nsys` (+2.1%).
+
+This is Step 2 of `results/nvidia-meeting-sm120/` reached from the other side:
+Blackwell already absorbs sub-sector misalignment (+6.8% there against +28.2% on
+sm_89), so a patch whose whole mechanism is removing that misalignment has little
+left to recover here. **Not a contradiction of the sm_89 numbers** — different GPU,
+driver, toolkit, gcc and OS, and sm_89 was not re-run.
+
+### No regression from the patch
+
+`run-all-demos.sh` 39/39, identical to the unpatched 6.0.0 SDK. `make tests` gives
+1199 ran / 10 failed / 91 unsupported; every failure was re-run in both arms and
+**none is attributable to the patch** — see `results/pr1066-sm120/TESTS.md`.
+
+### Two measurement traps, both of which changed a number
+
+1. **Non-interleaved sweeps lie.** All-before-then-all-after, one run per point,
+   reported 16 MB as a 1.1% regression; interleaved and repeated, the same point
+   is a 2.6% improvement. Opposite sign.
+2. **`nsys stats` silently reuses a stale `.sqlite`.** Re-running the sweep
+   regenerated every `.nsys-rep` but left the CSVs at their old contents, so the
+   first verification attempt "reproduced" the earlier batch to the digit.
+   `--force-export=true` is required. Same failure shape as batch 22's `ncu`
+   `n/a`: exit 0, no warning, stale data.
+
+### Bugs found in TornadoVM
+
+- **Filed: [#1070](https://github.com/beehive-lab/TornadoVM/pull/1070)** —
+  `bin/install_python_modules.py` blocks every build on `streamlit` and `wget`,
+  which nothing in the repository imports, and discards pip's error. On any PEP 668
+  distribution `make BACKEND=cuda` dies with `ModuleNotFoundError: No module named
+  'streamlit'`. This blocked the build for this batch.
+- **Open, not yet filed** — CUDA-backend profiler returns 0 for
+  `getDataTransferDispatchTime()`, `getKernelDispatchTime()` and
+  `getDeviceReadTime()`, failing three `TestProfiler` tests that are *not*
+  whitelisted. `CUDAEvent.clGetEventProfilingInfo` is a stub that zeroes its
+  buffer, so every absolute event timestamp on the backend is 0 and both dispatch
+  figures are structurally unobtainable. The zero read time is a third symptom with
+  a different, still-unexplained cause. Detail in `results/pr1066-sm120/TESTS.md`.
+
+### Next invocation
+
+- Decide the profiler fix: host-side timing around enqueue would make the dispatch
+  figures real, but it is a design change and must not be guessed at — a wrong
+  number is worse than a zero in a profiler.
+- The sm_89 baseline's Step 7 `find` count (batch 22, correction 1) is still un-re-run.

@@ -1,0 +1,17 @@
+WARNING: CPU IP/backtrace sampling not supported, disabling.
+Try the 'nsys status --environment' command to learn more.
+
+WARNING: CPU context switch tracing not supported, disabling.
+Try the 'nsys status --environment' command to learn more.
+
+WARNING: module-info.class ignored in patch: /home/michalis/TornadoVM/dist/tornadovm-6.0.1-jdk22plus-dev-cuda-linux-amd64/tornadovm-6.0.1-jdk22plus-dev-cuda/share/java/jvmci/jvmci-21.0.2.jar
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess (file:/home/michalis/TornadoVM/dist/tornadovm-6.0.1-jdk22plus-dev-cuda-linux-amd64/tornadovm-6.0.1-jdk22plus-dev-cuda/share/java/tornado/tornado-runtime-6.0.1-jdk22plus-dev.jar)
+WARNING: Please consider reporting this to the maintainers of class uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+n=67108864 block=256 executions=20 sampled-mismatches=0 PASSED
+Collecting data...
+Generating '/tmp/nsys-report-6e16.qdstrm'
+[1/1] [0%                          ] n67108864-after-r3.nsys-rep[1/1] [0%                          ] n67108864-after-r3.nsys-rep[1/1] [==================77%       ] n67108864-after-r3.nsys-rep[1/1] [===================81%      ] n67108864-after-r3.nsys-rep[1/1] [=====================86%    ] n67108864-after-r3.nsys-rep[1/1] [========================100%] n67108864-after-r3.nsys-rep[1/1] [========================100%] n67108864-after-r3.nsys-rep
+Generated:
+	/home/michalis/tornadovm-devoxx2026-cuda-demos/results/pr1066-sm120/raw-repeat/n67108864-after-r3.nsys-rep
