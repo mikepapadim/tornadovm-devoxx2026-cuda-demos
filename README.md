@@ -336,6 +336,7 @@ Track B on 6.0.0 is open work, not a result — nothing here claims it now works
 - `docs/compilation-pipeline.md` — the CUDA pipeline class by class, and where a second emitter would plug in.
 - `docs/PROFILER-METRICS.md` — every profiler measurement as chart-ready CSV, with what each metric means.
 - `docs/PRESENTATION-BRIEF.md` — the argument in order, each claim with its data file and suggested chart.
+- `docs/REPRODUCE-ON-ANOTHER-GPU.md` — runbook to reproduce the whole evidence pack on a different GPU and compare.
 - `docs/` — talk drafts, runbook, claims ledger, supporting evidence documents.
 - `results/raw/` — immutable raw outputs. `results/failures/` — captured failures.
 - `env/versions.env` — the pinned environment. `STATE.md` — durable study state.
