@@ -146,8 +146,13 @@ assume 32.
 
 Separates the layout effect from the launch-configuration effect.
 
+> **Do not run this inside the committed baseline directory.** It emits four CSVs
+> with exactly the names the sm_89 baseline already occupies, and would overwrite
+> them. Copy the two sources out and work in your own directory.
+
 ```bash
-cd results/nvidia-meeting/task-B2-geometry-controlled
+mkdir -p $D/task-B2 && cd $D/task-B2
+cp ../../nvidia-meeting/task-B2-geometry-controlled/GeometryControlled.{java,cu} .
 javac -cp "$TORNADOVM_HOME/share/java/tornado/*" -d . GeometryControlled.java
 nvcc -arch=sm_<cc> -O3 -o geom GeometryControlled.cu
 M='l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio,l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum,sm__warps_active.avg.pct_of_peak_sustained_active,launch__block_size,launch__registers_per_thread,gpu__time_duration.sum,dram__throughput.avg.pct_of_peak_sustained_elapsed,smsp__inst_executed.sum'
@@ -196,8 +201,15 @@ grep -oE 'mma\.sync\.aligned\.[a-z0-9.]+' d16-printkernel.log | sort | uniq -c
 2 **IMMA**, FP8 e4m3/e5m2 2 HMMA each. Plus demo 08: 1 HMMA / 16 cycles, scalar
 control 0.
 
-**These counter names may not exist on Blackwell.** If `ncu` rejects a metric,
-list what is available and record the substitution:
+**Counter names differ by architecture — confirmed on sm_120.** On sm_89 both FP8
+formats count as **HMMA**; on sm_120 FP8 issues as **QMMA**, inside the
+MMA/OMMA umbrella but *not* under `op_hmma`. So
+`op_hmma + op_imma` no longer sums to the tensor-pipe total there, and a
+like-for-like FP8 comparison across the two architectures needs different
+metrics on each side. Record which metric you used per architecture.
+
+If `ncu` rejects or `n/a`s a metric, list what is available and record the
+substitution:
 
 ```bash
 $NCU --query-metrics 2>/dev/null | grep -iE "tensor|hmma|imma" | head -20
@@ -208,6 +220,15 @@ $NCU --query-metrics 2>/dev/null | grep -iE "tensor|hmma|imma" | head -20
 Per-execution cost **must** be obtained by differencing two execution counts.
 Dividing a total by iterations overstates it by ~12× — that mistake is recorded
 in `results/raw/25-host-dispatch-breakdown/MANIFEST.md`.
+
+> **Differencing cancels call *counts* cleanly, but not one-time *durations*.**
+> `cuCtxCreate_v2` alone runs to ~110 ms and varies run to run, so its noise can
+> swamp a per-execution signal of a few µs and produce a large negative delta.
+> Drop the one-shot APIs before summing: `cuCtxCreate_v2`, `cuMemHostRegister_v2`,
+> `cuMemHostUnregister`, `cuMemAlloc_v2`, `cuMemFree_v2`, `cuModuleLoadDataEx`,
+> `cuModuleUnload`, `cuStreamCreate`, `cuStreamDestroy_v2`, `cuLibraryUnload`.
+> A sound check: their delta call-count should be ~0. Keep only APIs whose call
+> count actually scales with executions.
 
 ```bash
 cd demos/07-cuda-graph-benefit
@@ -231,20 +252,48 @@ not appear.
 
 **Do not implement CUDA Tile. Inventory only, and make no performance claim.**
 
+> **Two traps in the obvious command, both found the hard way.**
+> `find` defaults to `-P` and will not follow symlinks — `/usr/local/cuda/include`
+> is normally a link to `targets/x86_64-linux/include`, so a bare `find` can
+> report zero on a host that has the files. **Use `-L`.**
+> And `*tile*` matches ***vola**tile*: `is_volatile.h`, `remove_volatile.h` and
+> `add_volatile.h` are false positives in every CUDA release. **Filter them.**
+
 ```bash
-find /usr/local/cuda*/include -maxdepth 2 -iname '*tile*' | wc -l
-find /usr/local/cuda*/lib64 /usr/local/cuda*/bin -maxdepth 1 -iname '*tile*' | wc -l
+CUDA_INC=$(readlink -f /usr/local/cuda/include)
+
+# 1. real tile headers (exclude the *volatile* false positives)
+find -L /usr/local/cuda*/ -iname '*tile*' 2>/dev/null | grep -iv volatile | sort -u
+
+# 2. the unambiguous markers — these are the signal, not the file count
+ls -l "$CUDA_INC/crt/cuda_tile.h" 2>&1 | head -1
+grep -oE "__tile[a-z_]*__" "$CUDA_INC/crt/host_defines.h" 2>/dev/null | sort -u
+
+# 3. libraries, driver-level flags, NVRTC symbols
+find -L /usr/local/cuda*/lib64 /usr/local/cuda*/bin -maxdepth 1 -iname '*tile*' 2>/dev/null | grep -iv volatile
 nvcc --help 2>/dev/null | grep -ci tile
-nm -D /usr/local/cuda/lib64/libnvrtc.so.12 2>/dev/null | grep -ci tile
-nm -D /usr/local/cuda/lib64/libnvrtc.so.* | awk '$2=="T"{print $3}' | sort
+nm -D /usr/local/cuda/lib64/libnvrtc.so.* 2>/dev/null | grep -ci tile
+nm -D /usr/local/cuda/lib64/libnvrtc.so.* 2>/dev/null | awk '$2=="T"{print $3}' | sort
 ```
 
-**sm_89 baseline (CUDA 12.6.85): all four counts were 0.** NVRTC did export
-`nvrtcGetNVVM` and `nvrtcGetLTOIR`.
+### Measured, both toolkits
 
-**This is the highest-value delta if the 5070 host has a newer toolkit.** CUDA
-12.8+ or 13.x may ship a Tile path that 12.6 does not. A non-zero count here
-changes the whole feasibility conversation — capture the full file list.
+| probe | CUDA 12.6.85 (sm_89 host) | CUDA 13.0.88 (sm_120 host) |
+|---|---|---|
+| `crt/cuda_tile.h` | **absent** | **present**, 60 lines |
+| `__tile*__` qualifiers in `crt/host_defines.h` | **0** | **3** — `__tile_global__`, `__tile__`, `__tile_builtin__` |
+| declared entities | — | **1** — `cuda::cutile::print(const char*, ...)` |
+| libraries / `nvcc` flags / `libnvrtc` symbols | 0 / 0 / 0 | **0 / 0 / 0** |
+
+The 12.6 zero was **re-verified with `-L` and with the *volatile* filter** and
+is genuine, so the delta between the toolkits is real.
+
+**State it precisely: CUDA 13.0 has landed Tile *plumbing*, not a usable API.**
+Three location qualifiers and a single `print` builtin, with no library, no
+compiler flag and no NVRTC entry point. That is worth taking to NVIDIA as
+"we see the qualifiers and one builtin — what is the timeline for the rest?",
+**not** as a feasibility result. NVRTC continues to export `nvrtcGetNVVM` and
+`nvrtcGetLTOIR`.
 
 ## Step 8 — SASS (task C)
 
@@ -283,6 +332,11 @@ described below.
    cold/warm compile split, not for absolute steady-state timings.
 7. **Demo 12's wall clock cannot compare fused vs unfused** — both plans run in
    one JVM and the first absorbs process start-up.
+8. **`ncu` returns `n/a` for an unsupported metric and still exits 0**, with
+   nothing on stderr. A script that only checks `$?` will record a column of
+   `n/a` and report success. **Grep the output for `n/a` and fail loudly**, then
+   find the replacement metric with `ncu --query-metrics`. Counter names do get
+   renamed between architectures — see the FP8/QMMA note below.
 
 ---
 
@@ -290,17 +344,25 @@ described below.
 
 Concrete, checkable hypotheses. Each is a real finding whether it holds or not.
 
-### 1. PTX fallback instead of cubin — *most likely, and benign if it works*
+### 1. PTX fallback — *only when the toolkit does not know the arch*
 
-`ffm/CUDACompiler` asks NVRTC which archs it supports. If your GPU's arch is not
-among them it does **not** fail: it emits `--gpu-architecture=compute_<best
-known>` and lets the driver JIT the PTX, warning once. So a Blackwell card on
-CUDA 12.6 is expected to **run via PTX fallback**, not to break.
+> **Corrected after the sm_120 run.** An earlier revision predicted a Blackwell
+> card would take the PTX fallback. That happens **only if the toolkit predates
+> the GPU**. The sm_120 host had CUDA **13.0.88**, which targets sm_120 natively:
+> `cuobjdump` on the cached cubin reports `sm=120, toolkit=13.0,
+> -arch sm_120` — no fallback, and all MMA demos validated at max abs err
+> 0.00000 with the emitted PTX matching sm_89 shape for shape.
 
-- Confirm from the log which path was taken (look for the fallback warning).
-- Then confirm the **MMA demos still validate** — the inline `mma.sync` PTX is
-  embedded in the generated CUDA C and must be legal for the *virtual* arch it
-  is compiled against. This is the most plausible place for a genuine failure.
+`ffm/CUDACompiler` asks NVRTC which archs it supports. If your GPU's arch is
+**not** among them it does not fail: it emits
+`--gpu-architecture=compute_<best known>` and lets the driver JIT the PTX,
+warning once. That path is reached with an *old toolkit on a new card* — e.g.
+CUDA 12.6 on Blackwell — and is still worth exercising deliberately.
+
+- Confirm which path was taken: `cuobjdump -sass` the cached cubin, or look for
+  the fallback warning.
+- On the fallback path, confirm the **MMA demos still validate** — the inline
+  `mma.sync` PTX must be legal for the *virtual* arch it is compiled against.
 - Compare load time and first-execution latency against the cubin path.
 
 ### 2. Tensor-core counter names

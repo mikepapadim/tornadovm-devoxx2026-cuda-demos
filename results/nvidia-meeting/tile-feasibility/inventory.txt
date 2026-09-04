@@ -44,3 +44,33 @@ nvrtcVersion@@libnvrtc.so.12
 == nvrtc supported architectures (runtime query) ==
 nvrtc version: 12.6
 supported archs (14): sm_50, sm_52, sm_53, sm_60, sm_61, sm_62, sm_70, sm_72, sm_75, sm_80, sm_86, sm_87, sm_89, sm_90
+
+
+=== RE-VERIFICATION (2026-09-04), after a false-zero risk was found ===
+
+The original probe used `find` without -L. `find` defaults to -P and does not
+follow symlinks, and /usr/local/cuda/include is a link to
+targets/x86_64-linux/include -- so on a host that HAS tile files the command
+could report zero. Re-run here with -L, and with the *volatile* false positives
+filtered (the glob *tile* matches is_volatile.h / remove_volatile.h /
+add_volatile.h in every CUDA release):
+
+  find -L /usr/local/cuda*/ -iname '*tile*' | grep -iv volatile   -> 0
+  ls  $CUDA_INC/crt/cuda_tile.h                                   -> absent
+  grep -oE "__tile[a-z_]*__" $CUDA_INC/crt/host_defines.h         -> 0
+  nm -D libnvrtc.so.12 | grep -ci tile                            -> 0
+
+The CUDA 12.6.85 result is GENUINE, not an artifact of the weaker command.
+
+Cross-architecture comparison (never merged; see results/nvidia-meeting-sm120/):
+
+  probe                                   CUDA 12.6.85     CUDA 13.0.88
+  crt/cuda_tile.h                         absent           present (60 lines)
+  __tile*__ qualifiers in host_defines.h  0                3
+  declared entities                       --               1 (cuda::cutile::print)
+  libs / nvcc flags / nvrtc symbols       0 / 0 / 0        0 / 0 / 0
+
+CUDA 13.0 has landed Tile PLUMBING, not a usable API: location qualifiers and a
+single print builtin, with no library, no compiler flag and no NVRTC entry
+point. Take it to NVIDIA as "we see the qualifiers and one builtin, what is the
+timeline for the rest", not as a feasibility result.

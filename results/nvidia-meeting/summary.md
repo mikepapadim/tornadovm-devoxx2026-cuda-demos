@@ -319,6 +319,17 @@ cold/warm *split*, not as absolute steady-state timings.
 
 Raw: `tile-feasibility/inventory.txt`.
 
+> **Re-verified 2026-09-04.** The original probe used `find` without `-L`, which
+> does not follow the `include -> targets/x86_64-linux/include` symlink and could
+> report a false zero. Re-run with `-L` and with the *volatile* false positives
+> filtered, **the CUDA 12.6.85 zero is genuine**.
+>
+> **Cross-architecture (never merged — see `results/nvidia-meeting-sm120/`):**
+> CUDA 13.0.88 ships `crt/cuda_tile.h` (60 lines, one entity —
+> `cuda::cutile::print`) and three `__tile*__` qualifiers in `crt/host_defines.h`,
+> against **none** on 12.6.85. Libraries, `nvcc` flags and NVRTC symbols remain
+> **0 on both**. That is Tile *plumbing*, not a usable API.
+
 **Blocker, stated as fact:** CUDA Tile is not present in CUDA 12.6.85 on this
 host in any form. A Tile prototype cannot begin here without a toolkit that
 ships it. Which release does, and whether the integration surface is Tile C++ or
