@@ -318,13 +318,31 @@ not, and `wgmma` is not reachable by extending that enum.
 
 ---
 
+## Matrix status
+
+| Task | Status | Note |
+|---|---|---|
+| A. Baseline code quality | measured | geometry held constant at block=256 |
+| B. Alignment isolation | measured | single binary, offset swept 0/16/32/64/128 B |
+| B2. Geometry-controlled isolation | measured | 2×2 separates alignment from block size |
+| C. JIT specialisation | **partial** | TornadoVM-side SASS not capturable on this host |
+| D. Tensor-core path | measured | code-generation validation only, no timing claim |
+| E. Runtime and graph composition | measured | buffer reuse verified; graph cost differenced |
+| F. Fused GEMM baseline | measured | 3 shapes; cold/warm compile split; inversion resolved |
+| G. CUDA Tile feasibility | measured | host inventory; no Tile code written or run |
+
+The single remaining gap (C) is a **host limitation, not an omission**:
+TornadoVM's cubin is produced in-process by NVRTC and never written to disk, so
+`cuobjdump` has nothing to read. It is raised with NVIDIA in
+`open-questions.md` §5 rather than left as a to-do.
+
 ## Failures and gaps — not hidden
 
 | Item | Status |
 |---|---|
 | F. Fused GEMM baseline | **measured** — CUTLASS v3.5.1; shapes 256, 1024, 4096 |
 | F. JIT-kernel ratios confounded by launch geometry | **now isolated** — see task B2: 1.075x alignment/codegen x 1.131x block size = 1.216x |
-| F. TornadoVM fused slower end-to-end than unfused (342 vs 313 µs) while GPU time is 11.8% lower | **reported, not explained** — needs per-execution API differencing of both modes |
+| F. TornadoVM fused slower end-to-end than unfused (342 vs 313 µs) | **resolved** — execution-ordering artefact: the fused plan runs first and absorbs process start-up. `task-F-fused-gemm/wallclock-inversion-resolved.md` |
 | Cold vs warm compile time | **measured** — 42.2 ms Graal + 16.3 ms NVRTC = 58.5 ms of an 87.1 ms cold execution; warm ~0.4 ms |
 | TornadoVM-side SASS (task C) | **not capturable** — cubin produced in-process by NVRTC |
 | CUDA Graph per-execution API cost | **not differenced** |

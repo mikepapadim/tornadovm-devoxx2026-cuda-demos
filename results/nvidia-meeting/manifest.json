@@ -288,10 +288,11 @@
         "nvcc_template_constant_ns": 34700
       },
       "gaps": [
-        "SASS captured for the CUDA side only; TornadoVM's cubin is produced in-process by NVRTC and not written to disk"
+        "TornadoVM-side SASS not capturable on this host: the cubin is produced in-process by NVRTC and never written to disk. Not fixable locally; raised in open-questions.md section 5."
       ],
       "conclusion": "Given the same compile-time information, nvcc reaches parity (34.7 us vs 35.24 us).",
-      "architecture": "sm_89"
+      "architecture": "sm_89",
+      "gap_is_host_limitation": true
     },
     {
       "id": "F.fused-gemm",
@@ -302,10 +303,7 @@
       "partial_raw": [
         "results/raw/19-cutlass-cudnn-warp-demos/"
       ],
-      "gaps": [
-        "JIT-kernel ratios (1.20-1.41x) are confounded by launch geometry (block 1024 vs 256) and are NOT attributable to codegen or alignment; needs a re-run with GridScheduler pinned to 256",
-        "TornadoVM fused path slower end-to-end than unfused at 1024 (342 vs 313 us) while GPU time is 11.8% lower; not explained. Does not reproduce at 4096 (fused 2875 vs unfused 2938 us)"
-      ],
+      "gaps": [],
       "architecture": "sm_89",
       "cutlass_version": "v3.5.1 (cloned; not vendored in this repo)",
       "dtype": "fp16 in, fp16 out, row-major",
@@ -376,6 +374,20 @@
       "conclusion": "Library-task integration costs essentially nothing: the same CUTLASS kernel at the same launch configuration performs identically (1.00-1.04x). Fusion saves 6.2-11.8% GPU time. The JIT-kernel gap is not isolated.",
       "corrections": [
         "An earlier revision attributed the JIT-kernel ratio to the task B alignment effect. Retracted: launch geometry differs, and the ratio grows with size (1.20->1.41) whereas the alignment penalty is bounded at 1.25 and does not scale."
+      ],
+      "resolved": [
+        {
+          "item": "TornadoVM fused path slower end-to-end than unfused at 1024 (342 vs 313 us) while GPU time is 11.8% lower",
+          "resolution": "execution-ordering artefact of the demo harness, not a property of fusion",
+          "evidence": "results/nvidia-meeting/task-F-fused-gemm/wallclock-inversion-resolved.md",
+          "detail": "Both plans run in one JVM with fused first. Splitting the nsys trace at the phase boundary shows the fused phase absorbing cuCtxCreate (110 ms), 12 cuMemHostRegister, 17 cuMemAlloc, 788 D2H and 796 H2D start-up transfers and 2117 event creations, against 38 launches and 38 copies in the unfused phase. Per-plan first-execution exclusion does not remove process-level start-up.",
+          "consequence": "demo 12 wall-clock cannot compare fused vs unfused; its kernel-time numbers can. Other bundle results are unaffected because they use counters or execution-count differencing."
+        },
+        {
+          "item": "JIT-kernel ratios confounded by launch geometry (block 1024 vs 256)",
+          "resolution": "isolated in B2.geometry-controlled: 1.075x alignment/codegen x 1.131x block size = 1.216x",
+          "evidence": "results/nvidia-meeting/task-B2-geometry-controlled/README.md"
+        }
       ]
     },
     {
