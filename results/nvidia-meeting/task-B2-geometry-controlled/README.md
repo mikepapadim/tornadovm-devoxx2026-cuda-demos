@@ -66,8 +66,17 @@ choosing block=1024 pays this, in any language.
 
 **The residual codegen difference is instruction count, not memory behaviour.**
 At matched geometry TornadoVM executes 9,437,184 instructions against
-7,864,320 — **1.20×** — for identical arithmetic, from bounds checks and index
-computation. At 93% DRAM utilisation it contributes little to time.
+7,864,320 — **1.20×** — for identical arithmetic. At 93% DRAM utilisation it
+contributes little to time.
+
+> **Correction.** An earlier revision attributed this to "bounds checks and
+> index computation". **Bounds checks are not in the generated code.**
+> `CUDAHighTier` appends `ExceptionSuppression`, which walks every `GuardedNode`,
+> nulls its guard and deletes every guard and condition unconditionally — so JVM
+> guards are stripped before code generation. Our own SASS capture corroborates
+> it: `polynomial` has **1 branch-class instruction** for 256 FFMA, where
+> per-access bounds checks would produce many more. The 1.20× is index
+> arithmetic and the header offset. The claim was wrong and is retracted.
 
 ## Consequence for the meeting — with an important limit
 

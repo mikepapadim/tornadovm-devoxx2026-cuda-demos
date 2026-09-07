@@ -81,8 +81,11 @@ Three conclusions:
   80→51%, with registers identical at 16 in all four runs. Anyone choosing
   block=1024 pays this, in any language.
 - **The residual codegen difference is instruction count**: 9,437,184 vs
-  7,864,320 (**1.20×**) at matched geometry, from bounds checks and index
-  arithmetic, largely hidden by the bandwidth bound.
+  7,864,320 (**1.20×**) at matched geometry, largely hidden by the bandwidth
+  bound. **Not bounds checks** — `CUDAHighTier` appends `ExceptionSuppression`,
+  which deletes every guard and condition before code generation, and our SASS
+  shows `polynomial` at 1 branch for 256 FFMA. Index arithmetic and the header
+  offset. An earlier revision said "bounds checks" and was wrong.
 
 > **The 1.075 figure is `ncu`-conditioned and is not the number to quote.** All
 > four runs above were taken under Nsight Compute, which serialises launches and

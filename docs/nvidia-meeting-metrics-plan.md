@@ -91,7 +91,8 @@ Status: **measured** = captured on this host in this bundle or a cited batch;
 ### A. Baseline code quality — measured
 
 TornadoVM CUDA JIT vs hand-written CUDA, identical problem size, identical launch
-geometry (256-thread blocks), identical arithmetic including bounds checks, no
+geometry (256-thread blocks), identical arithmetic including the explicit
+index guard both implementations write in source, no
 `-use_fast_math` on either side.
 
 | Kernel | Character | Evidence |

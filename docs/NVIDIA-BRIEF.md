@@ -66,7 +66,8 @@ claim on this page can be checked at the source level in one command.
 every other timed demo in this repo reports wall clock, which on TornadoVM is
 dominated by host-side dispatch and tells you nothing about code generation.
 Three kernels, deliberately different bottlenecks, identical block and grid
-sizes, identical arithmetic including bounds checks, no `-use_fast_math` on
+sizes, identical arithmetic including the explicit index guard both
+implementations write in source, no `-use_fast_math` on
 either side.
 
 | Kernel | TornadoVM | CUDA | |

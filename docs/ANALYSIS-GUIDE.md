@@ -252,6 +252,7 @@ Retracted claims, kept visible so they are not reintroduced from an older file.
 | "TornadoVM-side SASS is not capturable" | **wrong** — the cubin is on disk by default |
 | "the fused path is slower, cause unknown" | **resolved** — execution-ordering artefact |
 | "a Blackwell card will take the PTX fallback" | **wrong** — only when the toolkit predates the GPU |
+| "the 1.20x instruction count is bounds checks and index arithmetic" | **retracted** — `CUDAHighTier` appends `ExceptionSuppression`, which deletes every guard and condition before codegen. SASS shows `polynomial` at 1 branch for 256 FFMA. It is index arithmetic and the header offset |
 
 The valid figures are the `nsys`, matched-geometry ones: **1.31 / 1.24 / 0.88**.
 
