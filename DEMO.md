@@ -10,7 +10,8 @@ The build is TornadoVM `develop` plus the load-batching fix
 backend looks like once that lands. There is no before/after toggling; the demo shows
 where the backend stands.
 
-Total runtime: **under 4 minutes** for all three.
+Total runtime: **under 6 minutes** for all four. Steps 2-4 are the comparison
+against hand-written CUDA; step 1 stands alone and is the natural opener.
 
 ---
 
@@ -34,7 +35,73 @@ tornado --devices   # -> NVIDIA GeForce RTX 4090
 
 ---
 
-## Step 1 — where the backend stands  (~90 s)
+## Step 1 — one kernel, end to end  (~70 s)
+
+**Run from:** `~/nvidia-demo/classes`
+
+```bash
+bash $DEMO/0-tiled.sh
+```
+
+The simplest thing that is still a real GPU kernel: a 16x16 shared-memory tiled
+matmul, written once in Java. Runs it, profiles it, and shows the CUDA it produced.
+Takes `[n] [executions]`, default `1024 10`.
+
+### Expected
+
+```
+ 1/3  RUN -- a shared-memory tiled matmul written in Java
+tiled matmul  n=1024  tile=16x16  grid=64x64 blocks of 16x16 threads
+first execution (JIT compile + run): 100582 us
+steady-state wall clock (n=9):      median 1103 us  (min 1096, max 1156)
+validation: c[512][341] = 491.000, expected 491.000 -> PASSED
+
+ 2/3  PROFILE -- what the GPU actually did (Nsight Systems)
+   kernel
+      tiled                    333.5 us   x10 launches
+   transfers
+      [CUDA memcpy Host-to-Devic   485.5 us per execution
+      [CUDA memcpy Device-to-Hos   271.1 us per execution
+
+   kernel 333 us  +  transfers 757 us  =  1090 us
+   which is essentially the wall clock printed in step 1.
+
+ 3/3  THE GENERATED CUDA -- what TornadoVM handed to NVRTC
+   __shared__ float adf_3[256];
+   __shared__ float adf_4[256];
+   f_54  =  *(( float *) ul_53);      <- global load
+   adf_3[i_38]  =  f_54;              <- shared store
+   __syncthreads();
+   f_63  =  adf_3[i_8];               <- shared load
+   f_95  =  fma(f_63, f_64, f_47);    <- FMA
+   140 lines of CUDA C in total.
+```
+
+### What to say
+
+Three things, in order.
+
+**It is a real kernel.** `__shared__` tiles come from `ctx.allocateFloatLocalArray`,
+`__syncthreads()` from `ctx.localBarrier()`, and the inner product is an FMA chain.
+140 lines of CUDA C from one Java method, compiled at run time and handed to NVRTC.
+It validates against a CPU reference.
+
+**The first execution costs 100 ms and the rest cost 1.1 ms.** That is the JIT
+compiling the kernel. Worth saying out loud before anyone asks.
+
+**The profile explains the wall clock exactly**: 333 us of kernel plus 757 us of
+transfers is the 1.1 ms. This is why every comparison in steps 2-4 uses kernel time
+-- wall clock on this workload is mostly PCIe.
+
+### Note
+
+The transfer counts (534 and 522 copies) include TornadoVM's small internal copies,
+not just the three 4 MB arrays; the per-execution *time* is the number that matters
+and is what is printed.
+
+---
+
+## Step 2 — where the backend stands  (~90 s)
 
 **Run from:** `~/nvidia-demo/classes`
 
@@ -70,11 +137,12 @@ API, so rungs 2 and 3 are hand-written CUDA transliterated into Java.
 **Do not quote the wall clock** the ladder prints if anyone runs it directly.
 TornadoVM's wall clock includes host dispatch and three 16 MB transfers; the CUDA
 binary reports kernel time only. Comparing them shows a fake ~3.3× gap. This script
-measures kernel time via nsys on both sides precisely to avoid that.
+measures kernel time via nsys on both sides precisely to avoid that -- and step 1
+shows the arithmetic behind it.
 
 ---
 
-## Step 2 — the CUDA it generates  (~40 s)
+## Step 3 — the CUDA it generates  (~40 s)
 
 **Run from:** `~/nvidia-demo/classes`
 
@@ -115,7 +183,7 @@ deletes every guard and condition before code generation.
 
 ---
 
-## Step 3 — the one difference that is left  (~40 s)
+## Step 4 — the one difference that is left  (~40 s)
 
 **Run from:** `~/nvidia-demo/classes`
 
@@ -158,7 +226,7 @@ thing to ask them about.
 | you are in the wrong directory | `cd ~/nvidia-demo/classes` — all three need it |
 | a Java stack trace from `medianOf` | the ladder needs ≥2 executions; the scripts pass 3 or 10, so only happens if you edit the args |
 | step 3 prints "no cubin cached" | `tornado.cuda.codecache.enable` must be on (default); cache is `$TORNADOVM_HOME/var/cuda-codecache/device-0-0/` |
-| nsys not found / permission denied | steps 2 and 3 do not need nsys — run those; use the committed CSVs for step 1's numbers |
+| nsys not found / permission denied | steps 3 and 4 do not need nsys — run those; use the committed CSVs for step 2's numbers |
 
 **Full fallback if the GPU is unavailable:** every number is committed in the demos
 repo under `results/raw/31-load-batching-reorder/` — `ladder-kernel-times.csv`,
