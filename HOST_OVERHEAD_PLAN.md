@@ -161,7 +161,20 @@ number, per the skill — "dispatch feels slow" is not a hypothesis.
 ~140 ms per process, against steady-state costs in microseconds. Dominates every
 short run, every CI job and every LLM run under ~20 s.
 
-- **W1a. Does the cubin cache actually skip NVRTC on a second run?**
+- **W1a. ~~Does the cubin cache actually skip NVRTC on a second run?~~ ANSWERED
+  2026-09-08: yes.** Cold cache 1.19 s, warm 1.06 s on a three-kernel run
+  (n=512, 3 runs each, cleared between colds) -- ~130 ms, ~43 ms per kernel of
+  NVRTC genuinely skipped. The hypothesis that it silently recompiles is **false**;
+  do not spend more time here. The related defect *was* real and is fixed in
+  [PR #1080](https://github.com/beehive-lab/TornadoVM/pull/1080): an absolute
+  `-Dtornado.*.codecache.dir` was concatenated onto `$TORNADOVM_HOME`, so the cache
+  was written into the SDK install tree and could not be relocated -- which breaks a
+  read-only or shared SDK, and blocks per-CI-job isolation. Two further defects in
+  the same line: an unset `TORNADOVM_HOME` created a directory literally named
+  `null`, and `MetalCodeCache` was the last Java reader of `TORNADO_SDK`, deprecated
+  by #773, so it hit that path on every Metal run.
+
+- **W1a-orig (superseded).**
   `tornado.cuda.codecache.enable` defaults to `True` and cubins land in
   `$TORNADOVM_HOME/var/cuda-codecache/device-0-0/`. *Hypothesis to test first:
   a second run of the same kernel does zero NVRTC work.* If it does not, that is
