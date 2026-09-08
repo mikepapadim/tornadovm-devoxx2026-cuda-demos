@@ -226,6 +226,43 @@ Raw data: `results/raw/32-host-overhead/`.
 
 ---
 
+## 4c. Iteration log
+
+**W1a -- cubin cache (closed).** Works; cold 1.19 s vs warm 1.06 s. The relocation
+defect was real: [PR #1080](https://github.com/beehive-lab/TornadoVM/pull/1080).
+
+**AppCDS (closed, negative).** Unavailable to TornadoVM on any JDK. `--patch-module`
+is required on JDK 22-26 for the vendored JVMCI, and CDS refuses to dump with it;
+`--upgrade-module-path` is unconditional and CDS refuses that too. Not fixable
+without changing how the graalJars and JVMCI are supplied.
+
+**Eager provider loading (closed, hypothesis eliminated).** Providers are lazy: a
+workload using no library task loads no provider class and no native library.
+
+**W3 -- stream synchronisation (done).** `develop` issues **3 `cuStreamSynchronize`
+per execution**, two against an already-drained stream.
+[PR #1081](https://github.com/beehive-lab/TornadoVM/pull/1081) takes it to 1.
+
+Two corrections to §2 of this plan, both mine:
+
+- §2 said #1023's win was unclaimed. I contradicted that after reading its closing
+  comment ("folded into #1022"), then checked the merged diff: **§2 was right.** The
+  merged #1022 touches three files, none of them the queue, and none of the three
+  sync commits are ancestors of `develop`. The measurement had been saying so all
+  along -- 3 syncs per execution is pre-#1023 behaviour.
+- The commits cannot be cherry-picked: they target the JNI `cuda_queue_t`, which the
+  FFM port replaced. #1081 is a reimplementation.
+
+Honest value: the call-count reduction is deterministic (3 -> 1, 4.19 -> 2.55 us of
+driver time) but **steady-state wall clock is 11 us either way** on the probe
+workload. #1023 said the same of itself.
+
+A hazard the JNI original never faced: `getStreamPointer` hands the raw stream to
+cuBLAS/cuDNN/cuFFT/CUTLASS, which enqueue outside the queue's bookkeeping. Marking
+pending on hand-out closes it; all 78 library tests pass.
+
+---
+
 ## 5. Workstreams, ranked
 
 Ranked by (measured ceiling × confidence) ÷ cost. Each states its hypothesis as a

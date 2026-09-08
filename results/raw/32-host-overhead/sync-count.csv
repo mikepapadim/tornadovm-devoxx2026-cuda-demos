@@ -1,0 +1,6 @@
+# saxpy n=1024, RTX 4090, same tree measured with and without PR #1081.
+# Steady state = median of executions 10000-30000 (per-execution cost needs ~1000 executions to settle).
+variant,syncs_per_execution,sync_us_per_execution,steady_state_wall_us_run1,steady_state_wall_us_run2,steady_state_wall_us_run3
+develop,3.00,4.19,11,11,11
+pr1081_pending_flag_only,2.00,4.19,11,11,11
+pr1081_full,1.00,2.55,11,11,10
