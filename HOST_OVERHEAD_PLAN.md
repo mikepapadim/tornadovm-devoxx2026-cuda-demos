@@ -263,6 +263,46 @@ pending on hand-out closes it; all 78 library tests pass.
 
 ---
 
+## 4d. Event pooling -- analysed, deliberately not shipped
+
+The largest remaining self-contained item after #1081, and I am not taking it on
+this evidence.
+
+**The opportunity.** Per execution the backend makes 4 `cuEventCreate` (1.74 us),
+4 `cuEventRecord` (0.69 us) and 4 `cuEventDestroy` (0.08 us). Creation is the
+expensive half -- a driver allocation at ~0.44 us a call -- so recycling `CUevent`s
+would save ~1.7 us of an ~11 us steady-state budget, about 15%.
+
+**Why not.** `cuEventDestroy` on an event whose recording has not completed is
+*defined*: the call returns immediately and the driver frees the resources once the
+device reaches it. **Re-recording a pooled event whose prior recording is still
+pending is not** -- the earlier recording is discarded, and anything that already
+issued a `cuStreamWaitEvent` against that handle observes the new one. So pooling
+is strictly less safe than the destroy it replaces, and the argument "destroying
+here is already safe, therefore pooling is" does **not** hold.
+
+Making it safe needs one of:
+
+- an established invariant that TornadoVM only releases an event after its
+  operation has completed -- `CUDAEvent.clReleaseEvent` is called from
+  `CUDADeviceContext` slot unstaging, where that is not obviously true; or
+- a `cuEventQuery` on acquire, destroying and recreating when the event is not
+  ready. That is safe and still net positive if a query is cheaper than a create,
+  but it needs its own measurement.
+
+The failure mode is a silently wrong synchronisation, not a crash, and 1.7 us does
+not justify shipping it on an unresolved invariant. Recorded so the next person
+starts from the hazard rather than rediscovering it.
+
+Groundwork if someone does take it: `CUDAHandles.Event` has only **two**
+construction sites and `cuEventDestroy` only **six** call sites across two files,
+so the mechanical part is small. The flags an event was created with must travel
+in the handle rather than be recomputed at release, because `timingEnabled` is
+mutable at runtime and an event created with `CU_EVENT_DISABLE_TIMING` can be
+released while timing is on.
+
+---
+
 ## 5. Workstreams, ranked
 
 Ranked by (measured ceiling × confidence) ÷ cost. Each states its hypothesis as a
