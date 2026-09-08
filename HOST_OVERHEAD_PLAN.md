@@ -151,6 +151,81 @@ within 10%, and the top three host costs are named with their shares.
 
 ---
 
+## 4b. Phase 0 result -- the premise needs correcting (2026-09-08)
+
+Measured before touching anything, and it changes the ranking below.
+
+**TornadoVM's steady-state per-execution host cost is ~13 us**, for a one-task graph
+with three transfers at n=1024 (GPU work negligible, so this is pure host cost).
+That is not a problem worth a campaign. **What looks like host overhead in every
+short measurement is JVM JIT warm-up of the dispatch path.**
+
+| executions so far | median us/execution |
+|---|---|
+| 0-10 | 173 |
+| 10-50 | 122 |
+| 50-100 | 89 |
+| 100-300 | 65 |
+| 300-1000 | 23 |
+| 1000-3000 | 17 |
+| 3000-10000 | 14 |
+| 10000-30000 | **11** |
+
+**14x from first execution to steady state, with the knee between 300 and 1000
+executions.** Anything measuring fewer than ~1000 executions is measuring the JVM
+warming up, not TornadoVM's dispatch.
+
+A second experiment separates the two causes. Warm one plan for 20,000 executions,
+then start a *fresh* plan in the same JVM:
+
+| | first 10 | 10-50 | 300-1000 |
+|---|---|---|---|
+| plan A, cold JVM | 173 us | 122 us | 23 us |
+| plan B, warm JVM, fresh plan | **31 us** | 23 us | 14 us |
+| plan C, warm JVM, fresh plan | **24 us** | 15 us | 13 us |
+
+So the warm-up is overwhelmingly **JVM-wide JIT**, not per-plan state: a fresh plan
+in a warm JVM starts 5.6x cheaper than the same plan in a cold one. There is a
+small genuine per-plan component (~24-31 us for the first executions, converging
+within ~50), but it is a second-order effect.
+
+The per-execution CUDA API cost at steady state, for the same workload:
+
+| API | calls/exec | us/exec |
+|---|---|---|
+| `cuStreamSynchronize` | 3.00 | 3.53 |
+| `cuMemcpyHtoDAsync` | 2.00 | 3.02 |
+| `cuLaunchKernel` | 1.00 | 2.14 |
+| `cuEventCreate` | 4.00 | 1.74 |
+| `cuMemcpyDtoHAsync` | 1.00 | 1.53 |
+| `cuEventRecord` | 4.00 | 0.69 |
+| `cuCtxSetCurrent` | 4.00 | 0.26 |
+| `cuEventDestroy` | 4.00 | 0.08 |
+| `cuStreamIsCapturing` | 1.00 | 0.06 |
+| **total** | **24** | **13.05** |
+
+24 driver calls and 13 us -- which is the whole steady-state cost. So the driver
+call count *is* the steady-state cost, and there is no meaningful Java-side residue
+once the JIT has warmed up.
+
+### What this means for the workstreams below
+
+- **Ranking changes.** For a long-running workload, steady state is already 13 us
+  and the only lever is driver call count -- W3 (sync count) and event pooling are
+  the whole opportunity, worth a few us each.
+- **For short runs, warm-up dominates and none of W2-W7 touches it.** A new
+  workstream is needed: reduce time-to-steady-state (AppCDS/AOT class loading,
+  shortening the JIT-sensitive dispatch path). That is where the large numbers are.
+- **Two corrections to my own measurements while getting here**, recorded so they
+  are not repeated: a delta method over two execution counts attributes a one-off
+  call's run-to-run variance to the per-execution term (`cuCtxCreate` appeared as
+  56 us/execution), and a 300-execution benchmark with 50 warm-up iterations
+  measures the JIT, not the runtime.
+
+Raw data: `results/raw/32-host-overhead/`.
+
+---
+
 ## 5. Workstreams, ranked
 
 Ranked by (measured ceiling × confidence) ÷ cost. Each states its hypothesis as a
