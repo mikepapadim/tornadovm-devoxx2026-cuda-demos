@@ -89,8 +89,13 @@ plotting data.**
 | 18 | 5. cuBLAS FP16 | 113.7 µs | 115.4 µs | 111.7 µs | 1.018× | 1.033× |
 
 **Demo 17 rung 3 is the whole story: 1.42× → 1.02× of hand-written CUDA.**
-Demo 18 gains nothing, because its tiled and MMA rungs stage one element per
-thread — one load in flight either way, nothing to batch.
+Demo 18 gains nothing — but *not* because the pass fails to fire. It fires on both
+fp16 kernels and batches correctly; the win is bounded by the staging fan-out per
+thread. `kcTiled` stages two elements, so batching takes it from one outstanding
+load to two, which is worth ~1% against demo 17's one-to-eight. `kcMma` stages two
+halves packed into a single 32-bit shared store, so the emitted order is already
+load, load, pack, store — nothing left to reorder in that block. See
+[demo 18's README](../../../demos/18-matmul-ladder-fp16/README.md#the-load-batching-fix-does-not-help-this-ladder--and-that-is-informative).
 
 ### Wall-clock, n=1024, 5 runs per arm (`ladder-rungs.csv`, `ladder-runs-raw.csv`)
 

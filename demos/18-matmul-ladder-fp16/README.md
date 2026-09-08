@@ -106,12 +106,26 @@ here, n=2048, it does essentially nothing:
 | 3. KernelContext MMA | 1017.6 µs | 1003.9 µs | 690.0 µs | 1.014× |
 | 5. cuBLAS GemmEx FP16 | 113.7 µs | 115.4 µs | 111.7 µs | 0.985× |
 
-**Why:** the fix only pays when several *independent* global loads can be put in
-flight together, and the win scales with how many elements each thread stages per
-tile iteration. Demo 17's `kcRegisterTiled` stages four elements each of A and B —
-eight loads in one straight-line run, seven stores sunk, 1.4×. `kcTiled` and
-`kcMma` here stage **one** element per thread, so there is one load in flight
-either way and nothing to batch: the pass fires and moves a single store.
+**Why:** the pass fires correctly on both kernels here — it is not blocked. The
+win is simply bounded by how many outstanding loads the batching can create, and
+that equals the staging fan-out per thread:
+
+| kernel | staged per thread | loads in flight, before → after | speedup |
+|---|---|---|---|
+| `kcRegisterTiled` (demo 17, fp32) | 8 | 1 → 8 | **1.39×** |
+| `kcTiled` (here) | 2 | 1 → 2 | ~1.01× |
+| `kcMma` (here) | 2, packed into one store | 2 → 4 in one block | 1.014× |
+
+`kcTiled` is genuinely interleaved — load, store, load, store — and the pass sinks
+the first store below the second load exactly as intended. Going from one
+outstanding load to two is just worth very little in a kernel dominated by a
+64-iteration inner product.
+
+`kcMma` is the more interesting case: the fp16 path packs two `__half` values into
+a single 32-bit shared store, so the emitted order is *already* load, load, pack,
+store. Check it with `tornado --printKernel` — the two `*(( __half *) ...)` loads
+sit back to back with only address arithmetic between them. There is no
+interleaving left to remove.
 
 So the 1.475× gap on rung 3 above is **not** the staging schedule. It is the
 pipelining, swizzling and tile selection described in this section, which is a

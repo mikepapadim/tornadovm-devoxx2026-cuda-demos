@@ -265,12 +265,16 @@ Every shared-memory kernel in the repo, flag off vs on. The pass fires on **8 of
 | `gemmBF16` / `gemmFP8` / `gemmInt8` | 2–4 | 1.016–1.032x *(noise)* |
 | `kcTiled` x2, `kcMma` | 1 | 1.011–1.018x *(noise)* |
 
-### The number of stores sunk predicts the win
+### The win = how many loads end up in flight
 
-One element staged per thread ⇒ one load in flight either way ⇒ nothing to batch.
+| kernel | staged/thread | in flight before → after | speedup |
+|---|---|---|---|
+| `kcRegisterTiled` | 8 | 1 → 8 | **1.39–1.65x** |
+| `kcTiled` (fp32, fp16) | 2 | 1 → 2 | ~1.01x |
+| `kcMma` (fp16) | 2, packed | already adjacent | 1.014x |
 
 <!--
-This is the slide that stops the obvious question. The win is blocked/register-tiled GEMM and anything staging several elements per thread — not one-element-per-thread reductions, scans or histograms, which is most of what kernelcontext contains today. And it grows with tile size: fan-out is (BM x BK) / threads, so an 8x8 micro-tile stages 16.
+Careful here — I got this wrong first time and said the fp16 kernels stage one element and have nothing to batch. They stage two, and the pass fires correctly on all of them. What differs is the payoff, not whether it applies. kcMma is the nice case: fp16 packs two halves into one 32-bit shared store, so the emitted order is already load-load-pack-store. The win is blocked/register-tiled GEMM and anything staging several elements per thread, and it grows with tile size: fan-out is (BM x BK) / threads, so an 8x8 micro-tile stages 16.
 -->
 
 ---

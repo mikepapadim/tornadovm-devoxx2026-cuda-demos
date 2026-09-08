@@ -220,10 +220,16 @@ reach:
   kernels_transformed: 8
   kernels_total: 14
   rule: >
-    The win is the number of global loads that get to overlap, and the number of stores sunk
-    predicts it. A kernel staging ONE element per thread per tile has one load in flight either
-    way and there is nothing to batch. Only kcRegisterTiled, which stages four elements each of
-    A and B, moves outside noise.
+    The win is the number of OUTSTANDING global loads the batching creates, which equals the
+    staging fan-out per thread. kcRegisterTiled stages eight elements (1 -> 8 loads in flight)
+    and gains 1.39-1.65x; kcTiled stages two (1 -> 2) and gains ~1%; kcMma stages two halves
+    packed into one 32-bit store, so its loads are ALREADY adjacent and there is nothing left to
+    reorder in that block. The pass fires correctly in all three cases -- what differs is the
+    payoff, not whether it applies.
+  correction: >
+    An earlier version of this record said the fp16 kernels stage one element per thread and so
+    have nothing to batch. That was inferred from store counts rather than read from the
+    generated code, and it is wrong: they stage two, and the pass does fire on both.
   rows:
     - demo: MatMulLadder
       kernel: kcRegisterTiled
