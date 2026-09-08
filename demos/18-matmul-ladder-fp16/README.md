@@ -92,6 +92,35 @@ That is the useful message. Reaching the tensor core from Java is a few lines;
 reaching cuBLAS's throughput is a different and much larger problem, and this
 ladder shows exactly how much of it the library is doing for you.
 
+### The load-batching fix does not help this ladder — and that is informative
+
+TornadoVM PR [#1079](https://github.com/beehive-lab/TornadoVM/pull/1079) batches
+the global loads of a shared-memory staging sequence, and it takes demo 17's
+fp32 register-tiled rung from 1.42× to 1.02× of hand-written CUDA. Re-measured
+here, n=2048, it does essentially nothing:
+
+| Rung | before | after | hand-written | speedup |
+|---|---|---|---|---|
+| 1. naive | 5115.4 µs | 5128.0 µs | 3412.4 µs | 1.00× |
+| 2. KernelContext tiled | 2609.0 µs | 2596.1 µs | 2586.3 µs | 1.005× |
+| 3. KernelContext MMA | 1017.6 µs | 1003.9 µs | 690.0 µs | 1.014× |
+| 5. cuBLAS GemmEx FP16 | 113.7 µs | 115.4 µs | 111.7 µs | 0.985× |
+
+**Why:** the fix only pays when several *independent* global loads can be put in
+flight together, and the win scales with how many elements each thread stages per
+tile iteration. Demo 17's `kcRegisterTiled` stages four elements each of A and B —
+eight loads in one straight-line run, seven stores sunk, 1.4×. `kcTiled` and
+`kcMma` here stage **one** element per thread, so there is one load in flight
+either way and nothing to batch: the pass fires and moves a single store.
+
+So the 1.475× gap on rung 3 above is **not** the staging schedule. It is the
+pipelining, swizzling and tile selection described in this section, which is a
+much larger piece of work. Evidence:
+[`results/raw/31-load-batching-reorder/`](../../results/raw/31-load-batching-reorder/).
+
+Same caveat as demo 17: these numbers come from a source build of `develop` plus
+PR #1079, not from the pinned `6.0.0` release every other number here uses.
+
 ## Related
 
 - **Demo 17** — the same ladder in FP32, with a register-tiled rung

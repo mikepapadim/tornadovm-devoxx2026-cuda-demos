@@ -1,0 +1,13 @@
+demo,rung_num,rung,runs,wallclock_off_us,wallclock_on_us,wallclock_ratio,gflops_off,gflops_on
+MatMulLadder,1,naive @Parallel,5,778,781,0.996,2760.3,2749.7
+MatMulLadder,2,KernelContext tiled,5,660,663,0.995,3253.8,3239.0
+MatMulLadder,3,KernelContext register-tiled,5,429,391,1.097,5005.8,5492.3
+MatMulLadder,4,CUTLASS sgemm,5,380,385,0.987,5651.3,5577.9
+MatMulLadder,5,cuBLAS sgemm,5,322,324,0.994,6669.2,6628.0
+MatMulLadder,6,cuBLAS sgemm TF32,5,304,304,1.000,7064.1,7064.1
+MatMulLadderFP16,1,naive @Parallel,5,764,768,0.995,2811.0,2796.0
+MatMulLadderFP16,2,KernelContext tiled,5,550,550,1.000,3905.0,3905.0
+MatMulLadderFP16,3,KernelContext MMA (tensor core),5,494,490,1.008,4347.0,4383.0
+MatMulLadderFP16,4,CUTLASS hgemm,5,192,192,1.000,11185.0,11185.0
+MatMulLadderFP16,5,cuBLAS GemmEx FP16,5,181,188,0.963,11865.0,11423.0
+MatMulLadderFP16,6,cuBLAS GemmEx FP16->FP32,5,290,290,1.000,7405.0,7405.0

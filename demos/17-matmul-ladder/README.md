@@ -90,6 +90,37 @@ statement that the gap appears *only* once a kernel does register blocking, with
 small fully-unrollable inner loops over a per-thread accumulator array. Simple
 kernels are already at parity.
 
+### That gap has since been diagnosed and fixed upstream
+
+**With TornadoVM PR [#1079](https://github.com/beehive-lab/TornadoVM/pull/1079),
+rung 3 goes from 1.42× to 1.02× of hand-written CUDA.** Same n=2048, same
+machine, re-measured across all three arms:
+
+| Rung | TornadoVM before | TornadoVM after | hand-written | before | **after** |
+|---|---|---|---|---|---|
+| 1. naive | 3409.2 µs | 3403.4 µs | 3384.0 µs | 1.007× | 1.006× |
+| 2. tiled | 2615.7 µs | 2596.3 µs | 2590.1 µs | 1.010× | 1.002× |
+| 3. register-tiled | 695.7 µs | **499.4 µs** | 488.9 µs | 1.423× | **1.021×** |
+| 5. cuBLAS sgemm | 316.2 µs | 314.6 µs | 309.2 µs | 1.023× | 1.017× |
+| 6. cuBLAS TF32 | 221.8 µs | 220.9 µs | 219.1 µs | 1.012× | 1.008× |
+
+The cause was the staging loop, not the inner product. TornadoVM emitted one
+global load per shared store, so a single load was in flight at a time; ptxas
+could not batch them because TornadoVM casts an integer address to a plain
+pointer, which lowers to a **generic `LD`** that may target shared memory.
+Hand-written CUDA loads through `const float *`, lowers to `LDG`, and ptxas
+batches on its own. Fixed in the code generator, where the address space is known.
+
+**Caveat on these numbers:** they come from a source build of TornadoVM `develop`
+plus PR #1079, **not** from the `6.0.0` SDKMAN release this repo pins everywhere
+else. Every other number in this README is the pinned release. Full evidence,
+including the 100-launch distribution and the SASS schedules, is in
+[`results/raw/31-load-batching-reorder/`](../../results/raw/31-load-batching-reorder/).
+
+Wall-clock moves much less — 429 µs → 391 µs, **1.10×** at n=1024 — because host
+dispatch dominates this demo. That is the gap between "the kernel got 1.4× faster"
+and "the demo got 1.1× faster", and it is worth saying out loud.
+
 ## What the kernel names give away
 
 `nsys` names every kernel, and the library rungs are worth reading:

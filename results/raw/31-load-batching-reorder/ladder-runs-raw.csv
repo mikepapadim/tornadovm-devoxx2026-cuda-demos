@@ -1,0 +1,121 @@
+demo,rung_num,rung,mode,run,wallclock_us,gflops
+MatMulLadderFP16,1,naive @Parallel,off,1,767,2800
+MatMulLadderFP16,2,KernelContext tiled,off,1,552,3890
+MatMulLadderFP16,3,KernelContext MMA (tensor core),off,1,495,4338
+MatMulLadderFP16,4,CUTLASS hgemm,off,1,193,11127
+MatMulLadderFP16,5,cuBLAS GemmEx FP16,off,1,195,11013
+MatMulLadderFP16,6,cuBLAS GemmEx FP16->FP32,off,1,290,7405
+MatMulLadderFP16,1,naive @Parallel,off,2,764,2811
+MatMulLadderFP16,2,KernelContext tiled,off,2,550,3905
+MatMulLadderFP16,3,KernelContext MMA (tensor core),off,2,495,4338
+MatMulLadderFP16,4,CUTLASS hgemm,off,2,194,11070
+MatMulLadderFP16,5,cuBLAS GemmEx FP16,off,2,181,11865
+MatMulLadderFP16,6,cuBLAS GemmEx FP16->FP32,off,2,291,7380
+MatMulLadderFP16,1,naive @Parallel,off,3,763,2815
+MatMulLadderFP16,2,KernelContext tiled,off,3,549,3912
+MatMulLadderFP16,3,KernelContext MMA (tensor core),off,3,490,4383
+MatMulLadderFP16,4,CUTLASS hgemm,off,3,191,11243
+MatMulLadderFP16,5,cuBLAS GemmEx FP16,off,3,180,11930
+MatMulLadderFP16,6,cuBLAS GemmEx FP16->FP32,off,3,292,7354
+MatMulLadderFP16,1,naive @Parallel,off,4,776,2767
+MatMulLadderFP16,2,KernelContext tiled,off,4,543,3955
+MatMulLadderFP16,3,KernelContext MMA (tensor core),off,4,494,4347
+MatMulLadderFP16,4,CUTLASS hgemm,off,4,192,11185
+MatMulLadderFP16,5,cuBLAS GemmEx FP16,off,4,184,11671
+MatMulLadderFP16,6,cuBLAS GemmEx FP16->FP32,off,4,289,7431
+MatMulLadderFP16,1,naive @Parallel,off,5,762,2818
+MatMulLadderFP16,2,KernelContext tiled,off,5,552,3890
+MatMulLadderFP16,3,KernelContext MMA (tensor core),off,5,489,4392
+MatMulLadderFP16,4,CUTLASS hgemm,off,5,189,11362
+MatMulLadderFP16,5,cuBLAS GemmEx FP16,off,5,178,12065
+MatMulLadderFP16,6,cuBLAS GemmEx FP16->FP32,off,5,290,7405
+MatMulLadderFP16,1,naive @Parallel,on,1,764,2811
+MatMulLadderFP16,2,KernelContext tiled,on,1,551,3897
+MatMulLadderFP16,3,KernelContext MMA (tensor core),on,1,490,4383
+MatMulLadderFP16,4,CUTLASS hgemm,on,1,196,10957
+MatMulLadderFP16,5,cuBLAS GemmEx FP16,on,1,187,11484
+MatMulLadderFP16,6,cuBLAS GemmEx FP16->FP32,on,1,287,7483
+MatMulLadderFP16,1,naive @Parallel,on,2,771,2785
+MatMulLadderFP16,2,KernelContext tiled,on,2,552,3890
+MatMulLadderFP16,3,KernelContext MMA (tensor core),on,2,492,4365
+MatMulLadderFP16,4,CUTLASS hgemm,on,2,190,11303
+MatMulLadderFP16,5,cuBLAS GemmEx FP16,on,2,188,11423
+MatMulLadderFP16,6,cuBLAS GemmEx FP16->FP32,on,2,289,7431
+MatMulLadderFP16,1,naive @Parallel,on,3,770,2789
+MatMulLadderFP16,2,KernelContext tiled,on,3,550,3905
+MatMulLadderFP16,3,KernelContext MMA (tensor core),on,3,490,4383
+MatMulLadderFP16,4,CUTLASS hgemm,on,3,194,11070
+MatMulLadderFP16,5,cuBLAS GemmEx FP16,on,3,183,11735
+MatMulLadderFP16,6,cuBLAS GemmEx FP16->FP32,on,3,295,7280
+MatMulLadderFP16,1,naive @Parallel,on,4,759,2829
+MatMulLadderFP16,2,KernelContext tiled,on,4,548,3919
+MatMulLadderFP16,3,KernelContext MMA (tensor core),on,4,487,4410
+MatMulLadderFP16,4,CUTLASS hgemm,on,4,188,11423
+MatMulLadderFP16,5,cuBLAS GemmEx FP16,on,4,190,11303
+MatMulLadderFP16,6,cuBLAS GemmEx FP16->FP32,on,4,290,7405
+MatMulLadderFP16,1,naive @Parallel,on,5,768,2796
+MatMulLadderFP16,2,KernelContext tiled,on,5,546,3933
+MatMulLadderFP16,3,KernelContext MMA (tensor core),on,5,493,4356
+MatMulLadderFP16,4,CUTLASS hgemm,on,5,192,11185
+MatMulLadderFP16,5,cuBLAS GemmEx FP16,on,5,190,11303
+MatMulLadderFP16,6,cuBLAS GemmEx FP16->FP32,on,5,292,7354
+MatMulLadder,1,naive @Parallel,off,1,767,2799.8
+MatMulLadder,2,KernelContext tiled,off,1,662,3243.9
+MatMulLadder,3,KernelContext register-tiled,off,1,436,4925.4
+MatMulLadder,4,CUTLASS sgemm,off,1,380,5651.3
+MatMulLadder,5,cuBLAS sgemm,off,1,322,6669.2
+MatMulLadder,6,cuBLAS sgemm TF32,off,1,306,7017.9
+MatMulLadder,1,naive @Parallel,off,2,778,2760.3
+MatMulLadder,2,KernelContext tiled,off,2,677,3172.1
+MatMulLadder,3,KernelContext register-tiled,off,2,439,4891.8
+MatMulLadder,4,CUTLASS sgemm,off,2,383,5607.0
+MatMulLadder,5,cuBLAS sgemm,off,2,321,6690.0
+MatMulLadder,6,cuBLAS sgemm TF32,off,2,305,7040.9
+MatMulLadder,1,naive @Parallel,off,3,782,2746.1
+MatMulLadder,2,KernelContext tiled,off,3,655,3278.6
+MatMulLadder,3,KernelContext register-tiled,off,3,429,5005.8
+MatMulLadder,4,CUTLASS sgemm,off,3,380,5651.3
+MatMulLadder,5,cuBLAS sgemm,off,3,321,6690.0
+MatMulLadder,6,cuBLAS sgemm TF32,off,3,304,7064.1
+MatMulLadder,1,naive @Parallel,off,4,777,2763.8
+MatMulLadder,2,KernelContext tiled,off,4,660,3253.8
+MatMulLadder,3,KernelContext register-tiled,off,4,425,5052.9
+MatMulLadder,4,CUTLASS sgemm,off,4,380,5651.3
+MatMulLadder,5,cuBLAS sgemm,off,4,333,6448.9
+MatMulLadder,6,cuBLAS sgemm TF32,off,4,304,7064.1
+MatMulLadder,1,naive @Parallel,off,5,778,2760.3
+MatMulLadder,2,KernelContext tiled,off,5,656,3273.6
+MatMulLadder,3,KernelContext register-tiled,off,5,418,5137.5
+MatMulLadder,4,CUTLASS sgemm,off,5,385,5577.9
+MatMulLadder,5,cuBLAS sgemm,off,5,325,6607.6
+MatMulLadder,6,cuBLAS sgemm TF32,off,5,302,7110.9
+MatMulLadder,1,naive @Parallel,on,1,785,2735.6
+MatMulLadder,2,KernelContext tiled,on,1,653,3288.6
+MatMulLadder,3,KernelContext register-tiled,on,1,391,5492.3
+MatMulLadder,4,CUTLASS sgemm,on,1,384,5592.4
+MatMulLadder,5,cuBLAS sgemm,on,1,322,6669.2
+MatMulLadder,6,cuBLAS sgemm TF32,on,1,302,7110.9
+MatMulLadder,1,naive @Parallel,on,2,779,2756.7
+MatMulLadder,2,KernelContext tiled,on,2,656,3273.6
+MatMulLadder,3,KernelContext register-tiled,on,2,386,5563.4
+MatMulLadder,4,CUTLASS sgemm,on,2,384,5592.4
+MatMulLadder,5,cuBLAS sgemm,on,2,322,6669.2
+MatMulLadder,6,cuBLAS sgemm TF32,on,2,304,7064.1
+MatMulLadder,1,naive @Parallel,on,3,812,2644.7
+MatMulLadder,2,KernelContext tiled,on,3,668,3214.8
+MatMulLadder,3,KernelContext register-tiled,on,3,389,5520.5
+MatMulLadder,4,CUTLASS sgemm,on,3,385,5577.9
+MatMulLadder,5,cuBLAS sgemm,on,3,324,6628.0
+MatMulLadder,6,cuBLAS sgemm TF32,on,3,303,7087.4
+MatMulLadder,1,naive @Parallel,on,4,781,2749.7
+MatMulLadder,2,KernelContext tiled,on,4,663,3239.0
+MatMulLadder,3,KernelContext register-tiled,on,4,395,5436.7
+MatMulLadder,4,CUTLASS sgemm,on,4,386,5563.4
+MatMulLadder,5,cuBLAS sgemm,on,4,326,6587.4
+MatMulLadder,6,cuBLAS sgemm TF32,on,4,306,7017.9
+MatMulLadder,1,naive @Parallel,on,5,776,2767.4
+MatMulLadder,2,KernelContext tiled,on,5,663,3239.0
+MatMulLadder,3,KernelContext register-tiled,on,5,399,5382.2
+MatMulLadder,4,CUTLASS sgemm,on,5,385,5577.9
+MatMulLadder,5,cuBLAS sgemm,on,5,328,6547.2
+MatMulLadder,6,cuBLAS sgemm TF32,on,5,307,6995.1

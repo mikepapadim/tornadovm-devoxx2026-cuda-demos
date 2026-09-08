@@ -69,6 +69,46 @@ A separate follow-up worth having: emit `__ldg()` or a global-qualified pointer 
 ptxas gets the address space directly. That would fix the schedule at the source
 and likely help elsewhere too. Not attempted here.
 
+## Both ladders, re-run with the fix
+
+Demo 17 (fp32) and demo 18 (fp16), all rungs, all three arms. **This is the
+plotting data.**
+
+### Kernel time, n=2048 (`ladder-kernel-times.csv`)
+
+| demo | rung | before | after | hand-written | before/CUDA | **after/CUDA** |
+|---|---|---|---|---|---|---|
+| 17 | 1. naive | 3409.2 µs | 3403.4 µs | 3384.0 µs | 1.007× | 1.006× |
+| 17 | 2. tiled | 2615.7 µs | 2596.3 µs | 2590.1 µs | 1.010× | 1.002× |
+| 17 | **3. register-tiled** | 695.7 µs | **499.4 µs** | 488.9 µs | 1.423× | **1.021×** |
+| 17 | 5. cuBLAS sgemm | 316.2 µs | 314.6 µs | 309.2 µs | 1.023× | 1.017× |
+| 17 | 6. cuBLAS TF32 | 221.8 µs | 220.9 µs | 219.1 µs | 1.012× | 1.008× |
+| 18 | 1. naive | 5115.4 µs | 5128.0 µs | 3412.4 µs | 1.499× | 1.503× |
+| 18 | 2. tiled | 2609.0 µs | 2596.1 µs | 2586.3 µs | 1.009× | 1.004× |
+| 18 | 3. MMA | 1017.6 µs | 1003.9 µs | 690.0 µs | 1.475× | 1.455× |
+| 18 | 5. cuBLAS FP16 | 113.7 µs | 115.4 µs | 111.7 µs | 1.018× | 1.033× |
+
+**Demo 17 rung 3 is the whole story: 1.42× → 1.02× of hand-written CUDA.**
+Demo 18 gains nothing, because its tiled and MMA rungs stage one element per
+thread — one load in flight either way, nothing to batch.
+
+### Wall-clock, n=1024, 5 runs per arm (`ladder-rungs.csv`, `ladder-runs-raw.csv`)
+
+| demo | rung | before | after | ratio | run-to-run range |
+|---|---|---|---|---|---|
+| 17 | 3. register-tiled | 429 µs | **391 µs** | **1.097×** | off 418–439, on 386–399 |
+| 17 | every other rung | — | — | 0.987–1.000× | overlapping |
+| 18 | every rung | — | — | 0.963–1.008× | overlapping |
+
+Rung 3's ranges do not overlap, so the wall-clock gain is real — but it is
+**1.10×, not 1.65×**, because host dispatch dominates this demo. Kernel time falls
+by ~44 µs at n=1024 while the ~322 µs of per-execution dispatch and transfer is
+unchanged. Quote the kernel-time ratio for code-generation claims and the
+wall-clock one for "what a user sees"; never mix them.
+
+`ladder-runs-raw.csv` has every individual run (120 rows: 2 demos x 6 rungs x
+2 modes x 5 runs) if you want error bars rather than medians.
+
 ## What else benefits
 
 Every shared-memory kernel in this repo, flag off vs on (`kernel-sweep.csv`). The pass
@@ -128,6 +168,9 @@ impossible. That asymmetry is the argument for keeping
 | `pure-cuda-probe.csv` | `ReorderProbe.cu` output (all three identical, as expected) |
 | `kernel-sweep.csv` | every shared-memory kernel in the repo, flag off vs on |
 | `register-cost.csv` | register pressure and spill traffic, off vs on |
+| `ladder-kernel-times.csv` | both ladders, all rungs, n=2048, three arms |
+| `ladder-rungs.csv` | both ladders, wall-clock medians, n=1024, 5 runs |
+| `ladder-runs-raw.csv` | every individual ladder run — **error bars** |
 | `ReorderProbe.cu` | the three-schedule probe |
 | `collect.sh` | regenerates every CSV here |
 

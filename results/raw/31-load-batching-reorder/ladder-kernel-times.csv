@@ -1,0 +1,10 @@
+demo,n,rung,kernel,tornadovm_off_us,tornadovm_on_us,handwritten_cuda_us,ratio_off_vs_cuda,ratio_on_vs_cuda,speedup_from_fix
+MatMulLadder,2048,1. naive,naive,3409.2,3403.4,3384.0,1.007,1.006,1.002
+MatMulLadder,2048,2. KernelContext tiled,kcTiled,2615.7,2596.3,2590.1,1.010,1.002,1.007
+MatMulLadder,2048,3. KernelContext register-tiled,kcRegisterTiled,695.7,499.4,488.9,1.423,1.021,1.393
+MatMulLadder,2048,5. cuBLAS sgemm,cutlass_80_simt_sgemm_256x128_8x4,316.2,314.6,309.2,1.023,1.017,1.005
+MatMulLadder,2048,6. cuBLAS sgemm TF32,cutlass_80_tensorop_s1688gemm_128x256,221.8,220.9,219.1,1.012,1.008,1.004
+MatMulLadderFP16,2048,1. naive,naive,5115.4,5128.0,3412.4,1.499,1.503,0.998
+MatMulLadderFP16,2048,2. KernelContext tiled,kcTiled,2609.0,2596.1,2586.3,1.009,1.004,1.005
+MatMulLadderFP16,2048,3. KernelContext MMA,kcMma,1017.6,1003.9,690.0,1.475,1.455,1.014
+MatMulLadderFP16,2048,5. cuBLAS GemmEx FP16,ampere_fp16_s1688gemm_fp16_128x64,113.7,115.4,111.7,1.018,1.033,0.985
