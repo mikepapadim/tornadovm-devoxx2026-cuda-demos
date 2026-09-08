@@ -303,6 +303,42 @@ released while timing is on.
 
 ---
 
+## 4e. Campaign status -- converged (2026-09-08)
+
+**Shipped**
+
+| PR | what | measured |
+|---|---|---|
+| [#1080](https://github.com/beehive-lab/TornadoVM/pull/1080) | absolute code-cache dir honoured, `null/` dir, Metal's dead `TORNADO_SDK` | correctness; unblocks a read-only/shared SDK |
+| [#1081](https://github.com/beehive-lab/TornadoVM/pull/1081) | skip synchronising an already-drained stream | 3 -> 1 syncs/exec, 4.19 -> 2.55 us |
+
+**Closed with reasons -- do not re-investigate**
+
+| item | outcome |
+|---|---|
+| W1a cubin cache | works (1.19 s cold vs 1.06 s warm); only the relocation defect was real |
+| W1c `cuMemHostRegister` | 21 calls totalling **2.2 ms fixed**, not ~1 ms each as §5 assumed. Not worth work |
+| AppCDS | structurally unavailable on every JDK (`--patch-module` on 22-26, `--upgrade-module-path` always) |
+| eager provider init | does not happen; providers are lazy |
+| event pooling | ~1.7 us available, declined on safety -- see §4d |
+| #1071 dispatch timers | `useDeps ? returnEvent : -1` is a **cross-backend convention at 15 sites**, not a CUDA bug. Changing what events are retained is a design decision for the maintainers, and only one backend is testable here |
+
+**Why this is converged.** Steady-state per-execution host cost is **11 us across
+22 driver calls**, and after #1081 every remaining item is 1-2 us with a
+silent-corruption failure mode. The genuinely large number is JIT warm-up
+(173 us -> 11 us over ~1000 executions) and its natural fix is blocked.
+
+**What is left, and who it belongs to.** W5-W7 are either larger design work or
+already in flight upstream as #1030 (deferred outputs), #1031 (copy-out
+coalescing) and #1051 (Graal caching). Measure those rather than rebuild them.
+
+**Method note for whoever picks this up.** Two errors are recorded in §4b because
+both are easy to repeat: a delta over two execution counts charges a one-off
+call's variance to the per-execution term, and any benchmark under ~1000
+executions measures the JIT rather than the runtime.
+
+---
+
 ## 5. Workstreams, ranked
 
 Ranked by (measured ceiling × confidence) ÷ cost. Each states its hypothesis as a
