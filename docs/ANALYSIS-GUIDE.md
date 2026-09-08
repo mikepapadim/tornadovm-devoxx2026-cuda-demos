@@ -210,6 +210,40 @@ That is *plumbing*, not a usable API.
 
 ---
 
+### Why is the register-tiled kernel 1.67x off hand-written CUDA?
+
+**It was, before the fix — now it is 1.4% off.** The staging loop emitted one
+global load per shared store, so one load was in flight at a time:
+`long_scoreboard` 12.10 stalls per issue against 1.45, issue rate 20.8% against
+50.9%, with **identical** FFMA count, identical register count and no spills on
+either side.
+
+The cause is the instruction, not the schedule. TornadoVM casts an integer address
+to a plain pointer, which ptxas lowers to a **generic `LD`** — a load that may
+target shared memory, so it may not be reordered against a shared store.
+Hand-written CUDA loads through `const float *`, lowers to **`LDG`**, and ptxas
+batches the loads on its own. The SASS staging schedules:
+
+```
+TornadoVM, before          L S L S L S L S L S L S L S L S     generic LD
+TornadoVM, after           L L L L L L L L S S S S S S S S     generic LD
+hand-written CUDA          L L L L L L L L S S S S S S S S     LDG
+```
+
+Fixed in the code generator, where the address space *is* known, by PR
+[#1079](https://github.com/beehive-lab/TornadoVM/pull/1079): 112.9 µs → 68.4 µs
+over 100 launches, against 67.5 µs hand-written.
+
+A probe that failed is worth keeping here: the interleaved schedule **cannot be
+written in CUDA C**. Three source orders of one kernel compile to byte-identical
+SASS. ptxas picks the schedule, not the source.
+
+→ `results/raw/31-load-batching-reorder/`, slides in
+`docs/slides/cuda-load-batching.md`, structured record in
+`docs/findings/cuda-load-batching.yaml`
+
+---
+
 ## 5. Comparing across architectures
 
 **Never merge or average two architectures.** Side by side in a table is fine;
@@ -269,6 +303,7 @@ The valid figures are the `nsys`, matched-geometry ones: **1.31 / 1.24 / 0.88**.
 | [#1067](https://github.com/beehive-lab/TornadoVM/issues/1067) | a `KernelContext` kernel that fails to compile silently returns **wrong results** |
 | [#1071](https://github.com/beehive-lab/TornadoVM/issues/1071) | zero dispatch and copy-out timers in the CUDA profiler |
 | [#1072](https://github.com/beehive-lab/TornadoVM/pull/1072) | assertions carried no messages, so failures read `[REASON] null` |
+| [#1078](https://github.com/beehive-lab/TornadoVM/issues/1078) | shared-memory staging serialises the global loads — PR [#1079](https://github.com/beehive-lab/TornadoVM/pull/1079), 1.65x on the register-tiled sgemm |
 
 Plus PR [#1022](https://github.com/beehive-lab/TornadoVM/pull/1022) — per-launch
 dispatch cost, verified against a same-session `develop` baseline.

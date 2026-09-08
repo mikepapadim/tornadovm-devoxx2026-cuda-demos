@@ -201,6 +201,31 @@ there a supported path to feed IR *in* at runtime?"
 → `results/nvidia-meeting/tile-feasibility/inventory.txt`,
 `results/nvidia-meeting/open-questions.md`
 
+
+### 9. A code-generator gap we found and closed — 1.65x
+
+**The one slide where we fixed something upstream.** Demo 17 rung 3, `nsys`,
+100 launches per arm, one build with `-Dtornado.cuda.batchGlobalLoads` toggled.
+
+| arm | median | |
+|---|---|---|
+| TornadoVM before | 112.895 µs | — |
+| **TornadoVM after** | **68.416 µs** | **1.650x** |
+| hand-written CUDA | 67.455 µs | after is within **1.4%** |
+
+The staging loop emitted one global load per shared store. ptxas could not fix it:
+TornadoVM emits a **generic `LD`**, which may target shared memory, while
+hand-written CUDA emits **`LDG`**, proven global and therefore freely reorderable.
+TornadoVM knows the address space at LIR level, so the batching belongs in the code
+generator — PR [#1079](https://github.com/beehive-lab/TornadoVM/pull/1079).
+
+Say alongside it: FFMA count is **bit-identical** before and after (1,073,741,824),
+registers identical at 72, no spills. Nothing about the arithmetic changed.
+
+Full deck for this finding: [`slides/cuda-load-batching.md`](slides/cuda-load-batching.md).
+Numbers: [`findings/cuda-load-batching.yaml`](findings/cuda-load-batching.yaml).
+Raw: `results/raw/31-load-batching-reorder/`.
+
 ---
 
 ## Data files

@@ -1,0 +1,235 @@
+# Structured record of the CUDA global-load batching finding.
+#
+# Machine-readable companion to docs/slides/cuda-load-batching.md. Pull numbers from
+# here rather than retyping them from the slides. If this file and the CSVs under
+# results/raw/31-load-batching-reorder/ ever disagree, the CSVs win.
+#
+# classification follows docs/claims.md:
+#   observed       reproduced locally, log committed
+#   source-backed  verified in the checkout, not run
+#   negative       a probe that failed to show what it was built to show (kept: it is evidence)
+
+id: cuda-load-batching
+title: Batching the global loads of a shared-memory staging sequence
+date: 2026-09-08
+upstream:
+  pull_request: https://github.com/beehive-lab/TornadoVM/pull/1079
+  issue: https://github.com/beehive-lab/TornadoVM/issues/1078
+evidence_dir: results/raw/31-load-batching-reorder
+slides: docs/slides/cuda-load-batching.md
+
+environment:
+  gpu: NVIDIA GeForce RTX 4090
+  arch: sm_89
+  cuda: "12.6"
+  jdk: 25.0.2
+  tornadovm: built from beehive-lab/TornadoVM develop + PR 1079
+  note: >
+    Both TornadoVM arms come from ONE build with -Dtornado.cuda.batchGlobalLoads
+    toggled at run time, so they differ only in emitted instruction order.
+
+workload:
+  demo: demos/17-matmul-ladder
+  kernel: kcRegisterTiled
+  cuda_twin: registerTiled
+  description: 1024x1024 sgemm, 64x64 block tile, 4x4 register micro-tile, A and B staged through shared memory
+  n: 1024
+  grid: [16, 16, 1]
+  block: [16, 16, 1]
+  geometry_verified: true          # from ncu launch dimensions, not from source comments
+  launches_per_arm: 100
+  measurement: nsys per-launch kernel duration
+
+headline:
+  classification: observed
+  claim: >
+    Batching the global loads of the shared-memory staging sequence makes TornadoVM's
+    register-tiled sgemm 1.650x faster, closing the gap to hand-written CUDA from
+    1.674x to 1.4%.
+  timings_us:
+    - arm: tornadovm_before
+      median: 112.895
+      mean: 112.916
+      stddev: 0.152
+      min: 112.511
+      p5: 112.671
+      p95: 113.151
+      max: 113.311
+    - arm: tornadovm_after
+      median: 68.416
+      mean: 68.238
+      stddev: 0.541
+      min: 66.944
+      p5: 67.104
+      p95: 68.832
+      max: 69.119
+    - arm: handwritten_cuda
+      median: 67.455
+      mean: 67.483
+      stddev: 0.388
+      min: 66.944
+      p5: 67.200
+      p95: 67.776
+      max: 70.975
+  ratios:
+    speedup_from_fix: 1.650
+    before_vs_handwritten: 1.674
+    after_vs_handwritten: 1.014
+  source: results/raw/31-load-batching-reorder/per-launch-durations.csv
+
+counters:
+  classification: observed
+  tool: ncu 2024.3.2
+  caveat: >
+    ncu and nsys disagree on ratios for this kernel family. Counters are used for WHY,
+    timings for HOW MUCH. Never put them on one axis.
+  rows:
+    - metric: smsp__average_warps_issue_stalled_long_scoreboard_per_issue_active.ratio
+      label: long_scoreboard stalls per issue
+      before: 12.10
+      after: 1.45
+    - metric: smsp__issue_active.avg.pct_of_peak_sustained_active
+      label: issue rate, % of peak sustained
+      before: 20.82
+      after: 50.90
+    - metric: sm__sass_thread_inst_executed_op_ffma_pred_on.sum
+      label: FFMA instructions
+      before: 1073741824
+      after: 1073741824
+      note: bit-identical, so the arithmetic is unchanged
+    - metric: launch__registers_per_thread
+      label: registers per thread
+      before: 72
+      after: 72
+      note: no extra pressure, no spills either side
+    - metric: l1tex__data_bank_conflicts_pipe_lsu.sum
+      label: LSU bank conflicts
+      before: 602227
+      after: 603209
+  source: results/raw/31-load-batching-reorder/ncu-counters.csv
+
+root_cause:
+  classification: observed
+  claim: >
+    TornadoVM casts an integer address to a plain pointer, which ptxas lowers to a
+    GENERIC LD. A generic load may target shared memory, so ptxas must keep it ordered
+    against every shared store and the staging chain serialises. Hand-written CUDA loads
+    through const float *, lowers to LDG (proven global, proven not to alias the shared
+    store), and ptxas batches the loads on its own.
+  sass_schedules:
+    legend: "L = global load, S = shared store (STS), in the staging loop"
+    tornadovm_before: "LSLSLSLSLSLSLSLS"
+    tornadovm_after:  "LLLLLLLLSSSSSSSS"
+    handwritten_cuda: "LLLLLLLLSSSSSSSS"
+  instruction:
+    tornadovm: LD (generic)
+    handwritten_cuda: LDG (global)
+  source: results/raw/31-load-batching-reorder/sass-schedules.txt
+
+ruled_out:
+  classification: observed
+  note: four plausible causes, each measured and each wrong
+  rows:
+    - hypothesis: TornadoVM emits worse arithmetic
+      probe: FFMA instruction count
+      result: identical, 1,073,741,824 both sides
+    - hypothesis: register pressure or spilling
+      probe: launch__registers_per_thread
+      result: identical at 72, zero spills either side
+    - hypothesis: shared-memory bank conflicts
+      probe: l1tex__data_bank_conflicts_pipe_lsu
+      result: TornadoVM has fewer
+    - hypothesis: pointer aliasing
+      probe: add const / __restrict__ to the generated kernel
+      result: 1.00x, no change
+      note: >
+        The near-miss. restrict says two pointers do not alias each other; it does not
+        say which address space a generic pointer points into, which is the actual issue.
+
+negative_result:
+  classification: negative
+  claim: >
+    The interleaved schedule cannot be written in CUDA C at all. Three source orders of
+    one kernel -- interleaved; interleaved with an asm volatile("" ::: "memory") between
+    pairs; batched -- compile to byte-identical SASS: 448 instructions, LDG x8 then
+    STS x8 in every case. ptxas picks the schedule, not the source, and the asm barrier
+    constrains only the NVVM frontend.
+  built_to_show: that the interleaved schedule is intrinsically slow in pure CUDA
+  actually_showed: that it is unreachable from CUDA C, which is why hand-written CUDA is fast
+  source: results/raw/31-load-batching-reorder/ReorderProbe.cu
+
+fix:
+  classification: source-backed
+  component: tornado-drivers/cuda/.../graal/compiler/CUDAGlobalLoadBatching.java
+  hook: CUDACompilationResultBuilder.emitBlock
+  flag: -Dtornado.cuda.batchGlobalLoads
+  default: true
+  summary: >
+    Within a straight-line run whose every instruction is a non-local LoadStmt, an
+    AssignStmt, or a local/private StoreStmt, sink the stores to the end of the run.
+    Stores are sunk rather than loads hoisted because hoisting a load means hoisting its
+    whole address-arithmetic chain, while sinking a store moves one instruction.
+  safety_argument:
+    - Disjoint address spaces: writes go to shared/private, reads come from global/constant.
+    - A shared or private load is not eligible, so a run can never contain a reader of the staged data.
+    - Store order is preserved, so two writes to one slot still land in program order.
+    - A store only moves later, so every value it reads is still defined before it.
+    - canSinkPast checks explicitly that nothing jumping ahead of a store defines a value it reads.
+    - The run ends before any barrier, so visibility to other threads is unchanged.
+    - If any single store fails the check, the whole run is left untouched.
+
+verification:
+  device_suite:
+    classification: observed
+    method: full tornado-test suite run twice on the same build, flag off and on
+    tests_per_run: 1199
+    regressions: 0
+    preexisting_failures: 11
+    note: >
+      Two further tests failed only in the baseline run (TestIO#testCopyInWithDevice,
+      TestWarmUp#test01). Those look like flakes and are NOT claimed as fixed by the pass.
+  codegen_unit_tests:
+    classification: observed
+    location: tornado-drivers/cuda/src/test
+    runner: make test-cuda-codegen
+    ci_lane: .github/workflows/unit-tests-codegen.yml
+    needs_gpu: false
+    targeted_cases: 15
+    random_programs: 4000
+    invariants:
+      - instruction multiset unchanged
+      - order of non-store instructions preserved
+      - order of stores preserved
+      - nothing crosses an instruction the pass does not model
+      - no hoisted instruction clobbers a store operand
+    note: the property test also asserts the generator actually triggers the pass, so the invariants cannot pass vacuously
+  device_codegen_tests:
+    classification: observed
+    location: tornado-unittests/.../codegen/TestSharedMemoryStaging.java
+    kernels: 7
+    design: >
+      Integer arithmetic with exact expected values, so a mis-schedule changes the ANSWER
+      rather than the speed. Verified with --printKernel that the pass actually fires on
+      them, so they are not vacuous.
+
+follow_ups:
+  - id: emit-ldg
+    claim: >
+      Emitting __ldg() or a global-qualified pointer would give ptxas the address space
+      directly, fix the schedule at the source, and likely help beyond this pattern.
+    status: not attempted, belongs in its own PR
+  - id: float-array-header
+    claim: >
+      The 16-byte FloatArray header still costs 5 sectors per warp-wide access instead
+      of 4. Separate from this fix.
+    status: known, see results/raw/22-ncu-alignment-counters
+
+caveats:
+  - One GPU, one kernel shape. A kernel that does not stage through shared memory is unaffected.
+  - Not a general "TornadoVM is X% of CUDA" claim.
+  - Arms were captured in sequence on an idle machine, not interleaved. Spread under 0.8% of median in every arm.
+
+reproduce: |
+  source scripts/setup-env.sh
+  cd results/raw/31-load-batching-reorder
+  ./collect.sh "$TORNADOVM_HOME" 1024 100
