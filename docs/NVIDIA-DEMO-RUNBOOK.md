@@ -1,7 +1,12 @@
 # NVIDIA demo — three commands
 
-Everything is self-contained in `~/nvidia-demo`. Nothing depends on `/tmp`, and the
-patched SDK is a copy, so a reboot or a tmp sweep will not break it.
+Self-contained in `~/nvidia-demo`. Nothing depends on `/tmp`, and the SDK is a copy,
+so a reboot or a tmp sweep cannot break it.
+
+The SDK is `develop` plus the load-batching fix
+([PR #1079](https://github.com/beehive-lab/TornadoVM/pull/1079)) — i.e. what
+TornadoVM's CUDA backend looks like once that lands. No before/after toggling: the
+demo shows where the backend stands.
 
 ## Setup — once, before you start
 
@@ -9,93 +14,89 @@ patched SDK is a copy, so a reboot or a tmp sweep will not break it.
 source ~/nvidia-demo/env.sh
 ```
 
-Sets `JAVA_HOME`, points `TORNADOVM_HOME` at the patched SDK, and drops you in
-`~/nvidia-demo/classes` where the demo classes already are. Both sides are
-pre-compiled — no build step in front of the audience.
+Sets `JAVA_HOME`, points `TORNADOVM_HOME` at the SDK, and drops you in
+`~/nvidia-demo/classes` where both sides are already compiled. No build step in
+front of the audience.
 
-Sanity check: `tornado --devices` should print the RTX 4090.
+Sanity check: `tornado --devices` prints the RTX 4090.
 
 ---
 
-## 1. The result  (~2 min)
+## 1. Where the backend stands  (~90 s)
 
 ```bash
 bash $DEMO/1-ladder.sh
 ```
 
-Six implementations of the same 2048x2048 sgemm. **Kernel time via nsys**, three
-arms: TornadoVM with the fix off, with it on, and hand-written CUDA.
+Six implementations of the same 2048×2048 sgemm, **kernel time via nsys**:
 
 ```
-rung                  TornadoVM before  TornadoVM after  hand-written  after vs CUDA
-3. register-tiled             694.2 us         499.2 us      486.0 us         1.027x
+rung                                  TornadoVM   hand-written     ratio
+1. naive @Parallel                    3408.5 us      3387.9 us    1.006x
+2. KernelContext tiled                2599.7 us      2594.8 us    1.002x
+3. KernelContext register-tiled        500.7 us       487.6 us    1.027x
 ```
 
-**Say:** rungs 1 and 2 are already at 1.005x and 1.001x of hand-written CUDA — the
-generated arithmetic was never the problem. Rung 3, the one doing register
-blocking, was 1.43x off. It is now 1.027x.
+**Say:** same algorithm, same tile sizes, same launch geometry — JIT-compiled from
+Java, within 3% of hand-written CUDA at every rung. The Java is written with
+`KernelContext`, TornadoVM's explicit shared-memory and thread-index API.
 
-**Do not quote the wall clock the demo prints.** TornadoVM's includes host dispatch
-and three 16 MB transfers; the CUDA binary's does not. That comparison is
-apples-to-oranges and this script deliberately does not make it.
+**Do not quote the wall clock the ladder prints.** TornadoVM's includes host
+dispatch and three 16 MB transfers; the CUDA binary's does not. This script
+compares kernel time precisely to avoid that.
 
-## 2. What changed  (~1 min)
+## 2. The CUDA it generates  (~40 s)
 
 ```bash
 bash $DEMO/2-printkernel.sh
 ```
 
-The emitted CUDA C for the staging loop, before and after.
+The generated `kcRegisterTiled`: the k-tile staging loop (eight global loads, then
+eight shared stores), the shared read-backs, and the FMA chain.
 
-```
-BEFORE:  f_108 = *((float *) ul_107);   <-- global load
-         adf_5[i_97] = f_108;           <-- shared STORE      one load in flight
-AFTER:   eight loads, then eight stores
-```
+**Say:** 418 lines of CUDA C produced from a Java method at run time and handed
+straight to NVRTC. No bounds checks — `CUDAHighTier` runs an `ExceptionSuppression`
+phase that deletes every guard before code generation.
 
-**Say:** same 16 statements both sides, 14 in a different position. Nothing added,
-removed or rewritten — only reordered.
-
-## 3. Why ptxas could not do it  (~1 min)
+## 3. The one difference that is left  (~40 s)
 
 ```bash
 bash $DEMO/3-sass.sh
 ```
 
 ```
-TornadoVM, batching off  LSLSLSLSLSLSLSLS  generic LD
-TornadoVM, batching on   LLLLLLLLSSSSSSSS  generic LD
-hand-written CUDA        LLLLLLLLSSSSSSSS  LDG
+                       staging schedule   memory ops
+TornadoVM              LLLLLLLLSSSSSSSS   STS x8  LD  x8
+hand-written CUDA      LLLLLLLLSSSSSSSS   STS x8  LDG x8
 ```
 
-**Say:** both TornadoVM rows use the *same* instruction and differ only in
-schedule. The hand-written row uses a *different* instruction, and that is the
-cause — a generic `LD` may target shared memory, so ptxas must keep it ordered
-against every shared store. `LDG` is proven global, so ptxas batches those itself.
+**Say:** the *schedule* is identical — that is why the two are within 3%. The
+*instruction* is not. TornadoVM casts an integer address to a plain pointer and the
+emitted C carries no address space (`GLOBAL_MEM_MODIFIER` is the empty string), so
+ptxas lowers it to a generic `LD`. A generic load may target shared memory, so
+ptxas must keep it ordered against every shared store and cannot batch these
+itself — TornadoVM has to do it in the code generator, where the address space is
+known.
 
-This is the slide for a compiler audience: TornadoVM knows the address space at LIR
-level even though its emitted C does not encode it, which is why the fix belongs in
-the code generator. The follow-up they will ask about is emitting `__ldg()` or a
-global-qualified pointer, which would fix the schedule at its source.
+**The open question for them:** emitting `__ldg()` or a global-qualified pointer
+would hand ptxas the address space directly and fix the schedule at its source.
 
 ---
 
 ## If something misbehaves
 
-- **`tornado --devices` finds nothing** — re-`source ~/nvidia-demo/env.sh`; check
+- **`tornado --devices` finds nothing** — re-`source ~/nvidia-demo/env.sh`, check
   `nvidia-smi`.
-- **A script prints a Java stack trace** — the ladder needs at least 2 executions
-  (`medianOf` divides by `executions - 1`). The scripts already pass 3 or 10.
-- **Demo 3 says no cubin was cached** — `tornado.cuda.codecache.enable` must be on;
-  it is by default. The cache lives at
-  `$TORNADOVM_HOME/var/cuda-codecache/device-0-0/`.
-- **Fallback**: every number above is committed in the demos repo under
-  `results/raw/31-load-batching-reorder/` with the raw CSVs, so the talk survives a
-  dead GPU.
+- **A Java stack trace** — the ladder needs at least 2 executions (`medianOf`
+  divides by `executions - 1`). The scripts pass 3 or 10.
+- **Demo 3 finds no cubin** — `tornado.cuda.codecache.enable` must be on (it is by
+  default); cache lives at `$TORNADOVM_HOME/var/cuda-codecache/device-0-0/`.
+- **Fallback** — every number is committed under
+  `results/raw/31-load-batching-reorder/`, so the talk survives a dead GPU.
 
 ## Backing material
 
 - upstream PR: https://github.com/beehive-lab/TornadoVM/pull/1079
 - evidence + raw CSVs: `results/raw/31-load-batching-reorder/`
-- slides: `docs/slides/cuda-load-batching.md` (Marp, renders to PDF/PPTX)
+- slides: `docs/slides/cuda-load-batching.md` (Marp → PDF/PPTX)
 - structured numbers: `docs/findings/cuda-load-batching.yaml`
