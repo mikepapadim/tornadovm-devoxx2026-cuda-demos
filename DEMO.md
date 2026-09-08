@@ -44,7 +44,7 @@ bash $DEMO/0-tiled.sh
 ```
 
 The simplest thing that is still a real GPU kernel: a 16x16 shared-memory tiled
-matmul, written once in Java. Runs it, profiles it, and shows the CUDA it produced.
+matmul, written once in Java. Runs it, profiles it, and prints the complete generated kernel.
 Takes `[n] [executions]`, default `1024 10`.
 
 ### Expected
@@ -67,24 +67,53 @@ validation: c[512][341] = 491.000, expected 491.000 -> PASSED
    which is essentially the wall clock printed in step 1.
 
  3/3  THE GENERATED CUDA -- what TornadoVM handed to NVRTC
-   __shared__ float adf_3[256];
-   __shared__ float adf_4[256];
-   f_54  =  *(( float *) ul_53);      <- global load
-   adf_3[i_38]  =  f_54;              <- shared store
-   __syncthreads();
-   f_63  =  adf_3[i_8];               <- shared load
-   f_95  =  fma(f_63, f_64, f_47);    <- FMA
-   140 lines of CUDA C in total.
+===============================================================
+__global__ void tiled(long long *_kernel_context, ..., unsigned char *arg3, int arg4)
+{
+  ...declarations...
+  __shared__ float adf_3[256];
+  __shared__ float adf_4[256];
+  i_5  =  (threadIdx.x);
+  i_7  =  (threadIdx.y);
+  i_39  =  (blockIdx.x);
+  ...
+  for(;i_48 < 1024;)                     <- the k-tile loop
+  {
+    f_54  =  *(( float *) ul_53);        <- global load
+    adf_3[i_38]  =  f_54;                <- shared store
+    f_62  =  *(( float *) ul_61);
+    adf_4[i_38]  =  f_62;
+    __syncthreads();
+    f_63  =  adf_3[i_8];                 <- 32 shared read-backs, fully unrolled
+    f_64  =  adf_4[i_5];
+    ...
+    __syncthreads();
+    f_95  =  fma(f_63, f_64, f_47);      <- 16 FMAs, one per k
+    f_96  =  fma(f_65, f_66, f_95);
+    ...
+    f_110  =  fma(f_93, f_94, f_109);
+  }  // B1
+  *(( float *) ul_116)  =  f_47;         <- the single global store
+  return;
+}
+
+   ^ 140 lines of CUDA C, generated from one Java method at run time.
 ```
 
 ### What to say
 
 Three things, in order.
 
-**It is a real kernel.** `__shared__` tiles come from `ctx.allocateFloatLocalArray`,
-`__syncthreads()` from `ctx.localBarrier()`, and the inner product is an FMA chain.
-140 lines of CUDA C from one Java method, compiled at run time and handed to NVRTC.
+**It is a real kernel, printed in full.** `__shared__` tiles come from
+`ctx.allocateFloatLocalArray`, both `__syncthreads()` from `ctx.localBarrier()`,
+`threadIdx`/`blockIdx` from the `KernelContext` fields, and it ends in one global
+store. 140 lines from one Java method, compiled at run time and handed to NVRTC.
 It validates against a CPU reference.
+
+Worth pointing at in the listing: **Graal fully unrolled the 16-iteration inner
+loop** into 32 shared read-backs and 16 back-to-back `fma()` calls. The k-tile loop
+survives as a loop; the inner one does not. That unrolling is a JIT advantage --
+`TILE` is a compile-time constant to TornadoVM at the moment it generates code.
 
 **The first execution costs 100 ms and the rest cost 1.1 ms.** That is the JIT
 compiling the kernel. Worth saying out loud before anyone asks.
