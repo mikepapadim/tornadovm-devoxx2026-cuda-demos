@@ -340,6 +340,57 @@ register_cost:
       spill_loads: {before: 0, after: 0}
       spill_stores: {before: 0, after: 0}
 
+alphabet_extension:
+  classification: observed
+  date: 2026-09-08
+  claim: >
+    The pass's whitelist originally admitted only AssignStmt as a pure computation, so the
+    half/bf16/fp8 conversion statements terminated a region. Widening it to a
+    PureRegisterComputation marker interface takes kcMma from one sunk store to two, and from
+    1.014x to 1.034x. Small, but it removes a blind spot: an fp16 kernel that interleaves
+    load, convert, store would have been skipped entirely rather than optimised.
+  design: >
+    An opt-in marker interface rather than a list held in the pass, so the purity assertion sits
+    beside the emitCode that has to justify it and a statement added later is excluded until
+    someone deliberately includes it.
+  admitted:
+    - AssignStmt
+    - MoveStmt
+    - DecompressPointerStmt
+    - Half2IntrinsicStmt
+    - ConvertHalfToFloatStmt
+    - ConvertFP8ToFloatStmt
+    - ConvertBF16ToFloatStmt
+    - ConvertFloatToBF16Stmt
+    - ConvertFloatToHalfStmt
+    - AddHalfStmt / SubHalfStmt / MultHalfStmt / DivHalfStmt
+    - VectorAddHalfStmt / VectorSubHalfStmt / VectorMultHalfStmt
+    - HalfBitsToIntStmt
+  excluded_with_reason:
+    - stmt: Dp4aStmt
+      reason: its inline PTX dereferences both operand pointers
+    - stmt: LdmatrixStmt
+      reason: ldmatrix.sync...shared.b16 reads shared memory
+    - stmt: ShuffleSyncStmt
+      reason: cross-lane
+    - stmt: WarpVoteStmt
+      reason: cross-lane
+    - stmt: MMAComputeStmt
+      reason: cross-lane, and its operands are fragment arrays
+    - stmt: CastCompressedStmt
+      reason: dereferences
+    - stmt: SwizzledLoadFP16Stride32Stmt
+      reason: dereferences
+  method_note: >
+    A static heuristic over the class bodies was NOT sufficient to decide this -- it flagged
+    LdmatrixStmt and ShuffleSyncStmt as pure. Each candidate's emitCode was read.
+  effect:
+    - kernel: kcMma
+      stores_sunk: {before: 1, after: 2}
+      speedup: {before: 1.014, after: 1.034}
+    - kernel: every other measured kernel
+      change: none
+
 follow_ups:
   - id: emit-ldg
     claim: >

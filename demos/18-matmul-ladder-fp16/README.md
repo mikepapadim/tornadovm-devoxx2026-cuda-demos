@@ -125,7 +125,14 @@ outstanding load to two is just worth very little in a kernel dominated by a
 a single 32-bit shared store, so the emitted order is *already* load, load, pack,
 store. Check it with `tornado --printKernel` — the two `*(( __half *) ...)` loads
 sit back to back with only address arithmetic between them. There is no
-interleaving left to remove.
+interleaving left to remove in that block.
+
+Investigating this did turn up one real gap. The `__half_as_ushort` that does the
+packing lowers to `HalfBitsToIntStmt`, which the pass originally did not recognise
+as a pure register computation, so it *ended* a reordering region. Admitting the
+half/bf16/fp8 conversion statements took `kcMma` from one sunk store to two and
+from 1.014× to 1.034× — still small here, but it means an fp16 kernel that
+interleaves load, convert, store is now optimised rather than silently skipped.
 
 So the 1.475× gap on rung 3 above is **not** the staging schedule. It is the
 pipelining, swizzling and tile selection described in this section, which is a
