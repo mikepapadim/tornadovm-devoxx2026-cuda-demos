@@ -12,6 +12,67 @@ Reading this as a compiler engineer? **[`docs/NVIDIA-BRIEF.md`](docs/NVIDIA-BRIE
 is the start-here page: the compilation pipeline, what is measured and how, and
 where the remaining gaps are.
 
+## The fastest way to see what this repo is about
+
+Two demos climb the *same* matrix multiply through six implementations, from a
+plain `@Parallel` loop to the vendor library, and a runner script measures every
+rung at the kernel level:
+
+```bash
+source scripts/setup-env.sh            # from the repo root — see the note below
+bash scripts/compare-ladder.sh 17      # FP32 ladder
+bash scripts/compare-ladder.sh 18      # FP16 ladder, including tensor cores from Java
+```
+
+Each takes an optional size and repeat count, e.g. `compare-ladder.sh 18 2048 20`.
+
+**What you should see** (FP16 ladder, `n = 1024`, RTX 4090 — your numbers will
+differ, the ordering should not):
+
+```
+   kernel                                 GPU avg     GFLOP/s  vs slowest
+   ----------------------------------------------------------------------
+   naive                                  496.6us        4324        1.0x
+   kcTiled                                337.9us        6355        1.5x
+   kcMma                                  192.3us       11167        2.6x
+   CUTLASS                                 30.4us       70737       16.4x
+   ampere_fp16_s1688gemm_fp16_128x...      21.5us       99788       23.1x
+   ampere_s1688gemm_fp16_128x64_sl...      21.4us      100250       23.2x
+```
+
+followed by a counter table explaining *why* each rung sits where it does —
+instruction count, registers, register spill, shared-memory bank conflicts,
+global-memory stall, and issue rate.
+
+Every rung is one edit to a `TaskGraph`, and every rung is validated against a
+CPU reference before it is timed.
+
+### Why the script, rather than just running the demo
+
+**Run the demo directly and the wall clock will mislead you.** At `n = 512` the
+FP16 ladder reports the tiled rung as *slower than naive* — 0.5×. At kernel
+level it is **1.5× faster**. The difference is ~100 µs of per-execution host
+dispatch swamping a kernel that takes less than that.
+
+The script separates the two, and reports Nsight Systems and Nsight Compute
+numbers in clearly separated blocks because **they are not comparable with each
+other**: `ncu` serialises launches, flushes caches and disallows clock boost, so
+its absolute times run several times higher and its ratios differ from `nsys`
+ratios on the same kernels. Use `nsys` for how fast, `ncu` for why.
+
+The script also picks an `ncu` that can actually connect to your driver rather
+than whichever is first on `PATH`, and invokes `java` directly, because the
+`tornado` launcher resolves a different JDK under the profilers.
+
+> `source scripts/setup-env.sh` must be run **from the repo root**. Anywhere else
+> it silently leaves `JAVA_HOME` at SDKMAN's `current`, and every later command
+> fails with `UnsupportedClassVersionError`.
+
+Full write-ups: [demo 17](demos/17-matmul-ladder/) (FP32, with a register-tiled
+rung) and [demo 18](demos/18-matmul-ladder-fp16/) (FP16, with `mma.sync` reached
+from Java). Captured evidence in `results/raw/28-matmul-ladder/` and
+`results/raw/30-matmul-ladder-fp16/`.
+
 ## Quick install
 
 ```bash
@@ -107,6 +168,8 @@ profiler, not the wall clock, is what shows the effect at all.
 | [13](demos/13-cudnn-jit-convblock/) | `CuDnnConvBlockHybrid.java` | CNN block alternating vendor and JIT kernels: JIT scale → cuDNN conv2d → JIT bias → cuDNN relu | `tornado --classpath . CuDnnConvBlockHybrid` |
 | [14](demos/14-warp-async-shared/) | `WarpAsyncSharedReduce.java` | `cp.async` + shared memory + `__shfl_down_sync` from Java, verified in the generated CUDA | `tornado --classpath . WarpAsyncSharedReduce` |
 | [17](demos/17-matmul-ladder/) | `MatMulLadder.java` | **The matmul ladder**: naive → KernelContext tiled → register-tiled → CUTLASS → cuBLAS → cuBLAS TF32, one problem, six rungs, kernel-time compared | `tornado --classpath . MatMulLadder` |
+| [18](demos/18-matmul-ladder-fp16/) | `MatMulLadderFP16.java` | **FP16 ladder** — one GEMM, six rungs, naive → `ctx.mma` tensor cores → CUTLASS → cuBLAS; measure with `scripts/compare-ladder.sh 18` | `tornado --classpath . MatMulLadderFP16` |
+| [17](demos/17-matmul-ladder/) | `MatMulLadder.java` | **FP32 ladder** — the same climb with a register-tiled rung; measure with `scripts/compare-ladder.sh 17` | `tornado --classpath . MatMulLadder` |
 | [16](demos/16-tensor-core-datatypes/) | `TensorCoreDataTypes.java` | **BF16, int8, FP8 e4m3 and FP8 e5m2** MMA from Java — every operand type the backend can emit, each validated and counted | `tornado --classpath . TensorCoreDataTypes` |
 | [15](demos/15-kernel-time-comparison/) | `KernelTimeComparison.java` | **Start here.** Kernel time only, TornadoVM vs hand-written CUDA over 3 kernels; both deltas root-caused with `nsys` + Nsight Compute counters | `tornado --classpath . KernelTimeComparison` |
 
