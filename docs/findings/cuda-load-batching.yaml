@@ -212,6 +212,128 @@ verification:
       rather than the speed. Verified with --printKernel that the pass actually fires on
       them, so they are not vacuous.
 
+reach:
+  classification: observed
+  method: >
+    Every demo in this repo that stages through shared memory, profiled under nsys with the
+    flag off and on, plus a --printKernel diff per kernel to see where the pass fires at all.
+  kernels_transformed: 8
+  kernels_total: 14
+  rule: >
+    The win is the number of global loads that get to overlap, and the number of stores sunk
+    predicts it. A kernel staging ONE element per thread per tile has one load in flight either
+    way and there is nothing to batch. Only kcRegisterTiled, which stages four elements each of
+    A and B, moves outside noise.
+  rows:
+    - demo: MatMulLadder
+      kernel: kcRegisterTiled
+      fires: true
+      stores_sunk: 7
+      speedup: 1.518
+    - demo: TensorCoreDataTypes
+      kernel: gemmFP8E4M3
+      fires: true
+      stores_sunk: 2
+      speedup: 1.032
+      note: single launch, inside noise
+    - demo: TensorCoreDataTypes
+      kernel: gemmBF16
+      fires: true
+      stores_sunk: 4
+      speedup: 1.028
+      note: single launch, inside noise
+    - demo: MatMulLadder
+      kernel: kcTiled
+      fires: true
+      stores_sunk: 1
+      speedup: 1.018
+    - demo: TensorCoreDataTypes
+      kernel: gemmFP8E5M2
+      fires: true
+      stores_sunk: 2
+      speedup: 1.016
+    - demo: TensorCoreDataTypes
+      kernel: gemmInt8
+      fires: true
+      stores_sunk: 2
+      speedup: 1.016
+    - demo: MatMulLadderFP16
+      kernel: kcTiled
+      fires: true
+      stores_sunk: 1
+      speedup: 1.016
+    - demo: MatMulLadderFP16
+      kernel: kcMma
+      fires: true
+      stores_sunk: 1
+      speedup: 1.011
+  untouched_kernels: [naive (x2), rowSumNaive, rowSumOptimised, gemmMMASingleTile, gemmScalarFp16]
+  untouched_note: bit-identical generated code; timings move 0.979x-1.004x, the noise floor here
+  benefits:
+    - blocked / register-tiled GEMM, where each thread stages several elements per tile
+    - any kernel whose staging fan-out per thread is greater than one
+    - batched gather-into-shared, multi-row stencil halo loads, tiled transpose, K-blocked attention staging
+  does_not_benefit:
+    - one-element-per-thread reductions, scans and histograms
+  scaling_note: >
+    Staging fan-out is (BM x BK) / threads-per-block, so a larger register tile means more loads
+    per region. The 4x4 micro-tile here is modest; the benefit grows with tile size.
+  not_measured:
+    - whether real workloads outside this repo benefit; GPULlama3.java's matmuls are the obvious candidate but are unmeasured
+
+register_cost:
+  classification: observed
+  claim: >
+    Sinking stores extends live ranges by construction -- n staged values are live where one was.
+    The cost is bounded (a region ends at the first barrier, so simultaneously-live staged values
+    equal the kernel's staging fan-out) and measured at 0 to +3 registers with zero spill traffic,
+    but it is NOT provably spill-free in general. That asymmetry is why the flag exists.
+  tool: ncu 2024.3.2
+  metrics: [launch__registers_per_thread, smsp__inst_executed_op_local_ld.sum, smsp__inst_executed_op_local_st.sum]
+  rows:
+    - demo: MatMulLadder
+      kernel: kcRegisterTiled
+      fires: true
+      registers: {before: 72, after: 72}
+      spill_loads: {before: 0, after: 0}
+      spill_stores: {before: 0, after: 0}
+    - demo: MatMulLadder
+      kernel: kcTiled
+      fires: true
+      registers: {before: 40, after: 40}
+      spill_loads: {before: 0, after: 0}
+      spill_stores: {before: 0, after: 0}
+    - demo: MatMulLadderFP16
+      kernel: kcMma
+      fires: true
+      registers: {before: 48, after: 48}
+      spill_loads: {before: 0, after: 0}
+      spill_stores: {before: 0, after: 0}
+    - demo: MatMulLadderFP16
+      kernel: kcTiled
+      fires: true
+      registers: {before: 40, after: 40}
+      spill_loads: {before: 0, after: 0}
+      spill_stores: {before: 0, after: 0}
+    - demo: TensorCoreDataTypes
+      kernel: gemmBF16
+      fires: true
+      registers: {before: 33, after: 34}
+      spill_loads: {before: 0, after: 0}
+      spill_stores: {before: 0, after: 0}
+    - demo: TensorCoreDataTypes
+      kernel: gemmInt8
+      fires: true
+      registers: {before: 25, after: 28}
+      spill_loads: {before: 0, after: 0}
+      spill_stores: {before: 0, after: 0}
+    - demo: MatMulLadder
+      kernel: naive
+      fires: false
+      registers: {before: 94, after: 94}
+      spill_loads: {before: 0, after: 0}
+      spill_stores: {before: 0, after: 0}
+
 follow_ups:
   - id: emit-ldg
     claim: >

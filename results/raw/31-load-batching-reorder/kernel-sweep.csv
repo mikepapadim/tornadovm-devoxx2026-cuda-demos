@@ -1,0 +1,16 @@
+demo,kernel,fires,stores_sunk,off_us,on_us,speedup
+MatMulLadder,kcRegisterTiled,yes,7,112.94,74.40,1.518
+TensorCoreDataTypes,gemmFP8E4M3,yes,2,2.05,1.99,1.032
+TensorCoreDataTypes,gemmBF16,yes,4,3.49,3.39,1.028
+MatMulLadder,kcTiled,yes,1,338.58,332.59,1.018
+TensorCoreDataTypes,gemmFP8E5M2,yes,2,2.02,1.98,1.016
+TensorCoreDataTypes,gemmInt8,yes,2,2.02,1.98,1.016
+MatMulLadderFP16,kcTiled,yes,1,336.69,331.35,1.016
+MatMulLadderFP16,kcMma,yes,1,183.25,181.19,1.011
+MatMulLadderFP16,ampere_fp16_s1688gemm,no,0,20.14,19.95,1.010
+MatMulLadderFP16,naive,no,0,534.72,531.51,1.006
+MatMulLadder,naive,no,0,440.63,438.93,1.004
+WarpAsyncSharedReduce,rowSumNaive,no,0,105.67,105.65,1.000
+WarpAsyncSharedReduce,rowSumOptimised,no,0,3.90,3.90,1.000
+TensorCoreMMA,gemmMMASingleTile,no,0,2.43,2.46,0.987
+TensorCoreMMA,gemmScalarFp16,no,0,1.50,1.54,0.979

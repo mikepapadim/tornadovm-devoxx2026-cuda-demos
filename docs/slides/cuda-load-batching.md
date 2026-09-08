@@ -255,6 +255,47 @@ A codegen reordering bug does not fail loudly — it returns a slightly wrong nu
 
 ---
 
+## What else benefits — mostly nothing
+
+Every shared-memory kernel in the repo, flag off vs on. The pass fires on **8 of 14**:
+
+| kernel | stores sunk | speedup |
+|---|---|---|
+| `kcRegisterTiled` | **7** | **1.518x** |
+| `gemmBF16` / `gemmFP8` / `gemmInt8` | 2–4 | 1.016–1.032x *(noise)* |
+| `kcTiled` x2, `kcMma` | 1 | 1.011–1.018x *(noise)* |
+
+### The number of stores sunk predicts the win
+
+One element staged per thread ⇒ one load in flight either way ⇒ nothing to batch.
+
+<!--
+This is the slide that stops the obvious question. The win is blocked/register-tiled GEMM and anything staging several elements per thread — not one-element-per-thread reductions, scans or histograms, which is most of what kernelcontext contains today. And it grows with tile size: fan-out is (BM x BK) / threads, so an 8x8 micro-tile stages 16.
+-->
+
+---
+
+## The cost: live ranges, honestly
+
+Sinking stores **extends live ranges by construction** — *n* staged values live where one was.
+
+| kernel | registers/thread | spill traffic |
+|---|---|---|
+| `kcRegisterTiled` | 72 → **72** | 0 → 0 |
+| `kcTiled`, `kcMma` | unchanged | 0 → 0 |
+| `gemmBF16` | 33 → **34** | 0 → 0 |
+| `gemmInt8` | 25 → **28** | 0 → 0 |
+
+Bounded — a region ends at the first barrier, so live staged values = the kernel's staging fan-out.
+
+### Measured spill-free. Not *provably* spill-free. Hence the flag.
+
+<!--
+Do not oversell this one. A kernel already at the register ceiling with a long staging region could spill and come out slower. I have not found one; I have not proved one cannot exist. That asymmetry is the whole argument for keeping the system property rather than hard-wiring the behaviour.
+-->
+
+---
+
 ## What is left
 
 **Still on the table for this kernel:**

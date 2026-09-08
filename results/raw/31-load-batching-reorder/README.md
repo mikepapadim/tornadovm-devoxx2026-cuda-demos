@@ -69,6 +69,54 @@ A separate follow-up worth having: emit `__ldg()` or a global-qualified pointer 
 ptxas gets the address space directly. That would fix the schedule at the source
 and likely help elsewhere too. Not attempted here.
 
+## What else benefits
+
+Every shared-memory kernel in this repo, flag off vs on (`kernel-sweep.csv`). The pass
+fires on **8 of 14** generated kernels, and **only one moves outside noise**:
+
+| kernel | stores sunk | speedup |
+|---|---|---|
+| `kcRegisterTiled` | **7** | **1.518x** |
+| `gemmBF16` / `gemmFP8E4M3` / `gemmFP8E5M2` / `gemmInt8` | 2–4 | 1.016–1.032x (single launch, noise) |
+| `kcTiled` (x2), `kcMma` | 1 | 1.011–1.018x (noise) |
+
+The number of stores sunk predicts the win, which is the mechanism restated: a kernel
+staging **one** element per thread per tile has one load in flight either way and there is
+nothing to batch. The six untouched kernels produce bit-identical code and move
+0.979x–1.004x, the noise floor here.
+
+So the pattern that benefits is **blocked / register-tiled GEMM** and anything else whose
+staging fan-out per thread exceeds one — batched gather-into-shared, multi-row stencil
+halo loads, tiled transpose, K-blocked attention staging. Not one-element-per-thread
+reductions, scans or histograms. And it grows with tile size: fan-out is
+`(BM x BK) / threads-per-block`, so an 8x8 micro-tile would stage 16 elements per thread
+against the 4x4's eight.
+
+Not measured: whether workloads outside this repo benefit. GPULlama3.java's matmuls are
+the obvious candidate and are unmeasured.
+
+## What it costs
+
+Sinking stores **extends live ranges by construction** — *n* staged values are live where
+one was. That is inherent to batching loads, not an artefact. `register-cost.csv`:
+
+| kernel | registers/thread | spill loads | spill stores |
+|---|---|---|---|
+| `kcRegisterTiled` | 72 → **72** | 0 → 0 | 0 → 0 |
+| `kcTiled`, `kcMma`, `kcTiled` (fp16) | unchanged | 0 → 0 | 0 → 0 |
+| `gemmBF16` | 33 → **34** | 0 → 0 | 0 → 0 |
+| `gemmInt8` | 25 → **28** | 0 → 0 | 0 → 0 |
+| `naive` (pass does not fire) | 94 → 94 | 0 → 0 | 0 → 0 |
+
+Zero spill traffic anywhere, both modes. The cost is bounded — a region ends at the first
+barrier, so the number of simultaneously live staged values equals the kernel's staging
+fan-out, which the kernel author chose.
+
+**But it is not *provably* spill-free.** A kernel already at the register ceiling with a
+long staging region could spill and come out slower. None was found here; none was proved
+impossible. That asymmetry is the argument for keeping
+`-Dtornado.cuda.batchGlobalLoads` rather than hard-wiring the behaviour.
+
 ## Files
 
 | file | what |
@@ -78,6 +126,8 @@ and likely help elsewhere too. Not attempted here.
 | `ncu-counters.csv` | stall and issue counters, off vs on |
 | `sass-schedules.txt` | the L/S schedules above |
 | `pure-cuda-probe.csv` | `ReorderProbe.cu` output (all three identical, as expected) |
+| `kernel-sweep.csv` | every shared-memory kernel in the repo, flag off vs on |
+| `register-cost.csv` | register pressure and spill traffic, off vs on |
 | `ReorderProbe.cu` | the three-schedule probe |
 | `collect.sh` | regenerates every CSV here |
 

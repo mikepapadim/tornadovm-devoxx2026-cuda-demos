@@ -1,0 +1,8 @@
+demo,kernel,fires,registers_before,registers_after,spill_loads_before,spill_loads_after,spill_stores_before,spill_stores_after
+MatMulLadder,kcRegisterTiled,yes,72,72,0,0,0,0
+MatMulLadder,kcTiled,yes,40,40,0,0,0,0
+MatMulLadderFP16,kcMma,yes,48,48,0,0,0,0
+MatMulLadderFP16,kcTiled,yes,40,40,0,0,0,0
+TensorCoreDataTypes,gemmBF16,yes,33,34,0,0,0,0
+TensorCoreDataTypes,gemmInt8,yes,25,28,0,0,0,0
+MatMulLadder,naive,no,94,94,0,0,0,0
