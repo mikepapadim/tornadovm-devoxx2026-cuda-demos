@@ -1,0 +1,11 @@
+arm,metric,unit,value
+tornadovm_off,l1tex__data_bank_conflicts_pipe_lsu.sum,,602227
+tornadovm_off,launch__registers_per_thread,register/thread,72
+tornadovm_off,sm__sass_thread_inst_executed_op_ffma_pred_on.sum,inst,1073741824
+tornadovm_off,smsp__average_warps_issue_stalled_long_scoreboard_per_issue_active.ratio,inst,12.10
+tornadovm_off,smsp__issue_active.avg.pct_of_peak_sustained_active,%,20.82
+tornadovm_on,l1tex__data_bank_conflicts_pipe_lsu.sum,,603209
+tornadovm_on,launch__registers_per_thread,register/thread,72
+tornadovm_on,sm__sass_thread_inst_executed_op_ffma_pred_on.sum,inst,1073741824
+tornadovm_on,smsp__average_warps_issue_stalled_long_scoreboard_per_issue_active.ratio,inst,1.45
+tornadovm_on,smsp__issue_active.avg.pct_of_peak_sustained_active,%,50.90

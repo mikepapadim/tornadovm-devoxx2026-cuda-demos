@@ -1,0 +1,4 @@
+variant,n,reps,median_us,gflops,vs_interleaved_pinned
+interleaved_pinned,1024,100,89.09,24105.2,1.000
+interleaved_nvcc,1024,100,89.09,24105.2,1.000
+batched,1024,100,89.15,24087.9,0.999

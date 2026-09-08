@@ -1,0 +1,4 @@
+arm,launches,median_us,mean_us,stddev_us,min_us,p5_us,p95_us,max_us,speedup_vs_off
+tornadovm_off,100,112.895,112.916,0.152,112.511,112.671,113.151,113.311,1.000
+tornadovm_on,100,68.416,68.238,0.541,66.944,67.104,68.832,69.119,1.650
+handwritten_cuda,103,67.455,67.483,0.388,66.944,67.200,67.776,70.975,1.674
