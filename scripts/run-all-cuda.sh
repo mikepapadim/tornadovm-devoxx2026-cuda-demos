@@ -78,6 +78,8 @@ done <<'DEMOS'
 13-cudnn-jit-convblock|CuDnnConvBlockHybrid.cu|-I/usr/include/x86_64-linux-gnu -lcudnn|4 16 32 32 16 5
 14-warp-async-shared|WarpAsyncSharedReduce.cu||2048 512 5
 15-kernel-time-comparison|KernelTimeComparison.cu||1048576 128 5
+16-tensor-core-datatypes|TensorCoreDataTypes.cu||
+17-matmul-ladder|MatMulLadder.cu|-lcublas|256 3
 DEMOS
 
 # Demo 15's two diagnostic probes: they attribute the kernel-time differences

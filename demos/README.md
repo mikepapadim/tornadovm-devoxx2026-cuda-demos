@@ -19,6 +19,7 @@ Each demo directory has its own `README.md` with build/run commands, a
 | [13-cudnn-jit-convblock](13-cudnn-jit-convblock/) | `CuDnnConvBlockHybrid.java` | A CNN block alternating vendor and JIT kernels in one graph: JIT `scale` → cuDNN `conv2d` → JIT `addBias` → cuDNN `relu`. Nsight Systems shows all four as separate kernels, the two JIT ones under their own Java method names. |
 | [14-warp-async-shared](14-warp-async-shared/) | `WarpAsyncSharedReduce.java` | Three hand-tuned CUDA optimisations written in Java in one kernel: async copy (`cp.async.ca.shared.global`), shared memory (`__shared__`) and warp shuffle (`__shfl_down_sync`) — all three confirmed in the `--printKernel` dump. 26.6x faster than the naive kernel at the kernel level. |
 | [15-kernel-time-comparison](15-kernel-time-comparison/) | `KernelTimeComparison.java` | **Kernel time only**, TornadoVM vs hand-written CUDA, measured with `nsys`: three kernels with different bottlenecks, both differences attributed to a specific cause with a standalone probe. Memory-bound gap is the `FloatArray` header offset; compute-bound win is JIT specialisation. |
+| [17-matmul-ladder](17-matmul-ladder/) | `MatMulLadder.java` | The same FP32 GEMM six ways — naive `@Parallel`, `KernelContext` tiled, `KernelContext` register-tiled, CUTLASS, cuBLAS, cuBLAS TF32 — validated identically and compared at the kernel level. The register micro-tile buys 3.8x over plain tiling; generated code is within 1-2% of hand-written CUDA on the simple rungs and 1.43x on the register-tiled one. |
 
 ## Building and running
 

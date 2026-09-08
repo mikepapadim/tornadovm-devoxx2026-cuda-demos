@@ -1,0 +1,18 @@
+Matrix-multiply ladder (hand-written CUDA): C = A * B, FP32, 2048x2048
+  10 reps per rung, median, inputs uploaded once
+
+    1. naive                         validation PASSED (max abs err 0.00000, 0/4194304 out of tol)
+    2. tiled                         validation PASSED (max abs err 0.00000, 0/4194304 out of tol)
+    3. register-tiled                validation PASSED (max abs err 0.00000, 0/4194304 out of tol)
+    4. cuBLAS sgemm                  validation PASSED (max abs err 0.00000, 0/4194304 out of tol)
+    5. cuBLAS sgemm TF32             validation PASSED (max abs err 0.00007, 0/4194304 out of tol)
+
+=== Summary (median us, this run / this GPU) ===
+rung                      median us      GFLOP/s   vs naive
+1. naive                       3390       5067.2       1.0x
+2. tiled                       2597       6614.6       1.3x
+3. register-tiled               489      35154.1       6.9x
+4. cuBLAS sgemm                 314      54729.9      10.8x
+5. cuBLAS sgemm TF32            223      76932.8      15.2x
+
+All five rungs produced the same, correct result

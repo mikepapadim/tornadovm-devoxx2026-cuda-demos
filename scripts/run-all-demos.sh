@@ -67,6 +67,8 @@ done <<'DEMOS'
 13-cudnn-jit-convblock:CuDnnConvBlockHybrid:4 16 32 32 16 5
 14-warp-async-shared:WarpAsyncSharedReduce:2048 512 5
 15-kernel-time-comparison:KernelTimeComparison:1048576 128 5
+16-tensor-core-datatypes:TensorCoreDataTypes:
+17-matmul-ladder:MatMulLadder:256 3
 DEMOS
 
 echo

@@ -106,6 +106,7 @@ profiler, not the wall clock, is what shows the effect at all.
 | [12](demos/12-cutlass-fused-epilogue/) | `CutlassFusedEpilogue.java` | CUTLASS fused epilogue (GEMM+bias+ReLU in one kernel) vs. GEMM + a separate JIT pass | `tornado --classpath . CutlassFusedEpilogue` |
 | [13](demos/13-cudnn-jit-convblock/) | `CuDnnConvBlockHybrid.java` | CNN block alternating vendor and JIT kernels: JIT scale → cuDNN conv2d → JIT bias → cuDNN relu | `tornado --classpath . CuDnnConvBlockHybrid` |
 | [14](demos/14-warp-async-shared/) | `WarpAsyncSharedReduce.java` | `cp.async` + shared memory + `__shfl_down_sync` from Java, verified in the generated CUDA | `tornado --classpath . WarpAsyncSharedReduce` |
+| [17](demos/17-matmul-ladder/) | `MatMulLadder.java` | **The matmul ladder**: naive → KernelContext tiled → register-tiled → CUTLASS → cuBLAS → cuBLAS TF32, one problem, six rungs, kernel-time compared | `tornado --classpath . MatMulLadder` |
 | [16](demos/16-tensor-core-datatypes/) | `TensorCoreDataTypes.java` | **BF16, int8, FP8 e4m3 and FP8 e5m2** MMA from Java — every operand type the backend can emit, each validated and counted | `tornado --classpath . TensorCoreDataTypes` |
 | [15](demos/15-kernel-time-comparison/) | `KernelTimeComparison.java` | **Start here.** Kernel time only, TornadoVM vs hand-written CUDA over 3 kernels; both deltas root-caused with `nsys` + Nsight Compute counters | `tornado --classpath . KernelTimeComparison` |
 
@@ -128,6 +129,7 @@ RTX 4090, driver 565.57.01, CUDA 12.6.85, JDK 25.0.2. Not general claims.
 | 07-cuda-graph-benefit | Graph replay speedup | nograph 292–364 µs vs. graph 36 µs → **8.1x / 10.0x** across the two run paths | `07-graphbenefit-*.log` |
 | 08-tensor-core-mma | Generated code | exactly **1** `mma.sync.aligned.m16n8k16` PTX instruction; 0 in the scalar reference | `08-mma-printkernel.log` |
 | 08-tensor-core-mma | **Hardware counters** | **1** HMMA instruction + **16** tensor-pipe cycles, identical to hand-written CUDA; **0** in the scalar reference | `23-ncu-tensor-core-counters/` |
+| 17-matmul-ladder | Ladder, kernel time (`nsys`) | naive 5.0 → tiled 6.6 → **register-tiled 24.7** → CUTLASS 43.4 → cuBLAS 53.7 → **TF32 76.2 TFLOP/s**; generated code within **1-2%** of hand-written CUDA on rungs 1-2, **1.43x** on the register-tiled rung | `28-matmul-ladder/` |
 | 16-tensor-core-datatypes | All 4 remaining operand types | BF16, int8, FP8 e4m3, FP8 e5m2 each **PASSED, max abs err 0.00000** over 256 cells, Java and CUDA alike | `26-tensor-core-datatypes/` |
 | 16-tensor-core-datatypes | **Hardware counters** | counters match emitted PTX exactly; **int8 dispatches to IMMA**, BF16 and both FP8 formats to **HMMA** | `26-tensor-core-datatypes/` |
 | 01-first-cuda-kernel | Bandwidth-bound comparison | TornadoVM issues **4x the instructions**, yet is only **3.4% slower** — both at ~95% of peak DRAM bandwidth, and `bytes/bandwidth` predicts the 1.0335 ratio exactly | `27-profiler-metrics/` |
