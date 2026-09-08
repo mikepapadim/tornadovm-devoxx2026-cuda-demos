@@ -69,6 +69,7 @@ done <<'DEMOS'
 15-kernel-time-comparison:KernelTimeComparison:1048576 128 5
 16-tensor-core-datatypes:TensorCoreDataTypes:
 17-matmul-ladder:MatMulLadder:256 3
+18-matmul-ladder-fp16:MatMulLadderFP16:256 3
 DEMOS
 
 echo

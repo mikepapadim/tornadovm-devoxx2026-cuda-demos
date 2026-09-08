@@ -80,6 +80,7 @@ done <<'DEMOS'
 15-kernel-time-comparison|KernelTimeComparison.cu||1048576 128 5
 16-tensor-core-datatypes|TensorCoreDataTypes.cu||
 17-matmul-ladder|MatMulLadder.cu|-lcublas|256 3
+18-matmul-ladder-fp16|MatMulLadderFP16.cu|-lcublas|256 3
 DEMOS
 
 # Demo 15's two diagnostic probes: they attribute the kernel-time differences

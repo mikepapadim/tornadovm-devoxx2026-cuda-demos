@@ -1,0 +1,10 @@
+FP16 matmul ladder (hand-written CUDA): C = A * B, 1024x1024, 10 reps
+
+rung                              median us      GFLOP/s
+1. naive                              414.7         5178
+2. tiled                              313.2         6858
+3. MMA (tensor core)                   98.3        21852
+5. cuBLAS GemmEx FP16                  21.4       100462
+6. cuBLAS GemmEx FP16->FP32            21.1       101834
+
+(rung 4, CUTLASS, is omitted here so this builds with the plain toolkit)
