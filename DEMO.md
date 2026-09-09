@@ -122,6 +122,41 @@ compiling the kernel. Worth saying out loud before anyone asks.
 transfers is the 1.1 ms. This is why every comparison in steps 2-4 uses kernel time
 -- wall clock on this workload is mostly PCIe.
 
+### Or run it by hand
+
+The script is only a wrapper. Every part is one command, from
+`~/nvidia-demo/classes`:
+
+```bash
+# 1/3  run it
+tornado --classpath . TiledMM 1024 10
+
+# 2/3  profile it
+nsys profile -t cuda --force-overwrite=true -o /tmp/t \
+     tornado --classpath . TiledMM 1024 10
+nsys stats --force-export=true --report cuda_gpu_kern_sum --format csv /tmp/t.nsys-rep
+nsys stats --force-export=true --report cuda_gpu_mem_time_sum --format csv /tmp/t.nsys-rep
+
+# 3/3  the generated CUDA, in full
+tornado --printKernel --classpath . TiledMM 1024 3
+```
+
+`--force-export=true` matters: `nsys stats` refuses to run if a `.sqlite` from an
+earlier export of the same name is still lying around, which happens the moment you
+re-run the profile. Without it the second attempt fails with a bare usage message.
+
+`--printKernel` prints every kernel the plan compiles; here there is only one.
+Pipe to `less` if you want to scroll it live.
+
+**Without the launcher**, if someone asks what `tornado` is doing — it is a plain
+JVM plus an argfile, and the flag is an ordinary system property:
+
+```bash
+java @$TORNADOVM_HOME/tornado-argfile -Dtornado.printKernel=True -cp . TiledMM 1024 3
+```
+
+Same output. Useful for showing there is no magic in the launcher.
+
 ### Note
 
 The transfer counts (534 and 522 copies) include TornadoVM's small internal copies,
@@ -160,6 +195,26 @@ Same algorithm, same tile sizes, same launch geometry, same arithmetic — the J
 side JIT-compiled at run time, **within 3% of hand-written CUDA at every rung**. The
 Java rungs use `KernelContext`, TornadoVM's explicit shared-memory and thread-index
 API, so rungs 2 and 3 are hand-written CUDA transliterated into Java.
+
+### Or run it by hand
+
+From `~/nvidia-demo/classes`:
+
+```bash
+# TornadoVM side
+nsys profile -t cuda --force-overwrite=true -o /tmp/tv \
+     tornado --classpath . MatMulLadder 2048 10
+nsys stats --force-export=true --report cuda_gpu_kern_sum --format csv /tmp/tv.nsys-rep
+
+# hand-written CUDA side
+nsys profile -t cuda --force-overwrite=true -o /tmp/cu \
+     $DEMO/matmul_ladder_cuda 2048 10
+nsys stats --force-export=true --report cuda_gpu_kern_sum --format csv /tmp/cu.nsys-rep
+```
+
+Compare the `Med (ns)` column: `kcRegisterTiled` against `registerTiled`,
+`kcTiled` against `tiled`, `naive` against `naive`. The script just does that
+arithmetic for you.
 
 ### Do not say
 
@@ -212,6 +267,27 @@ deletes every guard and condition before code generation.
 
 ---
 
+### Or run it by hand
+
+From `~/nvidia-demo/classes`:
+
+```bash
+tornado --printKernel --classpath . MatMulLadder 512 3 | less
+```
+
+Search inside `less` for `kcRegisterTiled` (`/kcRegisterTiled`) to jump to the
+register-tiled kernel, then look at the run of `*(( float *) ...)` loads followed by
+the run of `adf_*[...] =` stores.
+
+Or pull just that kernel out:
+
+```bash
+tornado --printKernel --classpath . MatMulLadder 512 3 2>/dev/null \
+  | awk '/__global__ void kcRegisterTiled/,/^\}/'
+```
+
+---
+
 ## Step 4 — the one difference that is left  (~40 s)
 
 **Run from:** `~/nvidia-demo/classes`
@@ -244,6 +320,27 @@ TornadoVM has to do it in the code generator, where the address space *is* known
 **End on the open question:** emitting `__ldg()` or a global-qualified pointer would
 hand ptxas the address space directly and fix the schedule at its source. That is the
 thing to ask them about.
+
+### Or run it by hand
+
+From `~/nvidia-demo/classes`:
+
+```bash
+# TornadoVM's own cubin -- the code cache writes it on every run
+tornado --classpath . MatMulLadder 512 3
+ls $TORNADOVM_HOME/var/cuda-codecache/device-0-0/
+cuobjdump -sass $TORNADOVM_HOME/var/cuda-codecache/device-0-0/kcRegisterTiled-*.cubin \
+  | grep -oE '\b(LD|LDG|STS)\b' | tr -d '\n'; echo
+
+# the hand-written one
+nvcc -arch=sm_89 -O3 -std=c++17 -cubin -o /tmp/hand.cubin $DEMO/MatMulLadder.cu
+cuobjdump -sass /tmp/hand.cubin | grep -oE '\b(LD|LDG|STS)\b' | tr -d '\n'; echo
+```
+
+The first prints `LDLDLDLD...STSSTS...`, the second `LDGLDGLDG...STSSTS...` — same
+schedule, different load instruction. That the cubin is simply sitting on disk is
+worth mentioning: `tornado.cuda.codecache.enable` is on by default, so the compiled
+kernel is always inspectable after a run.
 
 ---
 
