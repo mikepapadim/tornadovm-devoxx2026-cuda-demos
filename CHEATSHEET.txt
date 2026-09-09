@@ -67,6 +67,35 @@ STEP 2 — TornadoVM vs hand-written CUDA                                (~90 s)
   includes host dispatch and three 16 MB transfers, the CUDA binary's does not.
 
 
+STEP 2b — all six rungs, including the cuBLAS/CUTLASS library tasks     (~60 s)
+--------------------------------------------------------------------------------
+  location:  /home/michalis/nvidia-demo/classes
+
+  scripted (KERNEL time, all six):
+    bash ~/nvidia-demo/1b-ladder-all.sh
+
+  by hand (WALL CLOCK, all six -- the ladder's own summary):
+    tornado --classpath . MatMulLadder 2048 10
+
+  expect (kernel time):
+    1. naive @Parallel               JIT       3408 us    1.00x
+    2. KernelContext tiled           JIT       2599 us    1.31x
+    3. KernelContext register-tiled  JIT        501 us    6.81x
+    4. CUTLASS sgemm                 library    430 us    7.92x
+    5. cuBLAS sgemm                  library    316 us   10.79x
+    6. cuBLAS sgemm TF32             library    221 us   15.39x
+
+  rungs 4-6 are .libraryTask() calls: CUTLASS and cuBLAS from Java, same
+  TaskGraph, sharing device buffers with the JIT kernels, no hand-written JNI.
+
+  the script also prints the kernel names nsys reports for them -- cuBLAS
+  dispatches cutlass_80_* kernels, and picks a different tile per shape than
+  TornadoVM's fixed CUTLASS instantiation, which is why rung 4 trails rung 5.
+
+  NOTE the ladder's own summary is WALL CLOCK: rung 3 reads ~1500 us there
+       against ~500 us of kernel time. Use 1b-ladder-all.sh for kernel time.
+
+
 STEP 3 — the generated CUDA for the register-tiled kernel              (~40 s)
 --------------------------------------------------------------------------------
   location:  /home/michalis/nvidia-demo/classes
@@ -120,7 +149,8 @@ FILES
 --------------------------------------------------------------------------------
   ~/nvidia-demo/env.sh              sets everything, cds you to classes/
   ~/nvidia-demo/0-tiled.sh          step 1
-  ~/nvidia-demo/1-ladder.sh         step 2
+  ~/nvidia-demo/1-ladder.sh         step 2  (rungs 1-3 vs hand-written CUDA)
+  ~/nvidia-demo/1b-ladder-all.sh    step 2b (all 6 rungs incl. library tasks)
   ~/nvidia-demo/2-printkernel.sh    step 3
   ~/nvidia-demo/3-sass.sh           step 4
   ~/nvidia-demo/classes/            TiledMM.class, MatMulLadder.class  <-- run here
