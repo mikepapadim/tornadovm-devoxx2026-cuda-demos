@@ -1,0 +1,130 @@
+================================================================================
+ NVIDIA DEMO — EXACT COMMANDS AND LOCATIONS
+ Verified 2026-09-09 · RTX 4090 · run everything from ~/nvidia-demo/classes
+================================================================================
+
+SETUP — do this once, from anywhere
+--------------------------------------------------------------------------------
+    source ~/nvidia-demo/env.sh
+
+  Leaves you in  /home/michalis/nvidia-demo/classes   <-- ALL commands run here
+  Sets           TORNADOVM_HOME=/home/michalis/nvidia-demo/tornadovm-patched
+                 DEMO=/home/michalis/nvidia-demo
+
+  Check:   pwd                # /home/michalis/nvidia-demo/classes
+           tornado --devices  # NVIDIA GeForce RTX 4090
+
+
+STEP 1 — one kernel, end to end                                        (~70 s)
+--------------------------------------------------------------------------------
+  location:  /home/michalis/nvidia-demo/classes
+
+  scripted:
+    bash ~/nvidia-demo/0-tiled.sh
+
+  by hand:
+    tornado --classpath . TiledMM 1024 10
+
+    nsys profile -t cuda --force-overwrite=true -o /tmp/t \
+         tornado --classpath . TiledMM 1024 10
+    nsys stats --force-export=true --report cuda_gpu_kern_sum     --format csv /tmp/t.nsys-rep
+    nsys stats --force-export=true --report cuda_gpu_mem_time_sum --format csv /tmp/t.nsys-rep
+
+    tornado --printKernel --classpath . TiledMM 1024 3
+
+  without the launcher (same output, plain JVM):
+    java @$TORNADOVM_HOME/tornado-argfile -Dtornado.printKernel=True -cp . TiledMM 1024 3
+
+  expect:  first execution ~100000 us (JIT), steady state ~1100 us
+           kernel 333 us + transfers 757 us = 1090 us  ~= the wall clock
+           140 lines of CUDA C, validation PASSED
+
+
+STEP 2 — TornadoVM vs hand-written CUDA                                (~90 s)
+--------------------------------------------------------------------------------
+  location:  /home/michalis/nvidia-demo/classes
+
+  scripted:
+    bash ~/nvidia-demo/1-ladder.sh
+
+  by hand:
+    nsys profile -t cuda --force-overwrite=true -o /tmp/tv \
+         tornado --classpath . MatMulLadder 2048 10
+    nsys stats --force-export=true --report cuda_gpu_kern_sum --format csv /tmp/tv.nsys-rep
+
+    nsys profile -t cuda --force-overwrite=true -o /tmp/cu \
+         ~/nvidia-demo/matmul_ladder_cuda 2048 10
+    nsys stats --force-export=true --report cuda_gpu_kern_sum --format csv /tmp/cu.nsys-rep
+
+  compare the Med (ns) column:
+    kcRegisterTiled  vs  registerTiled      kcTiled vs tiled      naive vs naive
+
+  expect:  1. naive            3403 us  vs  3388 us   1.005x
+           2. tiled            2597 us  vs  2590 us   1.002x
+           3. register-tiled    499 us  vs   486 us   1.027x
+
+  DO NOT quote the ladder's own wall clock against the CUDA binary — TornadoVM's
+  includes host dispatch and three 16 MB transfers, the CUDA binary's does not.
+
+
+STEP 3 — the generated CUDA for the register-tiled kernel              (~40 s)
+--------------------------------------------------------------------------------
+  location:  /home/michalis/nvidia-demo/classes
+
+  scripted:
+    bash ~/nvidia-demo/2-printkernel.sh
+
+  by hand:
+    tornado --printKernel --classpath . MatMulLadder 512 3 | less
+        then inside less:   /kcRegisterTiled
+
+    # or pull just that kernel out
+    tornado --printKernel --classpath . MatMulLadder 512 3 2>/dev/null \
+      | awk '/__global__ void kcRegisterTiled/,/^\}/'
+
+  expect:  eight  f_NNN = *(( float *) ul_NNN);   <- global loads
+           then   adf_5[i_NN] = f_NNN;            <- shared stores
+
+
+STEP 4 — the SASS, and the one difference left                         (~40 s)
+--------------------------------------------------------------------------------
+  location:  /home/michalis/nvidia-demo/classes
+
+  scripted:
+    bash ~/nvidia-demo/3-sass.sh
+
+  by hand:
+    tornado --classpath . MatMulLadder 512 3
+    ls $TORNADOVM_HOME/var/cuda-codecache/device-0-0/
+    cuobjdump -sass $TORNADOVM_HOME/var/cuda-codecache/device-0-0/kcRegisterTiled-*.cubin \
+      | grep -oE '\b(LD|LDG|STS)\b' | tr -d '\n'; echo
+
+    nvcc -arch=sm_89 -O3 -std=c++17 -cubin -o /tmp/hand.cubin ~/nvidia-demo/MatMulLadder.cu
+    cuobjdump -sass /tmp/hand.cubin | grep -oE '\b(LD|LDG|STS)\b' | tr -d '\n'; echo
+
+  expect:  TornadoVM         LD  x8 then STS x8    (generic LD)
+           hand-written      LDG x8 then STS x8    (LDG)
+           same schedule, different load instruction
+
+
+GOTCHAS
+--------------------------------------------------------------------------------
+  * every command runs from ~/nvidia-demo/classes — check with pwd
+  * nsys stats NEEDS --force-export=true, or the 2nd run fails with a usage message
+  * the ladder needs >= 2 executions (medianOf divides by executions-1)
+  * steps 3 and 4 do not need nsys at all
+  * no GPU?  every number is in the repo:
+      ~/tornadovm-devoxx2026-cuda-demos/results/raw/31-load-batching-reorder/
+
+FILES
+--------------------------------------------------------------------------------
+  ~/nvidia-demo/env.sh              sets everything, cds you to classes/
+  ~/nvidia-demo/0-tiled.sh          step 1
+  ~/nvidia-demo/1-ladder.sh         step 2
+  ~/nvidia-demo/2-printkernel.sh    step 3
+  ~/nvidia-demo/3-sass.sh           step 4
+  ~/nvidia-demo/classes/            TiledMM.class, MatMulLadder.class  <-- run here
+  ~/nvidia-demo/matmul_ladder_cuda  the hand-written CUDA binary
+  ~/nvidia-demo/tornadovm-patched/  the SDK (develop + PR #1079)
+  ~/nvidia-demo/DEMO.md             the long-form run sheet
+================================================================================
