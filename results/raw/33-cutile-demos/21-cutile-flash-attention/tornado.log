@@ -1,10 +1,10 @@
 Q = [128, 64], K = V = [256, 64], 20 executions
 
 path                                             ms/execution      max error   result
-1. materialised (3 kernels + score matrix)              0.332         0.0000   correct
-2. flash (1 kernel, online softmax)                     0.193         0.0000   correct
+1. materialised (3 kernels + score matrix)              0.480         0.0000   correct
+2. flash (1 kernel, online softmax)                     0.365         0.0000   correct
 
-fusion: 0.332 ms -> 0.193 ms per execution, 1.72x faster
+fusion: 0.480 ms -> 0.365 ms per execution, 1.32x faster
 and 196608 fewer bytes of device traffic: the [128, 256] score matrix is never
 written, read back, or allocated at all. Both paths run entirely on the GPU.
 

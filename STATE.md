@@ -754,3 +754,37 @@ reference over the same FP16-rounded inputs; evidence in `results/raw/33-cutile-
 - Demo 21's causal-masking gap tracks `ct::select` lowering on the cuTile branch; revisit
   when that lands.
 - Nothing in batches 00–23 was re-run or rewritten for this batch.
+
+## Batch 25 — FP16 ladder with a CUDA Tile rung (demo 22) (2026-09-11)
+
+Demo 18's FP16 matmul ladder with a fourth rung inserted: the same GEMM written against
+`TileContext` and compiled through CUDA Tile, so the hand-written tensor-core rung, the tile
+rung and the vendor libraries are all measured the same way. All Observed; evidence in
+`results/raw/34-cutile-ladder/`.
+
+- `demos/22-matmul-ladder-fp16-tile/MatMulLadderFP16Tile.java` — seven rungs, all validated
+  against a CPU reference over the same FP16-rounded inputs, all PASSED at n=1024.
+- **Kernel time (nsys, `scripts/compare-ladder.sh 22 1024 20`, steady state):** naive
+  537.2 µs → `kcTiled` 331.3 µs → `kcMma` (hand-written `mma.sync`) 181.7 µs → **`tiles`
+  (CUDA Tile) 65.7 µs** → CUTLASS 29.9 µs → cuBLAS `ampere_*_s1688gemm_fp16` 20.2 µs. The
+  tile rung is **2.8x faster than the hand-written MMA rung** and **3.3x slower than cuBLAS**.
+  Both halves are the finding: the tile compiler beats a careful hand-written `mma.sync`
+  kernel against the same tensor cores, and a per-architecture vendor library is still ahead
+  of one 32x32 tile shape with no pipelining hints.
+- Wall clock on the same run is much flatter (2.0x for the tile rung, not 8.2x) because every
+  rung pays the same JVM-side dispatch at this size. The demo prints both and says which to
+  quote; `results/raw/34-cutile-ladder/wallclock-n1024.log` holds the flatter one.
+- Nsight Compute explains the ranking: `kcMma` 810 752 instructions / 292 558 bank conflicts
+  / 15.90 gmem-stall / 48 registers, versus `tiles` 214 784 / 7 717 / 0.50 / 110. The
+  hand-written rung spends its time on staging the tile compiler does not need, and the tile
+  kernel pays for it in registers.
+- `scripts/compare-ladder.sh` now takes `22` (with the `--release 21 --enable-preview` flags
+  that build needs), and `scripts/run-cutile-demos.sh` covers four demos: **12 passed, 0
+  failed**.
+
+### Next invocation
+
+- The tile rung uses one 32x32 shape and no hints. CUDA Tile takes `num_ctas`, `occupancy`
+  and `latency` hints, and TornadoVM knows the shapes at JIT time; sweeping them is the
+  obvious next measurement and the one NVIDIA asked about.
+- Nothing in batches 00-24 was re-run or rewritten for this batch.

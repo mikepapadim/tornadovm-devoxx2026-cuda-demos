@@ -23,6 +23,7 @@ Each demo directory has its own `README.md` with build/run commands, a
 | [19-cutile-matmul](19-cutile-matmul/) | `TileMatMul.java` | **CUDA Tile**: the same FP16 GEMM as a naive kernel, a hand-tiled `KernelContext` kernel, and a `TileContext` kernel that says only `tc.mma(a, b, acc)`. Rung 3 compiles through NVIDIA CUDA Tile — `ct::mma`, no inline PTX, tensor cores chosen by `tileiras`. |
 | [20-cutile-hybrid](20-cutile-hybrid/) | `TileHybridPipeline.java` | One `TaskGraph`, four stages: `KernelContext` JIT → **CUDA Tile** GEMM → cuBLAS `sgemv` → `@Parallel` JIT, then all four captured into one CUDA graph. A tile task chains and captures like any other task. |
 | [21-cutile-flash-attention](21-cutile-flash-attention/) | `TileFlashAttention.java` | Flash attention with online softmax in fifteen lines of Java, ported from NVIDIA's TileGym, against a materialised three-kernel path. 128× `HMMA.16816.F32` in the cubin, no `mma.sync` written by hand. |
+| [22-matmul-ladder-fp16-tile](22-matmul-ladder-fp16-tile/) | `MatMulLadderFP16Tile.java` | Demo 18's FP16 ladder with a **`TileContext`** rung inserted between the hand-written `mma.sync` rung and the vendor libraries. At n=1024 the tile rung is 2.8x faster than hand-written MMA and 3.3x slower than cuBLAS, in nsys kernel time. |
 
 ## Building and running
 
@@ -49,7 +50,7 @@ whichever JDK is active.
 `bash ../scripts/run-all-demos.sh` compiles and runs all thirteen demos both ways
 and exits non-zero on any failure.
 
-### The CUDA Tile demos (19, 20, 21) are separate
+### The CUDA Tile demos (19, 20, 21, 22) are separate
 
 They are **not** in `run-all-demos.sh`, because they do not run on the pinned 6.0.0 SDK at
 all: `TileContext` does not exist there. They need a TornadoVM built from the cuTile branch,
@@ -58,7 +59,7 @@ compile with `--release 21 --enable-preview` because that branch is a jdk21-dev 
 
 ```bash
 TORNADOVM_HOME=<cutile SDK> JAVA_HOME=<jdk21> bash ../scripts/run-cutile-demos.sh
-# 9 passed, 0 failed   (3 demos x compile + launcher + java @argfile)
+# 12 passed, 0 failed   (4 demos x compile + launcher + java @argfile)
 ```
 
 ## CUDA equivalents

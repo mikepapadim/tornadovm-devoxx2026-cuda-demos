@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Compile and run the CUDA Tile demos (19, 20, 21) BOTH ways: the `tornado` launcher and
+# Compile and run the CUDA Tile demos (19, 20, 21, 22) BOTH ways: the `tornado` launcher and
 # the `java @argfile` reproducibility path. Exits non-zero if any demo fails or reports a
 # wrong result.
 #
@@ -34,7 +34,7 @@ pass=0
 check() { # label logfile
   if grep -qE 'WRONG|FAILED|Exception|Error occurred' "$2"; then
     echo "FAIL $1 (see $2)"; fail=$((fail + 1))
-  elif grep -qE 'correct' "$2"; then
+  elif grep -qE 'correct|PASSED' "$2"; then
     echo "OK   $1"; pass=$((pass + 1))
   else
     echo "FAIL $1 -- no verdict in output (see $2)"; fail=$((fail + 1))
@@ -66,6 +66,7 @@ done <<'DEMOS'
 19-cutile-matmul:TileMatMul:256 10
 20-cutile-hybrid:TileHybridPipeline:256 20 both
 21-cutile-flash-attention:TileFlashAttention:128 256 20
+22-matmul-ladder-fp16-tile:MatMulLadderFP16Tile:256 5
 DEMOS
 
 echo
