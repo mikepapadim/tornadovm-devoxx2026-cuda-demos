@@ -7,3 +7,6 @@ target/
 
 # Internal prep notes for the NVIDIA sync — not for the public repo.
 .claude/
+
+# Compiled demo output (built into a temp dir by the run scripts).
+*.class

@@ -20,6 +20,9 @@ Each demo directory has its own `README.md` with build/run commands, a
 | [14-warp-async-shared](14-warp-async-shared/) | `WarpAsyncSharedReduce.java` | Three hand-tuned CUDA optimisations written in Java in one kernel: async copy (`cp.async.ca.shared.global`), shared memory (`__shared__`) and warp shuffle (`__shfl_down_sync`) — all three confirmed in the `--printKernel` dump. 26.6x faster than the naive kernel at the kernel level. |
 | [15-kernel-time-comparison](15-kernel-time-comparison/) | `KernelTimeComparison.java` | **Kernel time only**, TornadoVM vs hand-written CUDA, measured with `nsys`: three kernels with different bottlenecks, both differences attributed to a specific cause with a standalone probe. Memory-bound gap is the `FloatArray` header offset; compute-bound win is JIT specialisation. |
 | [17-matmul-ladder](17-matmul-ladder/) | `MatMulLadder.java` | The same FP32 GEMM six ways — naive `@Parallel`, `KernelContext` tiled, `KernelContext` register-tiled, CUTLASS, cuBLAS, cuBLAS TF32 — validated identically and compared at the kernel level. The register micro-tile buys 3.8x over plain tiling; generated code is within 1-2% of hand-written CUDA on the simple rungs and 1.43x on the register-tiled one. |
+| [19-cutile-matmul](19-cutile-matmul/) | `TileMatMul.java` | **CUDA Tile**: the same FP16 GEMM as a naive kernel, a hand-tiled `KernelContext` kernel, and a `TileContext` kernel that says only `tc.mma(a, b, acc)`. Rung 3 compiles through NVIDIA CUDA Tile — `ct::mma`, no inline PTX, tensor cores chosen by `tileiras`. |
+| [20-cutile-hybrid](20-cutile-hybrid/) | `TileHybridPipeline.java` | One `TaskGraph`, four stages: `KernelContext` JIT → **CUDA Tile** GEMM → cuBLAS `sgemv` → `@Parallel` JIT, then all four captured into one CUDA graph. A tile task chains and captures like any other task. |
+| [21-cutile-flash-attention](21-cutile-flash-attention/) | `TileFlashAttention.java` | Flash attention with online softmax in fifteen lines of Java, ported from NVIDIA's TileGym, against a materialised three-kernel path. 128× `HMMA.16816.F32` in the cubin, no `mma.sync` written by hand. |
 
 ## Building and running
 
@@ -46,6 +49,18 @@ whichever JDK is active.
 `bash ../scripts/run-all-demos.sh` compiles and runs all thirteen demos both ways
 and exits non-zero on any failure.
 
+### The CUDA Tile demos (19, 20, 21) are separate
+
+They are **not** in `run-all-demos.sh`, because they do not run on the pinned 6.0.0 SDK at
+all: `TileContext` does not exist there. They need a TornadoVM built from the cuTile branch,
+CUDA Toolkit 13.3+ and driver R580+ (`env/versions.env`, section *CUDA Tile*), and they
+compile with `--release 21 --enable-preview` because that branch is a jdk21-dev build.
+
+```bash
+TORNADOVM_HOME=<cutile SDK> JAVA_HOME=<jdk21> bash ../scripts/run-cutile-demos.sh
+# 9 passed, 0 failed   (3 demos x compile + launcher + java @argfile)
+```
+
 ## CUDA equivalents
 
 Each demo folder also contains a hand-written CUDA C++ version of the same
@@ -55,6 +70,11 @@ read side by side, and all thirteen compile and produce the same results:
 ```bash
 bash ../scripts/run-all-cuda.sh   # 13 compiles + 13 runs + 2 probes; CUDA toolkit only, no JDK
 ```
+
+The three CUDA Tile demos also have `.cu` versions, but they are not in that script either:
+they need `nvcc --enable-tile` from CUDA 13.3+, not the system 12.6. Each demo's README has
+its own one-line build command, and all three compile and run — they report **kernel time**
+with CUDA events, which is the honest companion to the Java demos' wall clock.
 
 Demo 12 needs a CUTLASS checkout (header-only, not vendored):
 `git clone --depth 1 --branch v3.5.1 https://github.com/NVIDIA/cutlass.git`

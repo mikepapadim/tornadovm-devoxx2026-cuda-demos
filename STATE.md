@@ -706,3 +706,51 @@ driver, toolkit, gcc and OS, and sm_89 was not re-run.
   figures real, but it is a design change and must not be guessed at — a wrong
   number is worse than a zero in a profiler.
 - The sm_89 baseline's Step 7 `find` count (batch 22, correction 1) is still un-re-run.
+
+## Batch 24 — CUDA Tile demos (19, 20, 21) added (2026-09-11)
+
+Three new Track A demos for the `TileContext` API, which compiles a TornadoVM task through
+**NVIDIA CUDA Tile** instead of the SIMT path. All Observed, all validated against a CPU
+reference over the same FP16-rounded inputs; evidence in `results/raw/33-cutile-demos/`.
+
+- **Separate pin, on purpose.** These demos do not run on the 6.0.0 SDK at all —
+  `TileContext` exists in no released TornadoVM. They are built against a source build of
+  branch `feat/cutile` (6.1.1-jdk21-dev, [PR #1083](https://github.com/beehive-lab/TornadoVM/pull/1083)),
+  need CUDA Toolkit 13.3+ (userspace pip wheel, no root) and driver R580+, and compile with
+  `--release 21 --enable-preview`. Recorded in `env/versions.env` under *CUDA Tile*; the
+  6.0.0 pin and every other demo are untouched. They are deliberately **not** in
+  `scripts/run-all-demos.sh` (which must keep passing on the 6.0.0 SDK) — there is a
+  separate `scripts/run-cutile-demos.sh`, and it reports **9 passed, 0 failed** (three demos
+  × compile + `tornado` launcher + `java @argfile`).
+- `demos/19-cutile-matmul` — the same FP16 GEMM three ways: naive, hand-tiled
+  `KernelContext`, and `TileContext`. Wall clock at n=256: 0.446 / 0.321 / 0.221 ms
+  (1.00x / 1.39x / 2.02x). The hand-written `TileMatMul.cu` measures the same three kernels
+  with CUDA events — 0.031 / 0.048 / 0.014 ms — where the hand-tiled rung is *slower* than
+  naive, so the two sets of numbers are quoted together rather than either alone.
+- `demos/20-cutile-hybrid` — one `TaskGraph`, four stages: `KernelContext` JIT → CUDA Tile
+  GEMM → cuBLAS `sgemv` → `@Parallel` JIT, on shared device buffers. `withCUDAGraph()`
+  captures all four, tile task included: 0.396 → 0.073 ms per execution (**5.44x**). The
+  CUDA equivalent captures the identical four stages and gets **1.14x** at the kernel level,
+  which is what shows that the Java figure is host dispatch, not faster kernels.
+- `demos/21-cutile-flash-attention` — flash attention with online softmax in fifteen lines,
+  ported from NVIDIA TileGym's `ops/tilecpp/attention.cuh`, against a materialised
+  three-kernel path that is also GPU-resident (three tile tasks in one graph, so the
+  comparison is fair): 0.378 → 0.253 ms (**1.49x**), 1.18x at the kernel level in CUDA. The
+  cubin holds **128 × HMMA.16816.F32** and the generated source has **zero** `asm volatile`
+  occurrences — tensor cores with no hand-written PTX. Causal masking is not implemented and
+  the README says why: it needs `ct::select`, which the Java API declares but does not lower.
+- **Side finding, filed not fixed:** `results/failures/09-kernelcontext-halffloat-write.md`.
+  An in-place `new HalfFloat(...)` write from a `KernelContext` kernel leaves the buffer
+  zeroed — no exception, no bailout, silent wrong answer. 25-line reproducer at
+  `results/raw/33-cutile-demos/HalfWrite.java`; contains no tile code, so it is a
+  pre-existing CUDA-backend issue. It cost demo 20 its first correct run. Not diagnosed
+  further (the generated SIMT kernel has not been inspected), and deliberately not reported
+  upstream from here.
+
+### Next invocation
+
+- Diagnose `results/failures/09-...` far enough to say where the zeros come from (start with
+  `--printKernel` on the reproducer) before it is worth reporting.
+- Demo 21's causal-masking gap tracks `ct::select` lowering on the cuTile branch; revisit
+  when that lands.
+- Nothing in batches 00–23 was re-run or rewritten for this batch.

@@ -1,0 +1,29 @@
+== 19
+n = 256, 10 executions per rung
+
+rung                                         ms/execution      vs naive   max error   result
+1. naive (one thread per element)                   0.031         1.00x      0.0000   correct
+2. tiled (shared memory, by hand)                   0.048         0.65x      0.0000   correct
+3. CUDA Tile (ct::mma)                              0.014         2.22x      0.0000   correct
+
+Kernel time only (CUDA events), so these are the numbers the Java demo
+cannot report without nsys.
+== 20
+n = 256, 20 executions
+pipeline: SIMT scale -> CUDA Tile gemm -> cuBLAS sgemv -> SIMT biasRelu
+
+stream launches      0.020 ms/execution   max error 0.0000 of 29.6289   correct
+CUDA graph           0.018 ms/execution   max error 0.0000 of 29.6289   correct
+
+CUDA graph replay: 0.020 ms -> 0.018 ms per execution, 1.12x faster
+Kernel time only (CUDA events). The Java demo measures wall clock, so its
+speedup is larger: it also removes the JVM-side dispatch of four tasks.
+== 21
+Q = [128, 64], K = V = [256, 64], 20 executions
+
+path                                             ms/execution      max error   result
+1. materialised (3 kernels + score matrix)              0.025         0.0000   correct
+2. flash (1 kernel, online softmax)                     0.022         0.0000   correct
+
+fusion: 0.025 ms -> 0.022 ms per execution, 1.18x faster
+Kernel time only (CUDA events), so this isolates the fusion from host dispatch.

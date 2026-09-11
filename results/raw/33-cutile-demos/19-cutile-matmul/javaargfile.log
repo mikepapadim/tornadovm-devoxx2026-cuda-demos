@@ -1,0 +1,12 @@
+n = 256, 10 executions per rung
+
+
+rung                                         ms/execution     vs naive   max error   result
+1. @Parallel-style naive (KernelContext)            0.439        1.00x      0.0000   correct
+2. KernelContext tiled (shared memory)              0.221        1.99x      0.0000   correct
+3. TileContext (CUDA Tile, ct::mma)                 0.159        2.77x      0.0000   correct
+
+Wall clock above includes host dispatch, which at these sizes is most of it:
+all three rungs submit the same number of launches, so the column compares
+dispatch as much as kernels. For kernel time use nsys (see README.md), and for
+what actually differs use --printKernel: rung 3 has no thread indices at all.

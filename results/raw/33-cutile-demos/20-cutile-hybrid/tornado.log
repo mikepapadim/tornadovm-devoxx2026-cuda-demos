@@ -1,0 +1,12 @@
+n = 256, 20 executions, mode = both
+pipeline: KernelContext scale -> CUDA Tile gemm -> cuBLAS sgemv -> @Parallel biasRelu
+
+   max error 0.0000 of max |value| 21.1709 (tolerance 0.2217)
+no CUDA graph       0.390 ms/execution   correct
+   max error 0.0000 of max |value| 21.1709 (tolerance 0.2217)
+withCUDAGraph()     0.085 ms/execution   correct
+
+CUDA graph replay: 0.390 ms -> 0.085 ms per execution, 4.57x faster
+0.305 ms of host dispatch saved per execution of this 4-stage graph
+The kernels are identical in both modes; what changes is how they are submitted,
+and the tile task captures and replays like every other task in the graph.
