@@ -4,6 +4,10 @@
 #
 #   bash scripts/compare-ladder.sh 17 [n] [executions]    # FP32 ladder
 #   bash scripts/compare-ladder.sh 18 [n] [executions]    # FP16 ladder
+#   bash scripts/compare-ladder.sh 22 [n] [executions]    # FP16 ladder + CUDA Tile rung
+#
+# Demo 22 needs TORNADOVM_HOME pointing at a cuTile-branch build, not the pinned
+# 6.0.0 SDK; that build is jdk21-dev, hence the extra preview flags below.
 #
 # Wall clock on these demos is dominated by host dispatch -- at small n a slower
 # kernel can look faster. This runs each ladder under Nsight Systems for
@@ -23,8 +27,12 @@ EXECUTIONS="${3:-20}"
 case "$DEMO" in
     17) DIR="demos/17-matmul-ladder";      MAIN="MatMulLadder";      LABEL="FP32" ;;
     18) DIR="demos/18-matmul-ladder-fp16"; MAIN="MatMulLadderFP16";  LABEL="FP16" ;;
-    *)  echo "[ERROR] demo must be 17 (FP32) or 18 (FP16); got '$DEMO'" >&2; exit 2 ;;
+    22) DIR="demos/22-matmul-ladder-fp16-tile"; MAIN="MatMulLadderFP16Tile"; LABEL="FP16+tile"
+        JAVAC_FLAGS="--release 21 --enable-preview -proc:none"; JAVA_FLAGS="--enable-preview" ;;
+    *)  echo "[ERROR] demo must be 17 (FP32), 18 (FP16) or 22 (FP16 + CUDA Tile); got '$DEMO'" >&2; exit 2 ;;
 esac
+JAVAC_FLAGS="${JAVAC_FLAGS:-}"
+JAVA_FLAGS="${JAVA_FLAGS:-}"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
@@ -52,12 +60,13 @@ echo "   GPU: $(nvidia-smi --query-gpu=name,compute_cap --format=csv,noheader 2>
 echo
 
 echo "-- building"
-javac -cp "$TORNADOVM_HOME/share/java/tornado/*" -d "$WORK" "$DIR/$MAIN.java" || exit 1
+# shellcheck disable=SC2086  -- JAVAC_FLAGS must word-split
+javac $JAVAC_FLAGS -cp "$TORNADOVM_HOME/share/java/tornado/*" -d "$WORK" "$DIR/$MAIN.java" || exit 1
 
 echo "-- Nsight Systems: per-kernel GPU time"
 # The tornado launcher resolves a different JDK under nsys; call java directly.
 ( cd "$WORK" && nsys profile --trace=cuda --sample=none --cpuctxsw=none --force-overwrite=true -o ladder \
-    "$JAVA_HOME/bin/java" @"$TORNADOVM_HOME/tornado-argfile" -cp . "$MAIN" "$N" "$EXECUTIONS" \
+    "$JAVA_HOME/bin/java" @"$TORNADOVM_HOME/tornado-argfile" $JAVA_FLAGS -cp . "$MAIN" "$N" "$EXECUTIONS" \
     > run.log 2>&1 )
 nsys stats --force-export=true --report cuda_gpu_kern_sum --format csv "$WORK/ladder.nsys-rep" 2>/dev/null \
     | grep -E '^[0-9]' > "$WORK/kern.csv"
@@ -105,7 +114,7 @@ if [ -n "$NCU" ]; then
     M="$M,smsp__average_warps_issue_stalled_long_scoreboard_per_issue_active.ratio"
     M="$M,smsp__issue_active.avg.pct_of_peak_sustained_active"
     ( cd "$WORK" && "$NCU" --csv --target-processes all --launch-count 12 --metrics "$M" \
-        "$JAVA_HOME/bin/java" @"$TORNADOVM_HOME/tornado-argfile" -cp . "$MAIN" 256 2 2>/dev/null ) \
+        "$JAVA_HOME/bin/java" @"$TORNADOVM_HOME/tornado-argfile" $JAVA_FLAGS -cp . "$MAIN" 256 2 2>/dev/null ) \
         > "$WORK/ncu.csv"
     python3 - "$WORK/ncu.csv" <<'PY'
 import csv, io, sys, collections, re

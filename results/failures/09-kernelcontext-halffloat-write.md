@@ -1,7 +1,25 @@
-# OPEN (2026-09-11) — in-place `HalfFloat` write from a `KernelContext` kernel yields zeros
+# RESOLVED (2026-09-11) — in-place `HalfFloat` write from a `KernelContext` kernel yields zeros
 
 Date: 2026-09-11. Found while building `demos/20-cutile-hybrid`.
 **Not a CUDA Tile issue** — the reproducer contains no tile code.
+
+**Resolved the same day**, in TornadoVM commit `75ae022` on branch `feat/cutile`. The cause
+was not the write: a half-float **read** lowers to a backend `ReadHalfFloatNode` rather than
+to a `ReadNode`/`JavaReadNode`, and `TornadoDataflowAnalysis` did not recognise it, while it
+did recognise the matching write through the `MarkWriteNode` marker. A kernel reading and
+writing the same `HalfFloatArray` was therefore classified `WRITE_ONLY`, the runtime skipped
+the host-to-device copy for that parameter, and the kernel read an uninitialised device
+buffer — which is why the answer was zeros rather than an error. Evidence: `--debug` printed
+`access: parameter 1 -> WRITE_ONLY`, and `--printBytecodes` showed **no**
+`TRANSFER_HOST_TO_DEVICE` despite `transferToDevice(EVERY_EXECUTION, a)`.
+
+The fix adds the missing counterpart marker, `MarkReadNode`, implemented by the CUDA, OpenCL
+and Metal `ReadHalfFloatNode` and handled in `TornadoDataflowAnalysis` (and in
+`TornadoFeatureExtraction`, whose read counter under-counted half-float reads for the same
+reason). Regression suite `TestHalfFloatInPlaceUpdate`: four tests that all fail on the
+unfixed analysis and pass with it. The analysis below is kept because the diagnosis path —
+that the output equalled the bias constant alone, i.e. the GEMM consumed a zero matrix — is
+what made the reproducer findable.
 
 ## What happens
 
@@ -47,13 +65,18 @@ neither "scaled once" nor "never scaled"), then print per-row ratios (`actual - 
 expected was exactly 0), then reduce to the 25-line probe above, which reproduces with no
 tile task, no library task and no graph.
 
-## Not diagnosed further
+## Where it was, in the end
 
-The generated SIMT kernel has not been inspected (`--printKernel`) and no narrowing of
-whether the fault is in the read, the `HalfFloat` construction, the write, or the dataflow
-analysis that marks the buffer for transfer back. Recorded here so the demo's workaround has
-a reason on file; worth a focused look before it is reported upstream, since it is a silent
-wrong answer rather than a failure.
+The generated CUDA was correct all along — `--printKernel` shows the read, the
+`__half2float`, the multiply and the store back to the same address. Nothing was wrong inside
+the kernel; the device buffer it read had never been filled. The fault was one missing
+`instanceof` in the sketch-tier access classification, and a marker interface that existed for
+writes but not for reads.
+
+One detail worth keeping: a test written the obvious way does **not** catch this. Calling
+`inOut.getSize()` inside the kernel reads a field of the array, which the analysis counts as a
+read of the parameter, so the classification comes out `READ_WRITE` anyway. The regression
+tests pass the size in as a parameter for that reason.
 
 ## Workaround in the demo
 

@@ -74,14 +74,21 @@ Expect one `EXECUTION_GRAPH_BEGIN_CAPTURE` / `END_CAPTURE` pair around all four 
 stages — the intermediates never leave the GPU. Under `nsys`, the four stages appear as four
 kernels on one stream, the cuBLAS one inside an `nvidia/cublas/...` NVTX range.
 
-## One trap, observed here
+## One trap, found here and since fixed
 
 An earlier version of stage 1 scaled the FP16 matrix in place with
 `inOut.set(i, new HalfFloat(inOut.get(i).getFloat32() * factor))` inside the `KernelContext`
-kernel. The pipeline then produced a zero result with no error reported. That reproduces in
-25 lines with no tile code involved — see
+kernel. The pipeline then produced a zero result with no error reported.
+
+The cause was in the backend, not the demo: a half-float read lowered to a node the
+sketch-tier dataflow analysis did not recognise, so the array was classified `WRITE_ONLY`
+and the runtime skipped its host-to-device copy — the kernel read an uninitialised buffer.
+Fixed in TornadoVM `75ae022` on the cuTile branch (a `MarkReadNode` marker, plus the
+`TestHalfFloatInPlaceUpdate` regression suite); write-up in
 [`results/failures/09-kernelcontext-halffloat-write.md`](../../results/failures/09-kernelcontext-halffloat-write.md).
-The demo scales the FP32 vector instead, which is where a pre-pass belongs anyway.
+
+The demo still scales the FP32 vector, which is where a pre-pass belongs anyway, and it keeps
+its two thread-level kernels either way.
 
 ## If it fails
 
