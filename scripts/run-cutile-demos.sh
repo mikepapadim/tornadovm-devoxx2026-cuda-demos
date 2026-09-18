@@ -1,12 +1,21 @@
 #!/usr/bin/env bash
+# LEGACY. Kept only for the `feat/cutile` feature-branch SDK, a jdk21-dev build whose
+# tornado-api classes need --release 21 --enable-preview.
+#
+# PREFER scripts/run-all-demos.sh. PR #1083 is merged into upstream develop, so the tile
+# demos now run on a jdk22plus build with no preview flags, on the same JDK as every other
+# demo, through the same runner. Which SDK is active is one line -- TORNADO_SDK_PROFILE in
+# env/versions.env -- and a demo the active SDK cannot run is skipped rather than failed:
+#
+#   source scripts/setup-env.sh && bash scripts/run-all-demos.sh
+#
+# This script also does NOT pass -Dtornado.recover.bailout=False, so a tile kernel that
+# fails to compile here falls back to the JVM and still prints "correct". run-all-demos.sh
+# passes it.
+#
 # Compile and run the CUDA Tile demos (19, 20, 21, 22) BOTH ways: the `tornado` launcher and
 # the `java @argfile` reproducibility path. Exits non-zero if any demo fails or reports a
 # wrong result.
-#
-# These demos are NOT part of scripts/run-all-demos.sh, because they do not run on the
-# pinned TornadoVM 6.0.0 SDK: TileContext does not exist there. They need a TornadoVM built
-# from the cuTile branch, plus CUDA Toolkit 13.3+ and driver R580+ (see
-# env/versions.env, section "CUDA Tile").
 #
 #   TORNADOVM_HOME=<cutile SDK> JAVA_HOME=<jdk21> bash scripts/run-cutile-demos.sh [out-dir]
 set -u
