@@ -1,0 +1,38 @@
+##### TestTileOpLevel
+Test ran: 106, Failed: 7, Unsupported: 0
+##### TestTileMatmul
+Test ran: 7, Failed: 0, Unsupported: 0
+##### TestTileElementwise
+Test ran: 8, Failed: 0, Unsupported: 0
+##### TestTileShapes
+Test ran: 4, Failed: 0, Unsupported: 0
+##### TestTileDTypes
+Test ran: 8, Failed: 0, Unsupported: 0
+##### TestTileMasking
+Test ran: 10, Failed: 0, Unsupported: 0
+##### TestTileChaining
+Test ran: 8, Failed: 0, Unsupported: 0
+##### TestTileAtomics
+Test ran: 6, Failed: 0, Unsupported: 0
+##### TestTileMathOps
+Test ran: 6, Failed: 0, Unsupported: 0
+##### TestTileRank3
+Test ran: 4, Failed: 0, Unsupported: 0
+##### TestTileStridedViews
+Test ran: 3, Failed: 0, Unsupported: 0
+##### TestTileRawBuffers
+Test ran: 2, Failed: 0, Unsupported: 0
+##### TestTileGemmVariants
+Test ran: 9, Failed: 0, Unsupported: 0
+##### TestTileAttention
+Test ran: 7, Failed: 0, Unsupported: 0
+##### TestTileAttentionVariants
+Test ran: 8, Failed: 0, Unsupported: 0
+##### TestTileRowKernels
+Test ran: 20, Failed: 0, Unsupported: 0
+##### TestTileMixedPipelines
+Test ran: 5, Failed: 0, Unsupported: 0
+##### TestTileLlmKernels
+Test ran: 4, Failed: 0, Unsupported: 0
+##### TestTileRecurrence
+Test ran: 3, Failed: 0, Unsupported: 0
