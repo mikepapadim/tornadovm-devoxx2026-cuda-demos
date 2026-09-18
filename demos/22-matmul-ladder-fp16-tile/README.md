@@ -25,8 +25,8 @@ Source: [`MatMulLadderFP16Tile.java`](MatMulLadderFP16Tile.java).
 
 ## Requirements
 
-Needs a TornadoVM built from the cuTile branch (not the pinned 6.0.0 SDK), CUDA Toolkit
-**13.3+** and driver **R580+**. See `env/versions.env`, section *CUDA Tile*.
+Needs a TornadoVM with the tile API (the `develop` SDK profile, not the pinned 6.0.0 SDK), CUDA Toolkit
+**13.3+** and driver **R580+**. See [SDK profiles](../../README.md#sdk-profiles) and [`docs/cutile-api.md`](../../docs/cutile-api.md).
 
 ## Run
 
@@ -38,11 +38,10 @@ Needs a TornadoVM built from the cuTile branch (not the pinned 6.0.0 SDK), CUDA 
 
 
 ```bash
-export TORNADOVM_HOME=<cutile SDK>
-export JAVA_HOME=$HOME/.sdkman/candidates/java/21.0.2-open
+source ../../scripts/setup-env.sh           # profile `develop` -- has the tile API
 cd demos/22-matmul-ladder-fp16-tile
 javac -proc:none -cp "$TORNADOVM_HOME/share/java/tornado/*" -d . MatMulLadderFP16Tile.java
-tornado --classpath . MatMulLadderFP16Tile 1024 20
+tornado --jvm="-Dtornado.recover.bailout=False" --classpath . MatMulLadderFP16Tile 1024 20
 ```
 
 `n` must be a multiple of 64.
@@ -89,6 +88,34 @@ cuobjdump -sass $TORNADOVM_HOME/var/cuda-codecache/device-0-0/tiles-*.cubin | gr
 
 Rung 3's kernel contains `asm volatile("mma.sync.aligned.m16n8k16...")`; rung 4's contains
 `ct::mma` and no PTX, and both cubins hold `HMMA` instructions.
+
+## The hand-written CUDA equivalent
+
+`MatMulLadderFP16Tile.cu` is the same ladder in CUDA C++, so each rung can be read against
+the Java one. It is demo 18's equivalent plus rung 4:
+
+```bash
+pip install --user nvidia-cuda-nvcc 'cuda-tile[tileiras]' nvidia-cuda-cccl
+nvcc --enable-tile -std=c++20 -arch=sm_120 -O3 -o matmul_ladder_fp16_tile \
+     MatMulLadderFP16Tile.cu -lcublas
+./matmul_ladder_fp16_tile 256 20
+```
+
+`--enable-tile` mixes tile kernels and host code in one translation unit, which is what lets
+this be an executable at all. TornadoVM instead drives `nvcc -tilecubin --tile-only` to a
+bare cubin and loads it itself, because it has no host translation unit to put the launch in.
+
+Read rung 3 against rung 4 in that file: rung 3 packs fragments by lane, indexes a 32-thread
+warp and names `m16n8k16` in inline PTX; rung 4 is `ct::mma` and nothing else. Both reach the
+tensor cores.
+
+Unlike demo 18's equivalent, every rung here is validated against a CPU reference, so a fast
+wrong rung cannot pass as a win. CUTLASS is omitted so the file builds with the plain toolkit.
+
+> The timings this binary prints are **not** comparable to the table above. That table is
+> `nsys` kernel time at n=1024 on an RTX 4090; this is CUDA-event time at whatever size you
+> pass, on whatever GPU you run. Do not quote one as if it confirmed the other.
+
 
 ## If it fails
 

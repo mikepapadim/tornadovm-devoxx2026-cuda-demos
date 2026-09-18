@@ -1,0 +1,7 @@
+CUDA Tile histogram (hand-written CUDA): 1048576 values into 256 bins, tile width 256
+  every one of the 4096 blocks folds into every one of the 256 bins -- 1048576 contended adds
+
+kernel time incl. the zeroing memset (CUDA events, median of 20): 687.3 us
+
+bins wrong 0/256, counted 1048576 of 1048576 values
+result is correct (every bin exact, all values counted)

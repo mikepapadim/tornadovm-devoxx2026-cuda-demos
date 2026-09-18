@@ -1,0 +1,9 @@
+n = 256, 10 executions per rung
+
+rung                                         ms/execution      vs naive   max error   result
+1. naive (one thread per element)                   0.055         1.00x      0.0000   correct
+2. tiled (shared memory, by hand)                   0.043         1.29x      0.0000   correct
+3. CUDA Tile (ct::mma)                              0.013         4.34x      0.0000   correct
+
+Kernel time only (CUDA events), so these are the numbers the Java demo
+cannot report without nsys.

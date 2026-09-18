@@ -1,0 +1,4 @@
+elementwise  offset=0 floats : median 17.6 us
+stencil      offset=0 floats : median 18.6 us
+elementwise  offset=4 floats : median 18.9 us
+stencil      offset=4 floats : median 19.1 us

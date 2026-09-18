@@ -1,0 +1,19 @@
+FP16 matmul ladder with a CUDA Tile rung (hand-written CUDA): C = A * B, 256x256, 20 reps
+
+rung                              median us      GFLOP/s
+1. naive                               16.6         2020
+   naive                        max abs error   0.0002  correct
+2. tiled                               12.6         2661
+   tiled                        max abs error   0.0002  correct
+3. MMA (tensor core, by hand)           6.5         5165
+   MMA by hand                  max abs error   0.0000  correct
+4. CUDA Tile (ct::mma)                 14.6         2300
+   CUDA Tile                    max abs error   0.0000  correct
+5. cuBLAS GemmEx FP16                   5.7         5891
+   cuBLAS FP16                  max abs error   0.0002  correct
+6. cuBLAS GemmEx FP16->FP32             5.7         5891
+   cuBLAS FP16->FP32            max abs error   0.0000  correct
+
+(rung 5 of the Java demo, CUTLASS, is omitted here so this builds with the plain toolkit)
+
+All rungs correct.

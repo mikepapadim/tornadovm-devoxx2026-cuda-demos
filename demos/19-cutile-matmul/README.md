@@ -19,7 +19,7 @@ Source: [`TileMatMul.java`](TileMatMul.java), hand-written CUDA in
 ## Requirements
 
 This demo does **not** run on the pinned TornadoVM 6.0.0 SDK — `TileContext` does not exist
-there. It needs a TornadoVM built from the cuTile branch, CUDA Toolkit **13.3+** and driver
+there. It needs a TornadoVM with the tile API (the `develop` SDK profile), CUDA Toolkit **13.3+** and driver
 **R580+** (R610+ for the in-process NVRTC route). See `env/versions.env`, section
 *CUDA Tile*.
 
@@ -33,13 +33,12 @@ there. It needs a TornadoVM built from the cuTile branch, CUDA Toolkit **13.3+**
 
 
 ```bash
-export TORNADOVM_HOME=<cutile SDK>          # not the 6.0.0 SDK
-export JAVA_HOME=$HOME/.sdkman/candidates/java/21.0.2-open
+source ../../scripts/setup-env.sh           # profile `develop` -- has the tile API
 cd demos/19-cutile-matmul
 
 # 6.0.0-jdk22plus-cuda SDK does not need it)
 javac -proc:none -cp "$TORNADOVM_HOME/share/java/tornado/*" -d . TileMatMul.java
-tornado --classpath . TileMatMul 256 10
+tornado --jvm="-Dtornado.recover.bailout=False" --classpath . TileMatMul 256 10
 ```
 
 Observed on an RTX 4090 (sm_89), driver 610.57.04, nvcc 13.3.73:

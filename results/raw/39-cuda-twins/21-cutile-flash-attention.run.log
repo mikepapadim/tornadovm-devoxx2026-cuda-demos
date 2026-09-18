@@ -1,0 +1,8 @@
+Q = [128, 64], K = V = [256, 64], 20 executions
+
+path                                             ms/execution      max error   result
+1. materialised (3 kernels + score matrix)              0.025         0.0000   correct
+2. flash (1 kernel, online softmax)                     0.023         0.0000   correct
+
+fusion: 0.025 ms -> 0.023 ms per execution, 1.09x faster
+Kernel time only (CUDA events), so this isolates the fusion from host dispatch.

@@ -19,8 +19,8 @@ Source: [`TileHybridPipeline.java`](TileHybridPipeline.java), hand-written CUDA 
 
 ## Requirements
 
-Needs a TornadoVM built from the cuTile branch (not the pinned 6.0.0 SDK), CUDA Toolkit
-**13.3+** and driver **R580+**. See `env/versions.env`, section *CUDA Tile*.
+Needs a TornadoVM with the tile API (the `develop` SDK profile, not the pinned 6.0.0 SDK), CUDA Toolkit
+**13.3+** and driver **R580+**. See [SDK profiles](../../README.md#sdk-profiles) and [`docs/cutile-api.md`](../../docs/cutile-api.md).
 
 ## Run
 
@@ -32,11 +32,10 @@ Needs a TornadoVM built from the cuTile branch (not the pinned 6.0.0 SDK), CUDA 
 
 
 ```bash
-export TORNADOVM_HOME=<cutile SDK>
-export JAVA_HOME=$HOME/.sdkman/candidates/java/21.0.2-open
+source ../../scripts/setup-env.sh           # profile `develop` -- has the tile API
 cd demos/20-cutile-hybrid
 javac -proc:none -cp "$TORNADOVM_HOME/share/java/tornado/*" -d . TileHybridPipeline.java
-tornado --classpath . TileHybridPipeline 256 20 both      # n, executions, nograph|graph|both
+tornado --jvm="-Dtornado.recover.bailout=False" --classpath . TileHybridPipeline 256 20 both      # n, executions, nograph|graph|both
 ```
 
 Observed on an RTX 4090 (sm_89), driver 610.57.04, nvcc 13.3.73:
