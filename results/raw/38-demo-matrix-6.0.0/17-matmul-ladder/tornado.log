@@ -1,0 +1,36 @@
+WARNING: module-info.class ignored in patch: /home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda/share/java/jvmci/jvmci-21.0.2.jar
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess (file:/home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda/share/java/tornado/tornado-runtime-6.0.0.jar)
+WARNING: Please consider reporting this to the maintainers of class uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+Matrix-multiply ladder: C = A * B, FP32, 256x256
+  3 executions per rung, steady-state median wall-clock (first excluded)
+
+1. naive @Parallel
+    validation PASSED (max abs err 0.00000, 0/65536 cells out of tol)
+2. KernelContext tiled
+    validation PASSED (max abs err 0.00000, 0/65536 cells out of tol)
+3. KernelContext register-tiled
+    validation PASSED (max abs err 0.00000, 0/65536 cells out of tol)
+4. CUTLASS sgemm
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::loadLibrary has been called by uk.ac.manchester.tornado.cutlass.provider.CutlassNativeLib in module tornado.cutlass (file:/home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda/share/java/tornado/tornado-cutlass-6.0.0.jar)
+WARNING: Use --enable-native-access=tornado.cutlass to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+    validation PASSED (max abs err 0.00000, 0/65536 cells out of tol)
+5. cuBLAS sgemm
+    validation PASSED (max abs err 0.00000, 0/65536 cells out of tol)
+6. cuBLAS sgemm TF32
+    validation PASSED (max abs err 0.00000, 0/65536 cells out of tol)
+
+=== Summary (steady-state median, this run / this GPU) ===
+rung                                median us      GFLOP/s   vs naive
+1. naive @Parallel                        298        112.6       1.0x
+2. KernelContext tiled                    533         63.0       0.6x
+3. KernelContext register-tiled           298        112.6       1.0x
+4. CUTLASS sgemm                          200        167.8       1.5x
+5. cuBLAS sgemm                           199        168.6       1.5x
+6. cuBLAS sgemm TF32                      171        196.2       1.7x
+
+All six rungs produced the same, correct result

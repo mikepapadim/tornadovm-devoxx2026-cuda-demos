@@ -1,12 +1,16 @@
 # TornadoVM on NVIDIA CUDA
 
-Java GPU kernels on the **TornadoVM 6.0.0 CUDA release**, each paired with a
+Java GPU kernels on TornadoVM's **CUDA backend**, each paired with a
 hand-written CUDA C++ equivalent and measured against it. Write GPU kernels in
 plain Java, drive CUDA-runtime behaviour (graph capture/replay, multi-stream
-concurrency) from `TornadoExecutionPlan`, and call cuBLAS/cuFFT without writing
-a line of JNI.
+concurrency) from `TornadoExecutionPlan`, call cuBLAS/cuFFT without writing a
+line of JNI — and, in demos 19-24, write **CUDA Tile (cuTile)** kernels that
+never name a thread.
 
-No source build required — TornadoVM 6.0.0 installs from SDKMAN in one command.
+Demos 00-18 need no source build: TornadoVM 6.0.0 installs from SDKMAN in one
+command. Demos 19-24 need a `develop` build, because the tile API is merged
+upstream but has not shipped in a release yet. **Which SDK is used is one line** —
+see [SDK profiles](#sdk-profiles).
 
 Reading this as a compiler engineer? **[`docs/NVIDIA-BRIEF.md`](docs/NVIDIA-BRIEF.md)**
 is the start-here page: the compilation pipeline, what is measured and how, and
@@ -93,6 +97,55 @@ cd tornadovm-devoxx2026-cuda-demos
 source scripts/setup-env.sh   # sets JAVA_HOME / TORNADOVM_HOME / PATH, generates the argfile
 tornado --devices
 ```
+
+## SDK profiles
+
+One line in `env/versions.env` decides which TornadoVM the demos run against:
+
+```
+TORNADO_SDK_PROFILE=develop        # or sdkman-6.0.0
+```
+
+It names a file in [`env/sdk/`](env/sdk/), which pins the SDK and declares what it
+can do. A demo tagged `requires=tile` reports `SKIPPED_REQUIREMENT` — never a
+failure — on a profile without the tile API, so one demo set works across SDKs.
+
+| Profile | SDK | Tile API | `run-all-demos.sh` |
+| --- | --- | --- | --- |
+| `sdkman-6.0.0` | released, `sdk install tornadovm 6.0.0-jdk22plus-cuda` | no | 48 passed, 0 failed, **6 skipped** |
+| `develop` | source build of upstream `develop` in `vendor/tornadovm` | **yes** | **66 passed, 0 failed, 0 skipped** |
+
+Override for one shell — **export it first**, since `VAR=x source …` does not persist:
+
+```bash
+export TORNADO_SDK_PROFILE=sdkman-6.0.0
+source scripts/setup-env.sh
+```
+
+When a release ships the tile API, add `env/sdk/sdkman-<version>.env` with
+`TORNADO_HAS_TILE_API=1` and change the selector. No demo or script changes.
+
+### Running the CUDA Tile demos (19-24)
+
+They need CUDA Toolkit **13.3+** — the tile path drives `nvcc`, not NVRTC. A
+userspace toolkit is enough and needs no root:
+
+```bash
+pip install --user nvidia-cuda-nvcc 'cuda-tile[tileiras]' nvidia-cuda-cccl
+
+git clone --branch develop https://github.com/beehive-lab/TornadoVM.git vendor/tornadovm
+cd vendor/tornadovm && make jdk22plus BACKEND=cuda && cd -
+
+source scripts/setup-env.sh          # profile `develop`
+```
+
+`--release 21 --enable-preview` is **no longer needed**: PR #1083 is merged, so
+`develop` is a jdk22plus build and the tile demos run on the same JDK as the rest.
+
+Always run a tile demo with `-Dtornado.recover.bailout=False` (the runner does).
+Every `TileContext` method has a plain-Java fallback, so with the default a tile
+kernel that fails to compile runs on the **host**, prints `correct`, and looks
+like a pass. See [`docs/cutile-api.md`](docs/cutile-api.md).
 
 ```
 Number of Tornado drivers: 1
@@ -394,7 +447,7 @@ Track B on 6.0.0 is open work, not a result — nothing here claims it now works
 
 - `demos/` — Track A demos, one directory and one README each.
 - `scripts/setup-env.sh` — sets `JAVA_HOME`/`TORNADOVM_HOME`, generates the argfile.
-- `scripts/run-all-demos.sh` — compiles and runs all 12 demos both ways. Needs a GPU.
+- `scripts/run-all-demos.sh` — compiles and runs all 22 demos both ways, skipping any the active SDK profile cannot run. Needs a GPU.
 - `scripts/run-all-cuda.sh` — builds and runs the hand-written CUDA equivalents. Needs a GPU and the CUDA toolkit, but no JDK.
 - `scripts/verify.sh` — validates deliverables and cited evidence paths. No GPU needed.
 - `docs/NVIDIA-BRIEF.md` — start-here page for compiler engineers: lowering path, measurements, ceiling.

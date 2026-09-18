@@ -1,0 +1,77 @@
+WARNING: module-info.class ignored in patch: /home/michalis/tornadovm-devoxx2026-cuda-demos/vendor/tornadovm/dist/tornadovm-6.1.1-jdk22plus-dev-cuda-linux-amd64/tornadovm-6.1.1-jdk22plus-dev-cuda/share/java/jvmci/jvmci-21.0.2.jar
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess (file:/home/michalis/tornadovm-devoxx2026-cuda-demos/vendor/tornadovm/dist/tornadovm-6.1.1-jdk22plus-dev-cuda-linux-amd64/tornadovm-6.1.1-jdk22plus-dev-cuda/share/java/tornado/tornado-runtime-6.1.1-jdk22plus-dev.jar)
+WARNING: Please consider reporting this to the maintainers of class uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+CuTileHistogram: 1024 values into 8 bins, tile width 256, 4 tile blocks
+CuTileHistogram: every one of the 4 blocks folds into every one of the 8 bins -- 32 contended adds
+#include "cuda_tile.h"
+namespace ct = cuda::tiles;
+using namespace ct::literals;
+extern "C" __tile_global__ void histogram(long long *_kernel_context, unsigned char *_constant_region, unsigned char *_local_region, int *_atomics, unsigned char *arg1, unsigned char *arg2, int arg3, int arg4)
+{
+  unsigned long long ul_0, ul_1; 
+  int i_6; 
+
+  // BLOCK 0
+  ul_0  =  (unsigned long long) arg1;
+  ul_1  =  (unsigned long long) arg2;
+  auto tview_2 = ct::partition_view{ct::tensor_span{ct::assume_aligned(reinterpret_cast<float *>(ul_0 + 16), 16_ic), ct::extents{1, 1024}}, ct::shape{1_ic, 256_ic}};
+  auto tview_3 = ct::partition_view{ct::tensor_span{ct::assume_aligned(reinterpret_cast<float *>(ul_1 + 16), 16_ic), ct::extents{1, 8}}, ct::shape{1_ic, 1_ic}};
+  ct::tile<float, ct::shape<1, 256>> tile_4 = ct::full<ct::tile<float, ct::shape<1, 256>>>(1.0f);
+  ct::tile<float, ct::shape<1, 256>> tile_5 = ct::full<ct::tile<float, ct::shape<1, 256>>>(0.0f);
+  i_6 = ct::bid().x;
+  auto tile_7 = tview_2.load(0, i_6);
+  auto tile_8 = tile_7 >= (float) 0.0;
+  auto tile_9 = tile_7 < (float) 1.0;
+  auto tile_10 = tile_8 & tile_9;
+  auto tile_11 = ct::select(tile_10, tile_4, tile_5);
+  auto tile_12 = ct::sum(tile_11, 1_ic);
+  ct::atomic_add(reinterpret_cast<float *>(ul_1 + 16) + ((ct::broadcast(ct::iota<ct::tile<int, ct::shape<1, 1>>>(), ct::shape<1, 1>{}) + 0 * 1) * 8 + (ct::broadcast(ct::iota<ct::tile<int, ct::shape<1, 1>>>(), ct::shape<1, 1>{}) + 0 * 1)), tile_12, ct::memory_order_relaxed_t{}, ct::thread_scope_device_t{});
+  auto tile_13 = tile_7 >= (float) 1.0;
+  auto tile_14 = tile_7 < (float) 2.0;
+  auto tile_15 = tile_13 & tile_14;
+  auto tile_16 = ct::select(tile_15, tile_4, tile_5);
+  auto tile_17 = ct::sum(tile_16, 1_ic);
+  ct::atomic_add(reinterpret_cast<float *>(ul_1 + 16) + ((ct::broadcast(ct::iota<ct::tile<int, ct::shape<1, 1>>>(), ct::shape<1, 1>{}) + 0 * 1) * 8 + (ct::broadcast(ct::iota<ct::tile<int, ct::shape<1, 1>>>(), ct::shape<1, 1>{}) + 1 * 1)), tile_17, ct::memory_order_relaxed_t{}, ct::thread_scope_device_t{});
+  auto tile_18 = tile_7 >= (float) 2.0;
+  auto tile_19 = tile_7 < (float) 3.0;
+  auto tile_20 = tile_18 & tile_19;
+  auto tile_21 = ct::select(tile_20, tile_4, tile_5);
+  auto tile_22 = ct::sum(tile_21, 1_ic);
+  ct::atomic_add(reinterpret_cast<float *>(ul_1 + 16) + ((ct::broadcast(ct::iota<ct::tile<int, ct::shape<1, 1>>>(), ct::shape<1, 1>{}) + 0 * 1) * 8 + (ct::broadcast(ct::iota<ct::tile<int, ct::shape<1, 1>>>(), ct::shape<1, 1>{}) + 2 * 1)), tile_22, ct::memory_order_relaxed_t{}, ct::thread_scope_device_t{});
+  auto tile_23 = tile_7 >= (float) 3.0;
+  auto tile_24 = tile_7 < (float) 4.0;
+  auto tile_25 = tile_23 & tile_24;
+  auto tile_26 = ct::select(tile_25, tile_4, tile_5);
+  auto tile_27 = ct::sum(tile_26, 1_ic);
+  ct::atomic_add(reinterpret_cast<float *>(ul_1 + 16) + ((ct::broadcast(ct::iota<ct::tile<int, ct::shape<1, 1>>>(), ct::shape<1, 1>{}) + 0 * 1) * 8 + (ct::broadcast(ct::iota<ct::tile<int, ct::shape<1, 1>>>(), ct::shape<1, 1>{}) + 3 * 1)), tile_27, ct::memory_order_relaxed_t{}, ct::thread_scope_device_t{});
+  auto tile_28 = tile_7 >= (float) 4.0;
+  auto tile_29 = tile_7 < (float) 5.0;
+  auto tile_30 = tile_28 & tile_29;
+  auto tile_31 = ct::select(tile_30, tile_4, tile_5);
+  auto tile_32 = ct::sum(tile_31, 1_ic);
+  ct::atomic_add(reinterpret_cast<float *>(ul_1 + 16) + ((ct::broadcast(ct::iota<ct::tile<int, ct::shape<1, 1>>>(), ct::shape<1, 1>{}) + 0 * 1) * 8 + (ct::broadcast(ct::iota<ct::tile<int, ct::shape<1, 1>>>(), ct::shape<1, 1>{}) + 4 * 1)), tile_32, ct::memory_order_relaxed_t{}, ct::thread_scope_device_t{});
+  auto tile_33 = tile_7 >= (float) 5.0;
+  auto tile_34 = tile_7 < (float) 6.0;
+  auto tile_35 = tile_33 & tile_34;
+  auto tile_36 = ct::select(tile_35, tile_4, tile_5);
+  auto tile_37 = ct::sum(tile_36, 1_ic);
+  ct::atomic_add(reinterpret_cast<float *>(ul_1 + 16) + ((ct::broadcast(ct::iota<ct::tile<int, ct::shape<1, 1>>>(), ct::shape<1, 1>{}) + 0 * 1) * 8 + (ct::broadcast(ct::iota<ct::tile<int, ct::shape<1, 1>>>(), ct::shape<1, 1>{}) + 5 * 1)), tile_37, ct::memory_order_relaxed_t{}, ct::thread_scope_device_t{});
+  auto tile_38 = tile_7 >= (float) 6.0;
+  auto tile_39 = tile_7 < (float) 7.0;
+  auto tile_40 = tile_38 & tile_39;
+  auto tile_41 = ct::select(tile_40, tile_4, tile_5);
+  auto tile_42 = ct::sum(tile_41, 1_ic);
+  ct::atomic_add(reinterpret_cast<float *>(ul_1 + 16) + ((ct::broadcast(ct::iota<ct::tile<int, ct::shape<1, 1>>>(), ct::shape<1, 1>{}) + 0 * 1) * 8 + (ct::broadcast(ct::iota<ct::tile<int, ct::shape<1, 1>>>(), ct::shape<1, 1>{}) + 6 * 1)), tile_42, ct::memory_order_relaxed_t{}, ct::thread_scope_device_t{});
+  auto tile_43 = tile_7 >= (float) 7.0;
+  auto tile_44 = tile_7 < (float) 8.0;
+  auto tile_45 = tile_43 & tile_44;
+  auto tile_46 = ct::select(tile_45, tile_4, tile_5);
+  auto tile_47 = ct::sum(tile_46, 1_ic);
+  ct::atomic_add(reinterpret_cast<float *>(ul_1 + 16) + ((ct::broadcast(ct::iota<ct::tile<int, ct::shape<1, 1>>>(), ct::shape<1, 1>{}) + 0 * 1) * 8 + (ct::broadcast(ct::iota<ct::tile<int, ct::shape<1, 1>>>(), ct::shape<1, 1>{}) + 7 * 1)), tile_47, ct::memory_order_relaxed_t{}, ct::thread_scope_device_t{});
+  return;
+}  //  kernel
+
+CuTileHistogram: bins wrong 0/8, counted 1024 of 1024 values
+CuTileHistogram: result is correct (every bin exact, all values counted)

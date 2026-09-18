@@ -1,0 +1,14 @@
+WARNING: module-info.class ignored in patch: /home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda/share/java/jvmci/jvmci-21.0.2.jar
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess (file:/home/michalis/.sdkman/candidates/tornadovm/6.0.0-jdk22plus-cuda/share/java/tornado/tornado-runtime-6.0.0.jar)
+WARNING: Please consider reporting this to the maintainers of class uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+Tensor-core operand types from Java: C[16x16] = A[16x32] * B[32x16], one warp
+  each result validated against a CPU reference over the same stored values
+
+  BF16     m16n8k16  f32.bf16.bf16.f32  PASSED (max abs err 0.00000, 0/256 cells out of tol)
+  int8     m16n8k32  s32.s8.s8.s32      PASSED (max abs err 0.00000, 0/256 cells out of tol)
+  FP8 e4m3 m16n8k32  f32.e4m3.e4m3.f32  PASSED (max abs err 0.00000, 0/256 cells out of tol)
+  FP8 e5m2 m16n8k32  f32.e5m2.e5m2.f32  PASSED (max abs err 0.00000, 0/256 cells out of tol)
+
+All four operand types produced correct results

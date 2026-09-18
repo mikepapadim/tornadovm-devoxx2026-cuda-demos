@@ -24,11 +24,18 @@ Needs a TornadoVM built from the cuTile branch (not the pinned 6.0.0 SDK), CUDA 
 
 ## Run
 
+> The `--release 21 --enable-preview` flags this demo used to need are **gone**. They existed
+> because the tile demos were pinned to the `feat/cutile` branch, a jdk21-dev build. PR #1083
+> is merged into upstream `develop`, so the `develop` SDK profile is a jdk22plus build and
+> this demo compiles and runs on the same JDK 25 as every other demo.
+> Verified 2026-09-18: `results/raw/37-demo-matrix-develop/`.
+
+
 ```bash
 export TORNADOVM_HOME=<cutile SDK>
 export JAVA_HOME=$HOME/.sdkman/candidates/java/21.0.2-open
 cd demos/20-cutile-hybrid
-javac --release 21 --enable-preview -proc:none -cp "$TORNADOVM_HOME/share/java/tornado/*" -d . TileHybridPipeline.java
+javac -proc:none -cp "$TORNADOVM_HOME/share/java/tornado/*" -d . TileHybridPipeline.java
 tornado --classpath . TileHybridPipeline 256 20 both      # n, executions, nograph|graph|both
 ```
 

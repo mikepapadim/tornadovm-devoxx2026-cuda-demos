@@ -788,3 +788,111 @@ rung and the vendor libraries are all measured the same way. All Observed; evide
   and `latency` hints, and TornadoVM knows the shapes at JIT time; sweeping them is the
   obvious next measurement and the one NVIDIA asked about.
 - Nothing in batches 00-24 was re-run or rewritten for this batch.
+
+## Batch 35 — cuTile on upstream develop, demos 23 & 24, switchable SDK config (2026-09-18)
+
+### The tile demos no longer need a feature branch
+
+`env/versions.env` pinned the tile demos to `feat/cutile` (`6.1.1-jdk21-dev`, PR #1083
+unmerged), which forced JDK 21, `--release 21 --enable-preview`, and a second runner
+script. **PR #1083 is merged**: its merge commit `ec970e26d` is an ancestor of upstream
+`develop`. Cloning `develop` at `8d592d6fbaafe42d66e1e22c27057cb1cdcf9097` and building
+`make jdk22plus BACKEND=cuda` removes all three constraints at once.
+
+Verified: demos 19-22 compile with plain `javac` and run on JDK 25. Their READMEs and the
+runner were updated; the old `CUTILE_*` pins are kept, annotated as superseded, so batches
+33/34 stay interpretable.
+
+### Switchable SDK config
+
+`TORNADO_SDK_PROFILE` in `env/versions.env` names a file in `env/sdk/`. Each profile
+declares the same variables including capability flags, so no consumer branches on the
+profile name. `run-all-demos.sh` gained a `requires` field and a third verdict,
+`SKIPPED_REQUIREMENT` — it had only pass/fail, so a demo the active SDK cannot run scored
+as a *failure*.
+
+- `develop` → **66 passed, 0 failed, 0 skipped** (22 demos × 3 checks)
+- `sdkman-6.0.0` → **48 passed, 0 failed, 6 skipped** (19-24 skip)
+
+`scripts/run-cutile-demos.sh` is now redundant and marked LEGACY rather than deleted.
+
+### The trap that would have faked a pass
+
+`TornadoOptions.RECOVER_BAILOUT` defaults **true** and every `TileContext` method has a JVM
+fallback. A tile task that fails to compile runs on the host, computes the right answer, and
+prints `correct` — **the exact word the runners grep for**. The old `run-cutile-demos.sh`
+did not disable it, so batches 33/34 could not have distinguished a working tile path from a
+silently-host-executed one on verdict alone. Every run now passes
+`-Dtornado.recover.bailout=False`.
+
+### sm_120 works, proved before any demo was written
+
+A hand-written cuTile GEMM compiled straight to a cubin with
+`nvcc -tilecubin --tile-only -std=c++20 -arch=sm_120` → **32 `HMMA.16816.F32`**. Then
+`tornado-test TestTileMatmul` → 7/7. Only then were the demos written.
+
+Two toolchain facts worth not rediscovering:
+
+- **`nvcc` spawns `tileiras` by bare name.** Without it on `PATH` the compile dies late with
+  `sh: 1: tileiras: not found`. `scripts/setup-env.sh` now handles it.
+- **CUDA 13.0's `crt/cuda_tile.h` is a 50-line stub** declaring only `cuda::cutile::print`.
+  The real 5,493-line `cuda::tiles` header comes with the 13.4 wheel.
+
+### Demos 23 and 24 — both PASS
+
+Chosen against what 19-22 actually exercise. Before these two, **nothing in the repo used a
+scan, a masked load or store, a loop-carried reduction, any predicate, or any of the ten
+atomic operations**.
+
+- **23-cutile-row-scan** — per-row prefix sum over a **ragged** extent, 1000 cols against a
+  128-wide tile: `prefixSum`, `loadMasked`/`storeMasked`, a `[1,1]` loop-carried carry and
+  implicit broadcast. Bit-exact (0/4096000 and 0/4096). Codegen shows `ct::partial_sum` ×8.
+- **24-cutile-histogram** — `PartitionView.atomicAdd`, 4096 blocks folding into 256 bins,
+  ~1M contended adds. Also answers "what replaces a scatter?" — a predicate over the whole
+  tile, since CUDA Tile has no gather/scatter. Codegen shows `ct::atomic_add` ×8,
+  `ct::select`, `ct::iota`, `ct::broadcast`.
+
+Each ships a pure cuTile C++ twin adapted from NVIDIA/TileGym at `ec339c0d` (MIT), linked
+and attributed rather than vendored, with a translation table that is explicit where the two
+differ. Demo 24's twin needed
+`atomic_add(tile, ct::memory_order_relaxed_t{}, ct::thread_scope_device_t{}, idx...)` — the
+Java API fixes relaxed/device and does not expose the shorter form.
+
+Two bugs found while writing them, both in my own code and both recorded in the source:
+a rank-2 partition needs a two-index `load` (the rank-1 form produced 49 downstream template
+errors), and an atomic accumulator must be cleared on the **host** each execution or the
+bins keep summing across iterations.
+
+### Bug found: FP8 tile arithmetic
+
+212 of 219 tile unit tests pass on sm_120. **All 7 failures are FP8 arithmetic** in
+`TestTileOpLevel`. Root cause, reduced to pure C++ in
+`results/raw/35-develop-cutile-baseline/fp8-probe/`: **CUDA Tile C++ 13.4 defines no
+arithmetic operators for FP8 tile element types**, and the backend emits the operator form
+directly. `fp8.cu` fails with `no operator "+" matches these operands`; the same kernel with
+an `element_cast` round-trip through f32 compiles clean. Not the documented "fp8 below CC
+9.0" limitation — this GPU is CC 12.0. Two defensible fixes upstream: emit the cast, or gate
+the ops so they report `[UNSUPPORTED]`.
+
+### A near-miss worth recording
+
+This batch was first built against a clone that was **31 commits stale** — it predated demos
+17-22 entirely. Working from it, I planned demos numbered 17/18 and built a one-commit-per-demo
+history rewrite. `git push --force-with-lease` **rejected** the push with `stale info`, which
+is the only reason demos 17-22 still exist. `--force` would have destroyed them. Fetch before
+planning; use `--force-with-lease`, never `--force`.
+
+### Known open defect (pre-existing)
+
+`scripts/verify.sh` fails `1 demo(s) have no .cu equivalent`:
+`demos/22-matmul-ladder-fp16-tile/` has no hand-written CUDA twin while every other demo
+does. Confirmed pre-existing on pristine `origin/main`. Not fixed here — writing a faithful
+twin for a six-rung ladder is the demo author's call.
+
+### Next invocation
+
+- Decide whether to file the FP8 finding upstream; it is written up and reproduced but not
+  filed.
+- Demo 22's missing `.cu` twin keeps `verify.sh` red.
+- No performance claim is made for demos 23/24. First execution pays an nvcc process spawn
+  per kernel/shape/arch, so any timing needs warm-up separation.

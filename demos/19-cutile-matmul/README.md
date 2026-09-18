@@ -25,14 +25,20 @@ there. It needs a TornadoVM built from the cuTile branch, CUDA Toolkit **13.3+**
 
 ## Run
 
+> The `--release 21 --enable-preview` flags this demo used to need are **gone**. They existed
+> because the tile demos were pinned to the `feat/cutile` branch, a jdk21-dev build. PR #1083
+> is merged into upstream `develop`, so the `develop` SDK profile is a jdk22plus build and
+> this demo compiles and runs on the same JDK 25 as every other demo.
+> Verified 2026-09-18: `results/raw/37-demo-matrix-develop/`.
+
+
 ```bash
 export TORNADOVM_HOME=<cutile SDK>          # not the 6.0.0 SDK
 export JAVA_HOME=$HOME/.sdkman/candidates/java/21.0.2-open
 cd demos/19-cutile-matmul
 
-# --enable-preview: the cuTile branch is a jdk21-dev build (the released
 # 6.0.0-jdk22plus-cuda SDK does not need it)
-javac --release 21 --enable-preview -proc:none -cp "$TORNADOVM_HOME/share/java/tornado/*" -d . TileMatMul.java
+javac -proc:none -cp "$TORNADOVM_HOME/share/java/tornado/*" -d . TileMatMul.java
 tornado --classpath . TileMatMul 256 10
 ```
 
@@ -86,6 +92,6 @@ where reaching the same tensor cores means writing `ctx.mma` against a fixed
   13.3. Point `-Dtornado.cuda.nvcc` at a newer one; a userspace
   `pip install --user 'cuda-tile[tileiras]' nvidia-cuda-cccl` is enough and needs no root.
 * `CUDA_ERROR_INVALID_IMAGE` or a load failure — the driver is older than R580.
-* `uses preview features of Java SE 21` from `javac` — add `--release 21 --enable-preview`.
+* `uses preview features of Java SE 21` — you are on the old `feat/cutile` SDK. Use the `develop` profile (`source scripts/setup-env.sh`); no preview flags are needed there.
 * Falls back to sequential Java with a bailout warning — run with `--debug` to see why;
   rung 3 bails out rather than miscompiling if a tile shape is not a compile-time constant.

@@ -24,6 +24,8 @@ Each demo directory has its own `README.md` with build/run commands, a
 | [20-cutile-hybrid](20-cutile-hybrid/) | `TileHybridPipeline.java` | One `TaskGraph`, four stages: `KernelContext` JIT → **CUDA Tile** GEMM → cuBLAS `sgemv` → `@Parallel` JIT, then all four captured into one CUDA graph. A tile task chains and captures like any other task. |
 | [21-cutile-flash-attention](21-cutile-flash-attention/) | `TileFlashAttention.java` | Flash attention with online softmax in fifteen lines of Java, ported from NVIDIA's TileGym, against a materialised three-kernel path. 128× `HMMA.16816.F32` in the cubin, no `mma.sync` written by hand. |
 | [22-matmul-ladder-fp16-tile](22-matmul-ladder-fp16-tile/) | `MatMulLadderFP16Tile.java` | Demo 18's FP16 ladder with a **`TileContext`** rung inserted between the hand-written `mma.sync` rung and the vendor libraries. At n=1024 the tile rung is 2.8x faster than hand-written MMA and 3.3x slower than cuBLAS, in nsys kernel time. |
+| [23-cutile-row-scan](23-cutile-row-scan/) | `CuTileRowScan.java` | A per-row prefix sum is one call, `tc.prefixSum`. The row is 1000 wide against a 128-wide tile, so `loadMasked`/`storeMasked` handle the 24-lane ragged tail and a `[1,1]` carry tile rides the loop. The first demo here with a **scan, a masked load/store and a loop-carried reduction**. |
+| [24-cutile-histogram](24-cutile-histogram/) | `CuTileHistogram.java` | A value histogram with **`PartitionView.atomicAdd`** — 4096 tile blocks folding into 256 bins, ~1M contended adds. Also the answer to "what replaces a scatter?": a predicate over the whole tile, since CUDA Tile has no gather/scatter. The only demo using the tile atomics. |
 
 ## Building and running
 
@@ -47,20 +49,37 @@ distinction matters.
 the installed SDK, not to this repo. `scripts/setup-env.sh` regenerates it for
 whichever JDK is active.
 
-`bash ../scripts/run-all-demos.sh` compiles and runs all thirteen demos both ways
-and exits non-zero on any failure.
+`bash ../scripts/run-all-demos.sh` compiles and runs every demo both ways and exits
+non-zero on any failure.
 
-### The CUDA Tile demos (19, 20, 21, 22) are separate
+### The CUDA Tile demos (19-24)
 
-They are **not** in `run-all-demos.sh`, because they do not run on the pinned 6.0.0 SDK at
-all: `TileContext` does not exist there. They need a TornadoVM built from the cuTile branch,
-CUDA Toolkit 13.3+ and driver R580+ (`env/versions.env`, section *CUDA Tile*), and they
-compile with `--release 21 --enable-preview` because that branch is a jdk21-dev build.
+They are in the same runner now. Which SDK is active is one line -- `TORNADO_SDK_PROFILE`
+in `env/versions.env` -- and a demo the active SDK cannot run is **skipped**, not failed:
 
 ```bash
-TORNADOVM_HOME=<cutile SDK> JAVA_HOME=<jdk21> bash ../scripts/run-cutile-demos.sh
-# 12 passed, 0 failed   (4 demos x compile + launcher + java @argfile)
+source ../scripts/setup-env.sh              # profile `develop`: has the tile API
+bash ../scripts/run-all-demos.sh
+# 66 passed, 0 failed, 0 skipped            (22 demos x compile + launcher + java @argfile)
+
+export TORNADO_SDK_PROFILE=sdkman-6.0.0     # the released SDK: no tile API
+source ../scripts/setup-env.sh
+bash ../scripts/run-all-demos.sh
+# 48 passed, 0 failed, 6 skipped            (19-24 report SKIPPED_REQUIREMENT)
 ```
+
+The tile demos need CUDA Toolkit 13.3+ and driver R580+ on top of that; see
+[`docs/cutile-api.md`](../docs/cutile-api.md) for the userspace toolchain install.
+
+> `--release 21 --enable-preview` is **no longer needed**. Those flags existed because the
+> tile demos were pinned to the `feat/cutile` branch, a jdk21-dev build. PR #1083 is merged,
+> so the `develop` profile is a jdk22plus build and the tile demos compile and run on the
+> same JDK 25 as everything else. `scripts/run-cutile-demos.sh` is kept only for the old
+> feature-branch SDK.
+
+Every run passes `-Dtornado.recover.bailout=False`. Without it a tile kernel that fails to
+compile falls back to the JVM, computes the right answer and prints `correct` -- the exact
+word the runner greps for -- so a wholly blocked GPU path would score as a pass.
 
 ## CUDA equivalents
 

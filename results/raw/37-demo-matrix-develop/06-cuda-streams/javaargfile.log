@@ -1,0 +1,32 @@
+WARNING: module-info.class ignored in patch: /home/michalis/tornadovm-devoxx2026-cuda-demos/vendor/tornadovm/dist/tornadovm-6.1.1-jdk22plus-dev-cuda-linux-amd64/tornadovm-6.1.1-jdk22plus-dev-cuda/share/java/jvmci/jvmci-21.0.2.jar
+units=8 unitSize=32768 innerIterations=65536 executions=8 mode=both
+
+=== SEQUENTIAL (single stream) ===
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess (file:/home/michalis/tornadovm-devoxx2026-cuda-demos/vendor/tornadovm/dist/tornadovm-6.1.1-jdk22plus-dev-cuda-linux-amd64/tornadovm-6.1.1-jdk22plus-dev-cuda/share/java/tornado/tornado-runtime-6.1.1-jdk22plus-dev.jar)
+WARNING: Please consider reporting this to the maintainers of class uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+execution 0: correct, wall=144927 us
+execution 1: correct, wall=1229 us
+execution 2: correct, wall=1182 us
+execution 3: correct, wall=1073 us
+execution 4: correct, wall=1083 us
+execution 5: correct, wall=1040 us
+execution 6: correct, wall=1040 us
+execution 7: correct, wall=1027 us
+SEQUENTIAL (single stream) median wall-clock (all 8 executions incl. first/JIT): 1083 us
+SEQUENTIAL (single stream) median wall-clock (excl. first execution): 1083 us
+SEQUENTIAL (single stream): All executions correct
+
+=== CONCURRENT (withIntraPlanConcurrency) ===
+execution 0: correct, wall=57641 us
+execution 1: correct, wall=1037 us
+execution 2: correct, wall=941 us
+execution 3: correct, wall=1075 us
+execution 4: correct, wall=897 us
+execution 5: correct, wall=897 us
+execution 6: correct, wall=862 us
+execution 7: correct, wall=1062 us
+CONCURRENT (withIntraPlanConcurrency) median wall-clock (all 8 executions incl. first/JIT): 1037 us
+CONCURRENT (withIntraPlanConcurrency) median wall-clock (excl. first execution): 1037 us
+CONCURRENT (withIntraPlanConcurrency): All executions correct
