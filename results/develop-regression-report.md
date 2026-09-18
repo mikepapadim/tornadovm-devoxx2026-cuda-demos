@@ -70,7 +70,8 @@ types**, and the backend emits the operator form directly. Reduced to pure C++ i
 through f32 compiles clean.
 
 This is **not** the documented "fp8 below compute capability 9.0" limitation — this GPU is
-CC 12.0. Written up in `docs/cutile-api.md`. Not filed upstream pending a decision.
+CC 12.0. Written up in `docs/cutile-api.md` and filed upstream as
+[beehive-lab/TornadoVM#1105](https://github.com/beehive-lab/TornadoVM/issues/1105).
 
 ## Harness changes that affect how results are read
 

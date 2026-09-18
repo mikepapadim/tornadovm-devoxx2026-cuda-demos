@@ -242,6 +242,8 @@ elementwise/reduction ops, or gate them in `CUDATileSupportPhase` so they report
 `[UNSUPPORTED]` instead of failing. Either way the tests currently assert behaviour the
 toolchain does not provide.
 
+Filed upstream as **[beehive-lab/TornadoVM#1105](https://github.com/beehive-lab/TornadoVM/issues/1105)**.
+
 ## Documented limitations (from `tile-api.rst:587-630`)
 
 Against CUDA 13.3's 84 `__tile_builtin__` operations, the API covers **71**. The 13 not

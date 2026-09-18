@@ -874,6 +874,12 @@ an `element_cast` round-trip through f32 compiles clean. Not the documented "fp8
 9.0" limitation — this GPU is CC 12.0. Two defensible fixes upstream: emit the cast, or gate
 the ops so they report `[UNSUPPORTED]`.
 
+**Filed: [#1105](https://github.com/beehive-lab/TornadoVM/issues/1105)** — with the pure-C++
+reduction, the working `element_cast` round-trip, and both fix options laid out rather than
+guessed between. Also notes that the unit-test reporter truncates the nvcc log out of the
+bailout message, which is why the first-line symptom is a bare "The CUDA Tile compiler
+failed".
+
 ### A near-miss worth recording
 
 This batch was first built against a clone that was **31 commits stale** — it predated demos
@@ -891,8 +897,7 @@ twin for a six-rung ladder is the demo author's call.
 
 ### Next invocation
 
-- Decide whether to file the FP8 finding upstream; it is written up and reproduced but not
-  filed.
+- FP8 finding filed upstream as #1105; watch for which fix the maintainers prefer.
 - Demo 22's missing `.cu` twin keeps `verify.sh` red.
 - No performance claim is made for demos 23/24. First execution pays an nvcc process spawn
   per kernel/shape/arch, so any timing needs warm-up separation.
