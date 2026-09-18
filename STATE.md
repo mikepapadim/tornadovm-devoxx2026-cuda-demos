@@ -888,16 +888,57 @@ history rewrite. `git push --force-with-lease` **rejected** the push with `stale
 is the only reason demos 17-22 still exist. `--force` would have destroyed them. Fetch before
 planning; use `--force-with-lease`, never `--force`.
 
-### Known open defect (pre-existing)
+### Both twin suites were lying, and are now green
 
-`scripts/verify.sh` fails `1 demo(s) have no .cu equivalent`:
-`demos/22-matmul-ladder-fp16-tile/` has no hand-written CUDA twin while every other demo
-does. Confirmed pre-existing on pristine `origin/main`. Not fixed here — writing a faithful
-twin for a six-rung ladder is the demo author's call.
+`verify.sh` had been red since demo 22 landed — it was the only demo without a CUDA twin.
+Written: `MatMulLadderFP16Tile.cu`, demo 18's ladder plus the tile rung, built with
+`--enable-tile` so tile kernels and host code share one translation unit and the result is
+an executable. (TornadoVM cannot do that: with no host TU to put the launch in, it drives
+`nvcc -tilecubin --tile-only` to a bare cubin and loads it itself.) `verify.sh`: **21/21**.
+
+Writing it exposed two defects in `run-all-cuda.sh`, both of which scored answers wrongly:
+
+1. **Demo 18's twin never validated anything** — it only timed — so the runner's "no verdict
+   in output" branch failed it, and a numerically wrong rung would have gone unnoticed.
+   Every rung is now checked against a CPU reference.
+2. **`check()` grepped for the bare substring `error`**, so a correct run printing
+   `max abs error 0.0002` was scored a **FAILURE**. This is why demos 19-21 could never have
+   been added to that runner. It now matches real diagnostics (`error:`, `cuda err`,
+   `Segmentation fault`) and explicit verdicts.
+
+With both fixed, demos 19-24 join the runner: **44 passed, 0 failed, 1 skipped** (CUTLASS,
+which needs `CUTLASS_DIR`). Demos 23 and 24's twins were kernel-only cubins and are now
+executables that validate their own output, so the reference and the TornadoVM
+implementation can actually be compared rather than merely both compiling.
+
+### Upstream: bailout should not default to on
+
+**Filed: [#1107](https://github.com/beehive-lab/TornadoVM/pull/1107)** (PR) — flip
+`tornado.recover.bailout` to `False` by default.
+
+The argument is that the project has already decided this four times over and only the
+default was left behind: `tornado-test:478` and `tornado-benchmarks.py:63` both hardcode
+`-Dtornado.recover.bailout=False`, `docs/source/tile-api.rst` tells readers to, and
+`TestTileDTypes`'s javadoc says the test *depends* on it. Every first-party harness that
+needs a trustworthy answer turns it off.
+
+Measured both arms rather than asserting no regression: `make tests` on unpatched
+`develop` @ `8d592d6` gives **16 failures**, and the patched build gives **the same 16**,
+test for test (`TestDevices` 2, `ComputeTests` 2,
+`TestMatrixMultiplicationKernelContext` 2, `TestProfiler` 3, `TestTileOpLevel` 7). That is
+expected rather than lucky — `tornado-test` sets the flag explicitly, so the default cannot
+reach the suite — and the run is there to show it, not to discover it. A sample of
+`tornado-examples` run with the flag forced both ways showed no behavioural difference
+either.
+
+The PR says plainly that this is a behaviour change for applications and belongs in release
+notes: code that silently falls back today will now see the exception instead of a slow
+correct answer.
 
 ### Next invocation
 
 - FP8 finding filed upstream as #1105; watch for which fix the maintainers prefer.
+- Bailout default filed as #1107.
 - Demo 22's missing `.cu` twin keeps `verify.sh` red.
 - No performance claim is made for demos 23/24. First execution pays an nvcc process spawn
   per kernel/shape/arch, so any timing needs warm-up separation.

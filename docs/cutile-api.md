@@ -165,7 +165,11 @@ JVM implementation. A tile task that fails to compile therefore **falls back to 
 computes the correct answer, and prints whatever verdict the program prints** — with the GPU
 untouched.
 
-Any demo, test or benchmark that claims to exercise cuTile must run with:
+Upstream PR **[beehive-lab/TornadoVM#1107](https://github.com/beehive-lab/TornadoVM/pull/1107)**
+proposes flipping this default to `False`, on the grounds that `tornado-test`,
+`tornado-benchmarks.py`, `tile-api.rst` and `TestTileDTypes` all already disable it.
+
+Until that lands, any demo, test or benchmark that claims to exercise cuTile must run with:
 
 ```
 -Dtornado.recover.bailout=False
