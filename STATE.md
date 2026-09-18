@@ -922,14 +922,29 @@ default was left behind: `tornado-test:478` and `tornado-benchmarks.py:63` both 
 `TestTileDTypes`'s javadoc says the test *depends* on it. Every first-party harness that
 needs a trustworthy answer turns it off.
 
-Measured both arms rather than asserting no regression: `make tests` on unpatched
-`develop` @ `8d592d6` gives **16 failures**, and the patched build gives **the same 16**,
-test for test (`TestDevices` 2, `ComputeTests` 2,
-`TestMatrixMultiplicationKernelContext` 2, `TestProfiler` 3, `TestTileOpLevel` 7). That is
-expected rather than lucky — `tornado-test` sets the flag explicitly, so the default cannot
-reach the suite — and the run is there to show it, not to discover it. A sample of
-`tornado-examples` run with the flag forced both ways showed no behavioural difference
-either.
+Measured both arms rather than asserting no regression. Full `make tests`, both 201
+classes / 1483 tests / 91 unsupported:
+
+| arm | failed |
+| --- | --- |
+| unpatched `develop` @ `8d592d6` | **17** |
+| patched | **16** |
+
+**16 failures common to both, zero unique to the patch** — the direction that matters. The
+single difference, `TestReductionsFloats#testComputePi`, is **flaky on unpatched develop**:
+re-run six times on the unpatched build it failed twice (runs 1 and 6) and passed four
+times, with the patch nowhere in the picture.
+
+That the arms agree is expected rather than lucky — `tornado-test` sets the flag
+explicitly, so the default cannot reach the suite — and the run is there to show it, not to
+discover it. A sample of `tornado-examples` with the flag forced both ways showed no
+behavioural difference either.
+
+**Correction worth recording:** the PR first claimed "16 vs 16, identical test-for-test".
+That came from comparing only the five classes that failed in the *patched* run, which can
+only detect failures the patch adds, never ones it appears to remove. The full baseline run
+showed 17. The PR body was corrected in place; the conclusion did not change, but the
+evidence behind it now actually supports the claim.
 
 The PR says plainly that this is a behaviour change for applications and belongs in release
 notes: code that silently falls back today will now see the exception instead of a slow
