@@ -1160,3 +1160,35 @@ Evidence: `results/raw/44-merged-7.0.0-all-demos/MANIFEST.md`. All Observed.
 - Update this box's CUDA Tile wheel and re-check demo 24's `.cu`.
 - `env/sdk/develop.env` still points `TORNADO_NVCC` at a python3.11 path (sm_120 machine).
 
+## Batch 45 — Demo 25: TileContext ladder vs. optimised KernelContext vs. native CUDA Tile (2026-09-22)
+
+New demo `demos/25-tile-ladder/` (`TileLadder.java`, `TileLadder.cu`, README). Evidence:
+`results/raw/45-tile-ladder/MANIFEST.md`. All Observed, sm_89, TornadoVM 7.0.0, n = 2048,
+kernel time under nsys, 3 runs, spread ≤ 0.9%, every rung validated on the full matrix.
+
+- **KernelContext:** simple 1006.0 µs → optimised **143.8 µs** (7.0×, 1.23× of cuBLAS).
+  Best of 11 validated tilings: 128×128 block, 8 warps 2×4, 64×32 warp tiles, k16 stages,
+  `cp.async` double buffering, `mmaLoadA/B` byte offsets (→ `ldmatrix`). Multi-warp safety of
+  the fragment loads checked in `CUDALIRStmt.java` at `v7.0.0` first.
+- **TileContext ladder:** 32×32×32 1123.7 → 64×64×64 502.5 → 128×128×32 529.1 → 128×128×64
+  **201.7 µs** (5.6× from shape alone; best of 14 shapes) → + `occupancy=2` **137.4 µs**,
+  1.05× faster than the optimised KernelContext kernel, 1.17× of cuBLAS (117.3 µs).
+  `occupancy=4` is 4.5× slower. The hint is set per-rung (read per compile) and shows only on
+  that kernel in `--printKernel`.
+- **Native CUDA Tile, idiomatic (runtime `n`): 1.8–4.5× slower than TileContext.** Fully
+  attributed: TornadoVM's generated kernel carries constant extents, `assume_aligned(…,16)` and
+  a straight-line k-loop. Native with all three = 200.8 µs (TileContext 201.7); + hint 136.2
+  (TileContext 137.4). TornadoVM's generated kernel compiled natively = 200.2 µs, so the
+  TornadoVM compile/launch path adds nothing. `#pragma unroll` does not give the unroll.
+- Suites: `run-all-demos.sh` **69/69** (23 demos); `run-all-cuda.sh` 45 passed, 2 failed
+  (05, 24 — batch 44 toolchain effects; 25 passes).
+- Own bug caught during tuning: a generator `replace` dropped the A-tile buffer selector; all
+  first-round variants failed validation, fixed before any number was taken.
+
+### Next invocation
+
+- Profile *why* `occupancy=2` helps the tile kernel so much (and `occupancy=4` hurts).
+- The remaining 1.23× from optimised KernelContext to cuBLAS is not attributed; 16-byte
+  `cp.async`, an A-side swizzle and deeper pipelines are the candidates the API lacks.
+- Re-tune demo 25 on sm_120: every tuned choice here (shape, tiling, hint) is sm_89-specific.
+

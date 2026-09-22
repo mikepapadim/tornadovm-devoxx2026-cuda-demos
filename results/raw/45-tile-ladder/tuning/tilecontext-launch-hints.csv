@@ -1,0 +1,7 @@
+hint,verdict,avg_us
+none,PASSED,201.1
+occupancy=1,PASSED,201.2
+occupancy=2,PASSED,137.8
+occupancy=4,PASSED,902.6
+# TileContext 128x128x64, n=2048, 11 executions, one nsys run per hint.
+# Values as printed during the sweep; the per-hint .nsys-rep files were overwritten run to run.

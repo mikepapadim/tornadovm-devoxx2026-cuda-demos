@@ -1,0 +1,33 @@
+# cu run 1
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+34.8,21737381,11,1976125.5,1967396.0,1965187,2015715,19500.6,"void native_runtime<(int)32, (int)32, (int)32>(const __half *, const __half *, float *, int)"
+18.9,11777107,11,1070646.1,1068130.0,1065857,1079490,5397.6,"void native_runtime<(int)64, (int)64, (int)64>(const __half *, const __half *, float *, int)"
+16.4,10246448,11,931495.3,931681.0,929569,932513,939.1,"void native_runtime<(int)128, (int)128, (int)32>(const __half *, const __half *, float *, int)"
+16.1,10066513,11,915137.5,914946.0,910402,919010,2628.6,"void native_runtime<(int)128, (int)128, (int)64>(const __half *, const __half *, float *, int)"
+5.8,3590407,11,326400.6,326464.0,323937,328384,1274.6,"void native_specialised<(int)2048>(const __half *, const __half *, float *)"
+3.5,2208196,11,200745.1,200704.0,199937,202305,638.1,"native_straight_2048(const __half *, const __half *, float *)"
+2.4,1493093,11,135735.7,135264.0,134177,138144,1458.5,"native_hinted_2048(const __half *, const __half *, float *)"
+2.0,1271716,11,115610.5,115296.0,115169,118592,996.6,void cutlass::Kernel<cutlass_80_tensorop_s16816gemm_f16_128x256_32x3_nn_align8>(T1::Params)
+
+# cu run 2
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+34.8,21683208,11,1971200.7,1971236.0,1967300,1977220,2990.5,"void native_runtime<(int)32, (int)32, (int)32>(const __half *, const __half *, float *, int)"
+18.8,11732915,11,1066628.6,1066274.0,1064866,1068994,1387.7,"void native_runtime<(int)64, (int)64, (int)64>(const __half *, const __half *, float *, int)"
+16.5,10256336,11,932394.2,932066.0,930434,934273,1340.5,"void native_runtime<(int)128, (int)128, (int)32>(const __half *, const __half *, float *, int)"
+16.2,10096530,11,917866.4,917410.0,912129,923906,3708.9,"void native_runtime<(int)128, (int)128, (int)64>(const __half *, const __half *, float *, int)"
+5.8,3598247,11,327113.4,327393.0,325153,328769,1523.7,"void native_specialised<(int)2048>(const __half *, const __half *, float *)"
+3.5,2210821,11,200983.7,200865.0,200128,202688,731.5,"native_straight_2048(const __half *, const __half *, float *)"
+2.4,1495777,11,135979.7,135840.0,133952,138912,1458.3,"native_hinted_2048(const __half *, const __half *, float *)"
+2.0,1262465,11,114769.5,114496.0,114336,117280,847.7,void cutlass::Kernel<cutlass_80_tensorop_s16816gemm_f16_128x256_32x3_nn_align8>(T1::Params)
+
+# cu run 3
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+34.9,21808487,11,1982589.7,1969315.0,1965924,2021572,24817.0,"void native_runtime<(int)32, (int)32, (int)32>(const __half *, const __half *, float *, int)"
+18.8,11760309,11,1069119.0,1067201.0,1065154,1081346,5411.0,"void native_runtime<(int)64, (int)64, (int)64>(const __half *, const __half *, float *, int)"
+16.4,10250804,11,931891.3,931618.0,929890,934306,1393.0,"void native_runtime<(int)128, (int)128, (int)32>(const __half *, const __half *, float *, int)"
+16.1,10087923,11,917083.9,916514.0,912897,920673,2599.8,"void native_runtime<(int)128, (int)128, (int)64>(const __half *, const __half *, float *, int)"
+5.8,3601416,11,327401.5,327777.0,324481,329537,1545.6,"void native_specialised<(int)2048>(const __half *, const __half *, float *)"
+3.5,2207523,11,200683.9,200832.0,199841,202337,701.1,"native_straight_2048(const __half *, const __half *, float *)"
+2.4,1506369,11,136942.6,136352.0,134016,140256,2286.9,"native_hinted_2048(const __half *, const __half *, float *)"
+2.0,1272835,11,115712.3,115360.0,115328,118433,918.7,void cutlass::Kernel<cutlass_80_tensorop_s16816gemm_f16_128x256_32x3_nn_align8>(T1::Params)
+

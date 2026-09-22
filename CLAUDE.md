@@ -42,10 +42,10 @@ Every completed task must leave:
 
 Any task that touches a demo must leave it compiling **and running both ways** —
 the `tornado` launcher and `java @$TORNADOVM_HOME/tornado-argfile`.
-`bash scripts/run-all-demos.sh` checks all 22 demos (00–24) and on the default
-`sdkman-7.0.0` profile must end `66 passed, 0 failed, 0 skipped` (22 compiles + 22
-`tornado` runs + 22 `java @argfile` runs). On a profile without the tile API, demos
-19–24 report `SKIPPED_REQUIREMENT` instead.
+`bash scripts/run-all-demos.sh` checks all 23 demos (00–25) and on the default
+`sdkman-7.0.0` profile must end `69 passed, 0 failed, 0 skipped` (23 compiles + 23
+`tornado` runs + 23 `java @argfile` runs). On a profile without the tile API, demos
+19–25 report `SKIPPED_REQUIREMENT` instead.
 
 ## Autonomous loop contract
 

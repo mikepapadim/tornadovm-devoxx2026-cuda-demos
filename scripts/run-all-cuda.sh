@@ -97,6 +97,7 @@ done <<'DEMOS'
 22-matmul-ladder-fp16-tile|MatMulLadderFP16Tile.cu|--enable-tile -std=c++20 -O3 -lcublas|256 20
 23-cutile-row-scan|CuTileRowScan.cu|--enable-tile -std=c++20 -O3|4096 1000 20
 24-cutile-histogram|CuTileHistogram.cu|--enable-tile -std=c++20 -O3|1048576 256 20
+25-tile-ladder|TileLadder.cu|--enable-tile -std=c++20 -O3 -lcublas|256 3
 DEMOS
 
 # Demo 15's two diagnostic probes: they attribute the kernel-time differences

@@ -1,0 +1,96 @@
+== profile: sdkman-7.0.0 (tile API: 1)
+== 00-hello-gpu
+OK   00-hello-gpu -- compile
+OK   00-hello-gpu -- tornado launcher
+OK   00-hello-gpu -- java @argfile
+== 01-first-cuda-kernel
+OK   01-first-cuda-kernel -- compile
+OK   01-first-cuda-kernel -- tornado launcher
+OK   01-first-cuda-kernel -- java @argfile
+== 02-cuda-runtime-api
+OK   02-cuda-runtime-api -- compile
+OK   02-cuda-runtime-api -- tornado launcher
+OK   02-cuda-runtime-api -- java @argfile
+== 04-cublas-hybrid
+OK   04-cublas-hybrid -- compile
+OK   04-cublas-hybrid -- tornado launcher
+OK   04-cublas-hybrid -- java @argfile
+== 05-cufft-hybrid
+OK   05-cufft-hybrid -- compile
+OK   05-cufft-hybrid -- tornado launcher
+OK   05-cufft-hybrid -- java @argfile
+== 06-cuda-streams
+OK   06-cuda-streams -- compile
+OK   06-cuda-streams -- tornado launcher
+OK   06-cuda-streams -- java @argfile
+== 07-cuda-graph-benefit
+OK   07-cuda-graph-benefit -- compile
+OK   07-cuda-graph-benefit -- tornado launcher
+OK   07-cuda-graph-benefit -- java @argfile
+== 08-tensor-core-mma
+OK   08-tensor-core-mma -- compile
+OK   08-tensor-core-mma -- tornado launcher
+OK   08-tensor-core-mma -- java @argfile
+== 11-integrated-showcase
+OK   11-integrated-showcase -- compile
+OK   11-integrated-showcase -- tornado launcher
+OK   11-integrated-showcase -- java @argfile
+== 12-cutlass-fused-epilogue
+OK   12-cutlass-fused-epilogue -- compile
+OK   12-cutlass-fused-epilogue -- tornado launcher
+OK   12-cutlass-fused-epilogue -- java @argfile
+== 13-cudnn-jit-convblock
+OK   13-cudnn-jit-convblock -- compile
+OK   13-cudnn-jit-convblock -- tornado launcher
+OK   13-cudnn-jit-convblock -- java @argfile
+== 14-warp-async-shared
+OK   14-warp-async-shared -- compile
+OK   14-warp-async-shared -- tornado launcher
+OK   14-warp-async-shared -- java @argfile
+== 15-kernel-time-comparison
+OK   15-kernel-time-comparison -- compile
+OK   15-kernel-time-comparison -- tornado launcher
+OK   15-kernel-time-comparison -- java @argfile
+== 16-tensor-core-datatypes
+OK   16-tensor-core-datatypes -- compile
+OK   16-tensor-core-datatypes -- tornado launcher
+OK   16-tensor-core-datatypes -- java @argfile
+== 17-matmul-ladder
+OK   17-matmul-ladder -- compile
+OK   17-matmul-ladder -- tornado launcher
+OK   17-matmul-ladder -- java @argfile
+== 18-matmul-ladder-fp16
+OK   18-matmul-ladder-fp16 -- compile
+OK   18-matmul-ladder-fp16 -- tornado launcher
+OK   18-matmul-ladder-fp16 -- java @argfile
+== 19-cutile-matmul
+OK   19-cutile-matmul -- compile
+OK   19-cutile-matmul -- tornado launcher
+OK   19-cutile-matmul -- java @argfile
+== 20-cutile-hybrid
+OK   20-cutile-hybrid -- compile
+OK   20-cutile-hybrid -- tornado launcher
+OK   20-cutile-hybrid -- java @argfile
+== 21-cutile-flash-attention
+OK   21-cutile-flash-attention -- compile
+OK   21-cutile-flash-attention -- tornado launcher
+OK   21-cutile-flash-attention -- java @argfile
+== 22-matmul-ladder-fp16-tile
+OK   22-matmul-ladder-fp16-tile -- compile
+OK   22-matmul-ladder-fp16-tile -- tornado launcher
+OK   22-matmul-ladder-fp16-tile -- java @argfile
+== 23-cutile-row-scan
+OK   23-cutile-row-scan -- compile
+OK   23-cutile-row-scan -- tornado launcher
+OK   23-cutile-row-scan -- java @argfile
+== 24-cutile-histogram
+OK   24-cutile-histogram -- compile
+OK   24-cutile-histogram -- tornado launcher
+OK   24-cutile-histogram -- java @argfile
+== 25-tile-ladder
+OK   25-tile-ladder -- compile
+OK   25-tile-ladder -- tornado launcher
+OK   25-tile-ladder -- java @argfile
+
+== Summary: 69 passed, 0 failed, 0 skipped ==
+   logs: all-java

@@ -1,0 +1,2 @@
+/home/michalis/.local/lib/python3.10/site-packages/nvidia/cu13/bin/nvcc
+Build cuda_13.3.r13.3/compiler.38244171_0

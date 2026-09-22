@@ -104,6 +104,7 @@ done <<'DEMOS'
 22-matmul-ladder-fp16-tile:MatMulLadderFP16Tile:256 5:tile
 23-cutile-row-scan:CuTileRowScan:4096 1000 20:tile
 24-cutile-histogram:CuTileHistogram:1048576 256 20:tile
+25-tile-ladder:TileLadder:256 3:tile
 DEMOS
 
 echo

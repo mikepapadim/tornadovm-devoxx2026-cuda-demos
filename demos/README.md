@@ -28,6 +28,7 @@ Each demo directory has its own `README.md` with build/run commands, a
 | [22-matmul-ladder-fp16-tile](22-matmul-ladder-fp16-tile/) | `MatMulLadderFP16Tile.java` | Demo 18's FP16 ladder with a **`TileContext`** rung inserted between the hand-written `mma.sync` rung and the vendor libraries. At n=1024 the tile rung is 2.8x faster than hand-written MMA and 3.3x slower than cuBLAS, in nsys kernel time. |
 | [23-cutile-row-scan](23-cutile-row-scan/) | `CuTileRowScan.java` | A per-row prefix sum is one call, `tc.prefixSum`. The row is 1000 wide against a 128-wide tile, so `loadMasked`/`storeMasked` handle the 24-lane ragged tail and a `[1,1]` carry tile rides the loop. The first demo here with a **scan, a masked load/store and a loop-carried reduction**. |
 | [24-cutile-histogram](24-cutile-histogram/) | `CuTileHistogram.java` | A value histogram with **`PartitionView.atomicAdd`** — 4096 tile blocks folding into 256 bins, ~1M contended adds. Also the answer to "what replaces a scatter?": a predicate over the whole tile, since CUDA Tile has no gather/scatter. The only demo using the tile atomics. |
+| [25-tile-ladder](25-tile-ladder/) | `TileLadder.java` | **The TileContext ladder** against a fully optimised `KernelContext` GEMM (128×128 blocks, 8 warps, 16 fragments per warp, `cp.async` double buffering) and native CUDA Tile. The tile shape alone is worth 5.6× in kernel time; with one launch hint the ten-line tile kernel edges past the hand-tuned one (137.4 vs 143.8 µs, cuBLAS 117.3). Native CUDA Tile written the usual way is up to 4.5× slower — until it is given the three facts TornadoVM's JIT knows, when it matches exactly. |
 
 ## Building and running
 
@@ -66,7 +67,7 @@ in `env/versions.env` -- and a demo the active SDK cannot run is **skipped**, no
 ```bash
 source ../scripts/setup-env.sh              # default profile `sdkman-7.0.0`: has the tile API
 bash ../scripts/run-all-demos.sh
-# 66 passed, 0 failed, 0 skipped            (22 demos x compile + launcher + java @argfile)
+# 69 passed, 0 failed, 0 skipped            (23 demos x compile + launcher + java @argfile)
 
 export TORNADO_SDK_PROFILE=sdkman-6.0.0     # the released SDK: no tile API
 source ../scripts/setup-env.sh
@@ -95,10 +96,10 @@ read side by side, and every one checks its result against a reference (demo 18'
 `.cu` used to print timings only; it validates since 3ade5c5).
 
 ```bash
-bash ../scripts/run-all-cuda.sh   # 22 compiles + 22 runs + 2 probes; CUDA toolkit only, no JDK
+bash ../scripts/run-all-cuda.sh   # 23 compiles + 23 runs + 2 probes; CUDA toolkit only, no JDK
 ```
 
-Results depend on the machine's toolchain — on the sm_89 box it ends 43 passed,
+Results depend on the machine's toolchain — on the sm_89 box it ends 45 passed,
 2 failed (demos 05 and 24, both toolchain effects); see "CUDA equivalents" in the repo
 README for why.
 
@@ -120,9 +121,9 @@ only 1.28x. The repo README has the full table.
 
 ## Evidence
 
-All 22 demos, CUDA Tile demos included, run on the pinned TornadoVM 7.0.0 / JDK 25.0.2 /
-RTX 4090: **66/66** checks pass (22 compiles + 22 `tornado` runs + 22 `java @argfile`
-runs, nothing skipped) — `results/raw/44-merged-7.0.0-all-demos/run-all-demos.log`.
+All 23 demos, CUDA Tile demos included, run on the pinned TornadoVM 7.0.0 / JDK 25.0.2 /
+RTX 4090: **69/69** checks pass (23 compiles + 23 `tornado` runs + 23 `java @argfile`
+runs, nothing skipped) — `results/raw/45-tile-ladder/run-all-demos.log`.
 Before the CUDA Tile demos were merged in, demos 00-18 alone were 48/48
 (`results/raw/40-tornadovm-7-migration/`); wall-clock timings for them were re-measured
 on 7.0.0 in `results/raw/41-tornadovm-7-timings/`.

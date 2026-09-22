@@ -112,8 +112,8 @@ failure — on a profile without the tile API, so one demo set works across SDKs
 
 | Profile | SDK | Tile API | `run-all-demos.sh` |
 | --- | --- | --- | --- |
-| **`sdkman-7.0.0`** (default) | released, `sdk install tornadovm 7.0.0-jdk22plus-cuda` | **yes** | **66 passed, 0 failed, 0 skipped** (sm_89) |
-| `develop` | source build of upstream `develop` in `vendor/tornadovm` | **yes** | 66 passed, 0 failed, 0 skipped (sm_120) |
+| **`sdkman-7.0.0`** (default) | released, `sdk install tornadovm 7.0.0-jdk22plus-cuda` | **yes** | **69 passed, 0 failed, 0 skipped** (sm_89, 23 demos) |
+| `develop` | source build of upstream `develop` in `vendor/tornadovm` | **yes** | 66 passed, 0 failed, 0 skipped (sm_120, 22 demos — before demo 25) |
 | `sdkman-6.0.0` | released, `sdk install tornadovm 6.0.0-jdk22plus-cuda` | no | 48 passed, 0 failed, **6 skipped** |
 
 Override for one shell — **export it first**, since `VAR=x source …` does not persist:
@@ -165,7 +165,7 @@ Driver: CUDADriver
 	CUDA --  [NVIDIA CUDA] -- NVIDIA GeForce RTX 4090
 ```
 
-Run everything — compiles all sixteen Track A demos and runs each both via the
+Run everything — compiles all 23 demos and runs each both via the
 `tornado` launcher and via `java @argfile` (48 checks):
 
 ```bash
@@ -227,9 +227,9 @@ and JDK-specific — `-XX:+EnableJVMCI` is required on JDK ≤ 26 and fatal on J
 
 Each demo is one self-contained Java file, paired with a hand-written CUDA C++
 equivalent in the same folder (see **CUDA equivalents** below). Every row below is
-verified on the pinned **TornadoVM 7.0.0** / JDK 25 / RTX 4090 (sm_89): **66/66** — 22
+verified on the pinned **TornadoVM 7.0.0** / JDK 25 / RTX 4090 (sm_89): **69/69** — 23
 demos × compile, `tornado` launcher and `java @argfile`, nothing skipped
-(`results/raw/44-merged-7.0.0-all-demos/run-all-demos.log`).
+(`results/raw/45-tile-ladder/run-all-demos.log`).
 
 Wall-clock timings for demos 00-18 were re-measured on 7.0.0 — see "Measured on
 TornadoVM 7.0.0" below and `results/raw/41-tornadovm-7-timings/`. Other `nsys` and
@@ -270,6 +270,7 @@ profiler, not the wall clock, is what shows the effect at all.
 | [22](demos/22-matmul-ladder-fp16-tile/) † | `MatMulLadderFP16Tile.java` | **FP16 ladder with a CUDA Tile rung** inserted between hand-written `mma.sync` and the vendor libraries; measure with `scripts/compare-ladder.sh 22` | `tornado --jvm="-Dtornado.recover.bailout=False" --classpath . MatMulLadderFP16Tile 1024 20` |
 | [23](demos/23-cutile-row-scan/) † | `CuTileRowScan.java` | **CUDA Tile scan**: a per-row prefix sum is one call, `tc.prefixSum`. 1000 columns against a 128-wide tile, so `loadMasked`/`storeMasked` handle the ragged tail and a `[1,1]` carry rides the loop | `tornado --jvm="-Dtornado.recover.bailout=False" --classpath . CuTileRowScan 4096 1000 20` |
 | [24](demos/24-cutile-histogram/) † | `CuTileHistogram.java` | **CUDA Tile atomics**: `PartitionView.atomicAdd`, 4096 blocks folding into 256 bins. Also what replaces a scatter — a predicate over the whole tile, since CUDA Tile has no gather/scatter | `tornado --jvm="-Dtornado.recover.bailout=False" --classpath . CuTileHistogram 1048576 256 20` |
+| [25](demos/25-tile-ladder/) † | `TileLadder.java` | **TileContext ladder vs. an optimised KernelContext GEMM vs. native CUDA Tile**: tile shape worth 5.6×; with `occupancy=2` the ten-line tile kernel beats the hand-tuned KernelContext one; idiomatic native CUDA Tile is up to 4.5× slower until given what the JIT knows | `tornado --jvm="-Dtornado.recover.bailout=False" --classpath . TileLadder 2048 10` |
 | [16](demos/16-tensor-core-datatypes/) | `TensorCoreDataTypes.java` | **BF16, int8, FP8 e4m3 and FP8 e5m2** MMA from Java — every operand type the backend can emit, each validated and counted | `tornado --classpath . TensorCoreDataTypes` |
 | [15](demos/15-kernel-time-comparison/) | `KernelTimeComparison.java` | **Start here.** Kernel time only, TornadoVM vs hand-written CUDA over 3 kernels; both deltas root-caused with `nsys` + Nsight Compute counters | `tornado --classpath . KernelTimeComparison` |
 
@@ -386,7 +387,7 @@ bash scripts/run-all-cuda.sh          # no JDK needed; see the note below on res
 | Machine | Result | Notes |
 |---|---|---|
 | RTX 5070 Ti (sm_120), `develop` profile | 44 passed, 0 failed, 1 skipped | demo 12 skipped without a CUTLASS checkout (`results/raw/39-cuda-twins/`) |
-| RTX 4090 (sm_89), `sdkman-7.0.0` profile, CUTLASS 3.5.1 | **43 passed, 2 failed** | see below (`results/raw/44-merged-7.0.0-all-demos/`) |
+| RTX 4090 (sm_89), `sdkman-7.0.0` profile, CUTLASS 3.5.1 | **45 passed, 2 failed** (with demo 25) | see below (`results/raw/45-tile-ladder/`) |
 
 The two sm_89 failures are toolchain effects, not demo bugs:
 
@@ -600,7 +601,7 @@ Track B on 6.0.0 is open work, not a result — nothing here claims it now works
 
 - `demos/` — Track A demos, one directory and one README each.
 - `scripts/setup-env.sh` — sets `JAVA_HOME`/`TORNADOVM_HOME`, generates the argfile.
-- `scripts/run-all-demos.sh` — compiles and runs all 22 demos both ways (66 checks), skipping any the active SDK profile cannot run. Needs a GPU.
+- `scripts/run-all-demos.sh` — compiles and runs all 23 demos both ways (69 checks), skipping any the active SDK profile cannot run. Needs a GPU.
 - `scripts/run-all-cuda.sh` — builds and runs the hand-written CUDA equivalents. Needs a GPU and the CUDA toolkit, but no JDK.
 - `scripts/verify.sh` — validates deliverables and cited evidence paths. No GPU needed.
 - `docs/NVIDIA-BRIEF.md` — start-here page for compiler engineers: lowering path, measurements, ceiling.

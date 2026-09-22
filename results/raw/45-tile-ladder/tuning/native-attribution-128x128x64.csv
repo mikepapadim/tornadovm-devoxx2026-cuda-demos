@@ -1,0 +1,8 @@
+kernel,instances,avg_us
+"v1_aligned(const __half *, const __half *, float *, int)",11,1024.7
+"v0_runtime(const __half *, const __half *, float *, int)",11,913.7
+"void v2_constant<(int)2048>(const __half *, const __half *, ",11,798.5
+"void v3_both<(int)2048>(const __half *, const __half *, floa",11,326.2
+"void v4_unroll<(int)2048>(const __half *, const __half *, fl",11,325.8
+"v5_straight(const __half *, const __half *, float *)",11,200.4
+"replica",11,200.2

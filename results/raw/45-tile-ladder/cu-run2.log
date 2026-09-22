@@ -1,0 +1,27 @@
+WARNING: CPU IP/backtrace sampling not supported, disabling.
+Try the 'nsys status --environment' command to learn more.
+
+WARNING: CPU context switch tracing not supported, disabling.
+Try the 'nsys status --environment' command to learn more.
+
+TileLadder (hand-written CUDA Tile + cuBLAS): FP16 C = A * B, 2048x2048, FP32 accumulate, 10 reps
+
+rung                                         median us   GFLOP/s
+-- part 1: the tile-shape ladder, n as a kernel argument
+N1. cuTile 32x32x32, runtime n                  1973.7      8704   max abs err 0.0000  correct
+N2. cuTile 64x64x64, runtime n                  1068.7     16075   max abs err 0.0000  correct
+N3. cuTile 128x128x32, runtime n                 934.7     18380   max abs err 0.0000  correct
+N4. cuTile 128x128x64, runtime n                 920.4     18665   max abs err 0.0000  correct
+-- part 2: 128x128x64 given what TornadoVM's JIT knows
+N5. + constant n + assume_aligned                329.3     52164   max abs err 0.0000  correct
+N6. + k-loop as straight-line code               203.6     84361   max abs err 0.0000  correct
+N7. + launch hint occupancy=2                    138.3    124218   max abs err 0.0000  correct
+-- reference
+R. cuBLAS GemmEx FP16->FP32                      119.7    143548   max abs err 0.0000  correct
+
+All rungs produced the same, correct result
+Collecting data...
+Generating '/tmp/nsys-report-24ba.qdstrm'
+[1/1] [0%                          ] cu2.nsys-rep[1/1] [0%                          ] cu2.nsys-rep[1/1] [6%                          ] cu2.nsys-rep[1/1] [============57%             ] cu2.nsys-rep[1/1] [========================100%] cu2.nsys-rep[1/1] [========================100%] cu2.nsys-rep
+Generated:
+    cu2.nsys-rep

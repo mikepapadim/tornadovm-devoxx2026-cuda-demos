@@ -1,0 +1,49 @@
+WARNING: CPU IP/backtrace sampling not supported, disabling.
+Try the 'nsys status --environment' command to learn more.
+
+WARNING: CPU context switch tracing not supported, disabling.
+Try the 'nsys status --environment' command to learn more.
+
+WARNING: module-info.class ignored in patch: /home/michalis/.sdkman/candidates/tornadovm/7.0.0-jdk22plus-cuda/share/java/jvmci/jvmci-21.0.2.jar
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess (file:/home/michalis/.sdkman/candidates/tornadovm/7.0.0-jdk22plus-cuda/share/java/tornado/tornado-runtime-7.0.0.jar)
+WARNING: Please consider reporting this to the maintainers of class uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+TileContext ladder vs optimised KernelContext: FP16 C = A * B, 2048x2048, FP32 accumulate
+  10 executions per rung, steady-state median wall clock (first excluded)
+  Wall clock includes host dispatch and the copy-out. For kernel time use nsys (README.md).
+
+1. KernelContext, simple
+   KernelContext, simple              PASSED (max abs err 0.0000, 0/4194304 out of tol)
+2. KernelContext, optimised
+   KernelContext, optimised           PASSED (max abs err 0.0000, 0/4194304 out of tol)
+3. TileContext 32x32x32
+   TileContext 32x32x32               PASSED (max abs err 0.0000, 0/4194304 out of tol)
+4. TileContext 64x64x64
+   TileContext 64x64x64               PASSED (max abs err 0.0000, 0/4194304 out of tol)
+5. TileContext 128x128x32
+   TileContext 128x128x32             PASSED (max abs err 0.0000, 0/4194304 out of tol)
+6. TileContext 128x128x64
+   TileContext 128x128x64             PASSED (max abs err 0.0000, 0/4194304 out of tol)
+7. TileContext 128x128x64 +hint
+   TileContext 128x128x64 +hint       PASSED (max abs err 0.0000, 0/4194304 out of tol)
+8. cuBLAS GemmEx FP16->FP32
+   cuBLAS GemmEx FP16->FP32           PASSED (max abs err 0.0000, 0/4194304 out of tol)
+
+=== Summary (steady-state median wall clock, this run / this GPU) ===
+rung                               nsys kernel name        median us    GFLOP/s
+1. KernelContext, simple           kcSimple                     2115       8123
+2. KernelContext, optimised        kcOptimised                  1200      14317
+3. TileContext 32x32x32            tile32x32x32                 2133       8054
+4. TileContext 64x64x64            tile64x64x64                 1539      11163
+5. TileContext 128x128x32          tile128x128x32               1518      11317
+6. TileContext 128x128x64          tile128x128x64               1183      14522
+7. TileContext 128x128x64 +hint    tile128x128x64Hinted         1146      14991
+8. cuBLAS GemmEx FP16->FP32        (cuBLAS-chosen)              1054      16300
+
+All rungs produced the same, correct result
+Collecting data...
+Generating '/tmp/nsys-report-d721.qdstrm'
+[1/1] [0%                          ] java1.nsys-rep[1/1] [0%                          ] java1.nsys-rep[1/1] [6%                          ] java1.nsys-rep[1/1] [======33%                   ] java1.nsys-rep[1/1] [==============63%           ] java1.nsys-rep[1/1] [======================90%   ] java1.nsys-rep[1/1] [========================100%] java1.nsys-rep[1/1] [========================100%] java1.nsys-rep
+Generated:
+    java1.nsys-rep

@@ -1,0 +1,38 @@
+WARNING: module-info.class ignored in patch: /home/michalis/.sdkman/candidates/tornadovm/7.0.0-jdk22plus-cuda/share/java/jvmci/jvmci-21.0.2.jar
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess (file:/home/michalis/.sdkman/candidates/tornadovm/7.0.0-jdk22plus-cuda/share/java/tornado/tornado-runtime-7.0.0.jar)
+WARNING: Please consider reporting this to the maintainers of class uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+TileContext ladder vs optimised KernelContext: FP16 C = A * B, 256x256, FP32 accumulate
+  3 executions per rung, steady-state median wall clock (first excluded)
+  Wall clock includes host dispatch and the copy-out. For kernel time use nsys (README.md).
+
+1. KernelContext, simple
+   KernelContext, simple              PASSED (max abs err 0.0000, 0/65536 out of tol)
+2. KernelContext, optimised
+   KernelContext, optimised           PASSED (max abs err 0.0000, 0/65536 out of tol)
+3. TileContext 32x32x32
+   TileContext 32x32x32               PASSED (max abs err 0.0000, 0/65536 out of tol)
+4. TileContext 64x64x64
+   TileContext 64x64x64               PASSED (max abs err 0.0000, 0/65536 out of tol)
+5. TileContext 128x128x32
+   TileContext 128x128x32             PASSED (max abs err 0.0000, 0/65536 out of tol)
+6. TileContext 128x128x64
+   TileContext 128x128x64             PASSED (max abs err 0.0000, 0/65536 out of tol)
+7. TileContext 128x128x64 +hint
+   TileContext 128x128x64 +hint       PASSED (max abs err 0.0000, 0/65536 out of tol)
+8. cuBLAS GemmEx FP16->FP32
+   cuBLAS GemmEx FP16->FP32           PASSED (max abs err 0.0000, 0/65536 out of tol)
+
+=== Summary (steady-state median wall clock, this run / this GPU) ===
+rung                               nsys kernel name        median us    GFLOP/s
+1. KernelContext, simple           kcSimple                      254        132
+2. KernelContext, optimised        kcOptimised                   204        164
+3. TileContext 32x32x32            tile32x32x32                  298        113
+4. TileContext 64x64x64            tile64x64x64                  223        150
+5. TileContext 128x128x32          tile128x128x32                299        112
+6. TileContext 128x128x64          tile128x128x64                140        240
+7. TileContext 128x128x64 +hint    tile128x128x64Hinted          463         72
+8. cuBLAS GemmEx FP16->FP32        (cuBLAS-chosen)               253        133
+
+All rungs produced the same, correct result
