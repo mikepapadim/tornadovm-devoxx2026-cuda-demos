@@ -22,22 +22,23 @@ sizes, identical arithmetic including bounds checks, and no `-use_fast_math`
 (TornadoVM does not enable it either, so turning it on would measure a compiler
 flag rather than codegen).
 
-## Result
+## Result (TornadoVM 7.0.0)
 
 Mean of the per-kernel `Avg (ns)` reported by `nsys`, over 3 independent runs of
-20 executions each, RTX 4090. Spread across runs is under 1%, so these are
-stable numbers rather than one-shot readings
-(`results/raw/21-kernel-time-comparison/repeat-runs.csv` has every value).
+20 executions each, RTX 4090. Spread across runs is under 0.7%
+(`results/raw/36-demo15-demo17-on-7.0.0/15-nsys-kernsum.csv` has every value).
 
-| Kernel | TornadoVM | CUDA | Ratio |
-|---|---|---|---|
-| `elementwise` (memory-bound) | 13.94 µs | 10.62 µs | CUDA **1.31x** faster |
-| `stencil` (memory-bound) | 14.32 µs | 11.55 µs | CUDA **1.24x** faster |
-| `polynomial` (compute-bound) | 35.24 µs | 39.93 µs | TornadoVM **1.13x** faster |
+| Kernel | TornadoVM | CUDA | Ratio | on 6.0.0 |
+|---|---|---|---|---|
+| `elementwise` (memory-bound) | 10.98 µs | 10.69 µs | CUDA **1.03x** faster | CUDA 1.31x |
+| `stencil` (memory-bound) | 11.95 µs | 11.63 µs | CUDA **1.03x** faster | CUDA 1.24x |
+| `polynomial` (compute-bound) | 35.09 µs | 40.27 µs | TornadoVM **1.15x** faster | TornadoVM 1.13x |
 
-TornadoVM loses on both memory-bound kernels and wins on the compute-bound one.
-Both results have a single identifiable cause, and neither is "TornadoVM emits
-worse arithmetic" — §Why below establishes that with two probes.
+**The story is the last column.** On TornadoVM 6.0.0 this demo found a 24–31% gap
+on memory-bound kernels, traced it to one cause with Nsight Compute and a probe,
+and reported it upstream. The fix shipped in 7.0.0 and the gap is now ~3%. The
+compute-bound win is unchanged, and it has a different cause: JIT specialisation.
+§Why below walks through both.
 
 ## Reproducing it
 
@@ -67,54 +68,62 @@ demo exists to look past.
 ```bash
 nsys profile --trace=cuda --force-overwrite=true -o tornado \
   tornado --classpath . KernelTimeComparison
-nsys stats --report cuda_gpu_kern_sum --format csv tornado.nsys-rep
+nsys stats --force-export=true --report cuda_gpu_kern_sum --format csv tornado.nsys-rep
 
 nsys profile --trace=cuda --force-overwrite=true -o cuda ./kernel_time_comparison
-nsys stats --report cuda_gpu_kern_sum --format csv cuda.nsys-rep
+nsys stats --force-export=true --report cuda_gpu_kern_sum --format csv cuda.nsys-rep
 ```
 
+`--force-export=true` matters: without it `nsys stats` can silently reuse a stale
+`.sqlite` from an earlier run with the same name.
+
 `Avg (ns)` is the column to compare. Because both sides name their kernels
-`elementwise`, `polynomial` and `stencil`, the two tables line up directly:
+`elementwise`, `polynomial` and `stencil`, the two tables line up directly
+(7.0.0, run 1 of 3; middle columns omitted):
 
 ```
 # TornadoVM
-Time (%),Total Time (ns),Instances,Avg (ns),Name
-55.5,706021,20,35301.1,polynomial
-22.5,286531,20,14326.5,stencil
-22.0,279360,20,13968.0,elementwise
+Time (%),Total Time (ns),Instances,Avg (ns),...,Name
+60.5,700022,20,35001.1,...,polynomial
+20.6,238215,20,11910.8,...,stencil
+18.9,219335,20,10966.8,...,elementwise
 
 # CUDA
-Time (%),Total Time (ns),Instances,Avg (ns),Name
-64.4,804708,20,40235.4,"polynomial(const float *, float *, int, int)"
-18.5,231808,20,11590.4,"stencil(const float *, float *, int)"
-17.1,213953,20,10697.6,"elementwise(const float *, float *, int)"
+64.3,805274,20,40263.7,...,"polynomial(const float *, float *, int, int)"
+18.6,232328,20,11616.4,...,"stencil(const float *, float *, int)"
+17.1,213928,20,10696.4,...,"elementwise(const float *, float *, int)"
 ```
 
 `Instances` must read 20 on both sides — that confirms you are comparing the
 same amount of work.
 
-### 4. Optional — per-kernel hardware counters
+### 4. Per-kernel hardware counters
 
-`ncu` gives memory throughput and occupancy per kernel:
+Nsight Compute shows the memory side directly. Use the 2024.3.2 build: when last
+checked, the newer `ncu` on `PATH` on this machine could not connect to the driver
+(`results/failures/08-nsight-compute-permission.md`). The commands below are the ones
+that produced this README's counters:
 
 ```bash
-ncu --set full --kernel-name elementwise --launch-count 1 ./kernel_time_comparison
+NCU=/opt/nvidia/nsight-compute/2024.3.2/ncu
+M=l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum,\
+l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio,\
+dram__bytes_read.sum,smsp__inst_executed.sum
+
+$NCU --csv --target-processes all --metrics $M \
+  java @$TORNADOVM_HOME/tornado-argfile -cp . KernelTimeComparison 4194304 256 2
+$NCU --csv --metrics $M ./kernel_time_comparison 4194304 256 2
 ```
 
-**This is blocked on this machine** (`ERR_NVGPUCTRPERM`,
-`NVreg_RestrictProfilingToAdminUsers=1`, no passwordless sudo — see
-`results/failures/08-nsight-compute-permission.md`). Everything reported here
-comes from `nsys`, which needs no special permissions. On a machine where `ncu`
-works, it would show the transaction-count effect of §Why directly.
+## Why: two effects, one of them now fixed
 
-## Why: two probes, two causes
+Neither effect is arithmetic quality. Both are structural, and both are
+reproducible in isolation with a hand-written CUDA probe.
 
-Neither difference is arithmetic quality. Both are structural, and both are
-reproducible in isolation.
+### Memory-bound: the array header used to misalign coalescing — fixed in 7.0.0
 
-### Memory-bound: TornadoVM's array header misaligns coalescing
-
-`tornado --printKernel` shows every `FloatArray` access offset by four floats:
+`tornado --printKernel` shows every `FloatArray` access offset by four floats,
+past the array's 16-byte header:
 
 ```c
 l_4  =  (long long) i_2;
@@ -125,69 +134,65 @@ f_8  =  *(( float *) ul_7);
 ```
 
 A warp reads 32 x 4 = 128 bytes, which is exactly **4 sectors** of 32 bytes when
-aligned. Offsetting by 16 bytes makes every warp-wide access straddle a fifth
-sector: **5 transactions for the same data, 1.25x.**
+aligned. On **6.0.0** the buffer itself started on an aligned boundary, so the
+16-byte header pushed every warp-wide access across a fifth sector: **5 transactions for the
+same data**. Nsight Compute measured exactly that — 5.00 sectors per request in
+every TornadoVM kernel against 4.00 for CUDA, and sector totals identical to the
+same CUDA kernel run deliberately at a 4-float offset
+(`results/raw/22-ncu-alignment-counters/`). Reported upstream as
+[#1065](https://github.com/beehive-lab/TornadoVM/issues/1065).
 
-That is measurable directly, and Nsight Compute measures it. Every global access
-in all three TornadoVM kernels reports 5.00 sectors per request, against 4.00
-for the hand-written CUDA:
-
-```bash
-/opt/nvidia/nsight-compute/2024.3.2/ncu --csv \
-  --metrics l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio,\
-l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum \
-  <binary>
-```
-
-| Kernel | metric | CUDA | TornadoVM | CUDA forced to offset 4 |
-|---|---|---|---|---|
-| `elementwise` | load sectors | 524,288 | **655,360** | 655,360 |
-| `elementwise` | store sectors | 524,288 | **655,360** | 655,360 |
-| `polynomial` | load sectors | 524,288 | **655,360** | — |
-| `stencil` | load sectors | 1,835,006 | **1,966,080** | 1,966,080 |
-| `stencil` | store sectors | 524,288 | **655,360** | 655,360 |
-
-The TornadoVM counts are **identical to the deliberately misaligned CUDA
-kernel** — exactly, not approximately. The mechanism is measured, not inferred.
-
-Two things fall out that the timing alone could not show:
-
-- **`polynomial` pays the same 1.25x penalty and it costs nothing.** It is the
-  kernel where TornadoVM *wins*. Being compute-bound, it hides the extra
-  transactions behind the FMA chain. So the header offset is in every kernel
-  TornadoVM generates; it only becomes visible in time when the kernel is
-  bandwidth-bound.
-- **DRAM traffic is unchanged** (~16.78 MB read on both sides, within 0.03%).
-  The cost is extra 32-byte sector transactions inside the cache hierarchy, not
-  extra memory traffic.
-
-For the wall-clock consequence, [`ProbeHeaderAlignment.cu`](ProbeHeaderAlignment.cu)
-runs the *identical* CUDA kernel at offset 0 and offset 4 floats:
+[`ProbeHeaderAlignment.cu`](ProbeHeaderAlignment.cu) shows what that offset
+costs, using the *identical* CUDA kernel at offset 0 and offset 4 floats:
 
 ```bash
 nvcc -arch=sm_89 -o probe_alignment ProbeHeaderAlignment.cu && ./probe_alignment
 ```
 
 ```
-elementwise  offset=0 floats : median 12.5 us
-stencil      offset=0 floats : median 13.2 us
-elementwise  offset=4 floats : median 16.0 us     <- 1.28x slower
-stencil      offset=4 floats : median 16.7 us     <- 1.27x slower
+elementwise  offset=0 floats : median 11.7 us
+stencil      offset=0 floats : median 12.5 us
+elementwise  offset=4 floats : median 15.1 us     <- 1.29x slower
+stencil      offset=4 floats : median 15.7 us     <- 1.26x slower
 ```
 
-1.28x and 1.27x, against the 1.31x and 1.24x measured between the two
-implementations. **The header offset accounts for essentially the whole
-memory-bound gap.** It is a data-layout property, not a code-generation one, and
-padding the payload to a 128-byte boundary would recover it. Reported upstream —
-see the repo README's "Upstream issues filed" section.
+That matches the 1.31x / 1.24x this demo measured on 6.0.0: **the offset was
+essentially the whole memory-bound gap.**
 
-Sector counts are the right evidence for the mechanism, but they are not a
-linear predictor of time: `stencil`'s total sectors rise 1.111x against a
-measured 1.24x. Use the counters for *why*, the timing loop for *how much*.
-Kernel durations reported under `ncu` itself are not comparable to either —
-single cold launches put all four probe configurations at ~19.5 µs.
+**What changed in 7.0.0.** PR
+[#1066](https://github.com/beehive-lab/TornadoVM/pull/1066) pads each allocation
+so that `base + 16` — where element 0 lives — is 32-byte aligned. The generated
+code is **byte-identical**: the `+ 4L` above is still there on 7.0.0. What moved is
+where the buffer starts. Nsight Compute on 7.0.0, both sides at the same n:
 
-Full data: `results/raw/22-ncu-alignment-counters/`.
+| Kernel | load sectors | load sectors/request | DRAM read |
+|---|---|---|---|
+| `elementwise` | 524,288 **both** | 4 **both** | 16,780,160 vs 16,779,904 B |
+| `polynomial` | 524,288 **both** | 4 **both** | 16,784,256 vs 16,780,928 B |
+| `stencil` | 1,835,006 **both** | 4.67 **both** | 16,781,056 vs 16,780,288 B |
+
+Every sector count now equals hand-written CUDA's exactly (store sectors too).
+On 6.0.0 the TornadoVM load counts were 655,360 and 1,966,080.
+
+One caveat from the PR itself: buffers in **`withBatch` slots are deliberately
+not padded**, so batched execution still carries the offset. Not measured here.
+
+### The ~3% that is left
+
+With memory traffic identical, the visible remaining difference is instruction
+count. TornadoVM executes more instructions on both memory-bound kernels, with
+the same number of global load/store instructions and the same 16 registers:
+
+| Kernel | instructions, TornadoVM / CUDA |
+|---|---|
+| `elementwise` | 2,359,296 / 1,966,080 = **1.20x** |
+| `stencil` | 5,242,880 / 3,670,016 = **1.43x** |
+| `polynomial` | 35,782,656 / 44,826,624 = 0.80x |
+
+That is **consistent with** a ~3% gap on bandwidth-bound kernels, but it is
+**not shown to cause it** — and the repo has already retracted one attribution of
+the 1.20x (to bounds checks; see `docs/ANALYSIS-GUIDE.md`). Treat it as the next
+thing to look at, not an explanation.
 
 ### Compute-bound: TornadoVM JIT-specialises on the runtime value
 
@@ -203,36 +208,39 @@ f_12  =  fma(f_11, f_8, 0.5F);
 ```
 
 nvcc compiles ahead of time, cannot know `degree`, and must emit a real loop —
-`cuobjdump -sass` shows 11 branch instructions in that kernel.
+`cuobjdump -sass` shows 11 branch instructions in that kernel. It also executes
+1.25x TornadoVM's instruction count (table above).
 [`ProbeJitSpecialisation.cu`](ProbeJitSpecialisation.cu) gives nvcc the same
 information via a template parameter:
 
 ```bash
-nvcc -arch=sm_89 -o probe_specialisation ProbeJitSpecialisation.cu && ./probe_specialisation
+nvcc -arch=sm_89 -o probe_specialisation ProbeJitSpecialisation.cu
+nsys profile --trace=cuda --force-overwrite=true -o spec ./probe_specialisation
+nsys stats --force-export=true --report cuda_gpu_kern_sum --format csv spec.nsys-rep
 ```
 
 ```
-degree as runtime argument         median 39.5 us
-degree as compile-time constant    median 34.7 us
+polyRuntime  (degree as runtime argument)      36.77 us
+polyConst<>  (degree as compile-time constant) 32.23 us    <- 1.14x
 ```
 
-34.7 µs against TornadoVM's 35.24 µs — within 1.6%. **Once nvcc knows what the
-JIT knows, the two are equal.** TornadoVM's win here is not better arithmetic;
-it is having the value available at compile time, which is a structural
-advantage of JIT compilation over AOT, not a TornadoVM trick. It is also a real
-advantage: a CUDA programmer only gets it by templating and instantiating every
-value they might need.
+Specialisation alone is worth **1.14x** — the same in each of three runs — and
+TornadoVM's measured win over hand-written CUDA is **1.15x**. Compare the ratios,
+not the absolute times: the probe's kernel is not the demo's kernel.
+**Once nvcc knows what the JIT knows, the two are equal.** TornadoVM's win here is
+not better arithmetic; it is having the value available at compile time — a
+structural advantage of JIT over AOT compilation. It is also a real one: a CUDA
+programmer only gets it by templating and instantiating every value they might
+need.
 
 ## What to take from this
 
-Controlling for both effects, **the generated arithmetic is equivalent.** The
-honest summary for a talk:
-
-- TornadoVM's kernels are competitive with hand-written CUDA on the same GPU.
-- It pays ~25–30% on bandwidth-bound kernels for its array header layout — a
-  fixable layout issue, not a compiler limitation.
-- It gains on kernels whose shape depends on a runtime value, because it
-  compiles when that value is known.
+- **On TornadoVM 7.0.0 the generated kernels are within ~3% of hand-written CUDA
+  on bandwidth-bound work, and faster on kernels shaped by a runtime value.**
+- The 24–31% memory-bound gap on 6.0.0 was a data-layout property, not a
+  code-generation one. It was diagnosed here with a counter and a probe, reported
+  as #1065, and fixed by #1066 without touching the generated code.
+- The compute-bound win is JIT specialisation and survives the upgrade unchanged.
 - Wall-clock differences elsewhere in this repo (demos 06, 07, 11, 13) are
   host-side dispatch, a separate cost from anything measured here.
 
@@ -249,12 +257,14 @@ Kernel-time comparison: n=4194304, polynomial degree=256, 20 executions
         Compare kernel time with nsys -- see this demo's README.
 
 first execution (JIT compile): <large> us
-steady-state median wall-clock (n=19): 1170 us
+steady-state median wall-clock (n=19): 1181 us
 validation PASSED (max abs err 0.0000001, 0/4194304 elements out of tol)
 Result is correct
 ```
 
-Captured evidence: `results/raw/21-kernel-time-comparison/`.
+Captured evidence: `results/raw/36-demo15-demo17-on-7.0.0/` (7.0.0);
+`results/raw/21-kernel-time-comparison/` and `results/raw/22-ncu-alignment-counters/`
+(the 6.0.0 diagnosis).
 
 ## If the demo fails on stage
 
@@ -262,9 +272,11 @@ Captured evidence: `results/raw/21-kernel-time-comparison/`.
   different number of executions — pass the same third argument to both.
 - If the CUDA kernel names in `nsys` appear mangled beyond recognition, add
   `--demangle=true` to `nsys stats`.
-- `ncu` will fail with `ERR_NVGPUCTRPERM` on this machine; that is expected and
-  documented above. Use `nsys`.
-- Fall back to the captured CSVs in `results/raw/21-kernel-time-comparison/`.
+- If `ncu` cannot connect to the driver, use
+  `/opt/nvidia/nsight-compute/2024.3.2/ncu` rather than the one on `PATH`.
+- If the memory-bound kernels show the old ~1.3x gap, check `tornado --version`:
+  you are on a release older than 7.0.0.
+- Fall back to the captured CSVs in `results/raw/36-demo15-demo17-on-7.0.0/`.
 
 ## JBang
 

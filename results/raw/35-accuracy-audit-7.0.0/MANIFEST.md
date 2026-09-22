@@ -1,5 +1,10 @@
 # Batch 35 — Accuracy audit of the repo against TornadoVM 7.0.0
 
+> **Correction (batch 36):** the demo 17 rung 3 figure below (480.3 µs, "~0.98x,
+> parity") came from a single low run. Over 13 runs on 7.0.0 the median is
+> **499.8 µs, 1.02x** of hand-written CUDA — see
+> `results/raw/36-demo15-demo17-on-7.0.0/MANIFEST.md`. The rest of this audit stands.
+
 Captured 2026-09-22. Checks the repo's claims against its own evidence, against
 upstream state, and — where a claim depends on the TornadoVM version — against
 fresh measurements on the pinned `7.0.0-jdk22plus-cuda` SDK. Same machine and

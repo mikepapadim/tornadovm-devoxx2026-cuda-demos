@@ -1,0 +1,27 @@
+# TornadoVM run 1
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+45.6,34029479,10,3402947.9,3403076.0,3401828,3404260,726.5,naive
+34.8,25964381,10,2596438.1,2596428.5,2595532,2597069,476.9,kcTiled
+6.7,4999220,10,499922.0,499839.0,499214,500975,533.7,kcRegisterTiled
+5.7,4262781,10,426278.1,426348.5,425964,426604,249.9,"void cutlass::Kernel2<cutlass::gemm::kernel::DefaultGemmUniversal<float, cutlass::layout::RowMajor, (cutlass::ComplexTransform)0, (int)1, float, cutlass::layout::RowMajor, (cutlass::ComplexTransform)0, (int)1, float, cutlass::layout::RowMajor, float, cutlass::arch::OpClassSimt, cutlass::arch::Sm80, cutlass::gemm::GemmShape<(int)128, (int)128, (int)8>, cutlass::gemm::GemmShape<(int)32, (int)64, (int)8>, cutlass::gemm::GemmShape<(int)1, (int)1, (int)1>, cutlass::epilogue::thread::LinearCombination<float, (int)1, float, float, (cutlass::epilogue::thread::ScaleType::Kind)0, (cutlass::FloatRoundStyle)2, float>, cutlass::gemm::threadblock::GemmIdentityThreadblockSwizzle<(int)1>, (int)2, cutlass::arch::OpMultiplyAdd, (cutlass::gemm::SharedMemoryClearOption)0, (bool)0, (bool)0, (bool)0, cutlass::layout::NoPermute, cutlass::layout::NoPermute, cutlass::layout::NoPermute, void>::SelectBase<cutlass::gemm::threadblock::GemmIdentityThreadblockSwizzle<(int)1>, void>>(T1::Params)"
+4.2,3144255,10,314425.5,314346.0,313834,315657,533.2,void cutlass::Kernel2<cutlass_80_simt_sgemm_256x128_8x4_nn_align1>(T1::Params)
+3.0,2208607,10,220860.7,220870.0,220679,221094,139.8,void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_128x256_16x3_nn_align4>(T1::Params)
+
+# TornadoVM run 2
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+45.6,34078309,10,3407830.9,3407681.0,3407072,3409344,632.1,naive
+34.8,25996865,10,2599686.5,2599594.0,2599273,2600202,308.1,kcTiled
+6.7,5012207,10,501220.7,501231.0,500206,502478,584.9,kcRegisterTiled
+5.7,4277912,10,427791.2,427884.0,427148,428620,530.0,"void cutlass::Kernel2<cutlass::gemm::kernel::DefaultGemmUniversal<float, cutlass::layout::RowMajor, (cutlass::ComplexTransform)0, (int)1, float, cutlass::layout::RowMajor, (cutlass::ComplexTransform)0, (int)1, float, cutlass::layout::RowMajor, float, cutlass::arch::OpClassSimt, cutlass::arch::Sm80, cutlass::gemm::GemmShape<(int)128, (int)128, (int)8>, cutlass::gemm::GemmShape<(int)32, (int)64, (int)8>, cutlass::gemm::GemmShape<(int)1, (int)1, (int)1>, cutlass::epilogue::thread::LinearCombination<float, (int)1, float, float, (cutlass::epilogue::thread::ScaleType::Kind)0, (cutlass::FloatRoundStyle)2, float>, cutlass::gemm::threadblock::GemmIdentityThreadblockSwizzle<(int)1>, (int)2, cutlass::arch::OpMultiplyAdd, (cutlass::gemm::SharedMemoryClearOption)0, (bool)0, (bool)0, (bool)0, cutlass::layout::NoPermute, cutlass::layout::NoPermute, cutlass::layout::NoPermute, void>::SelectBase<cutlass::gemm::threadblock::GemmIdentityThreadblockSwizzle<(int)1>, void>>(T1::Params)"
+4.2,3154267,10,315426.7,315353.0,314857,316041,411.2,void cutlass::Kernel2<cutlass_80_simt_sgemm_256x128_8x4_nn_align1>(T1::Params)
+3.0,2214430,10,221443.0,221366.5,221094,221894,228.5,void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_128x256_16x3_nn_align4>(T1::Params)
+
+# TornadoVM run 3
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+45.6,34034652,10,3403465.2,3403596.5,3402236,3405309,967.5,naive
+34.8,25962498,10,2596249.8,2596310.0,2595399,2596935,546.2,kcTiled
+6.7,4997225,10,499722.5,499677.5,498990,500526,432.9,kcRegisterTiled
+5.7,4260756,10,426075.6,426091.5,425580,426443,275.3,"void cutlass::Kernel2<cutlass::gemm::kernel::DefaultGemmUniversal<float, cutlass::layout::RowMajor, (cutlass::ComplexTransform)0, (int)1, float, cutlass::layout::RowMajor, (cutlass::ComplexTransform)0, (int)1, float, cutlass::layout::RowMajor, float, cutlass::arch::OpClassSimt, cutlass::arch::Sm80, cutlass::gemm::GemmShape<(int)128, (int)128, (int)8>, cutlass::gemm::GemmShape<(int)32, (int)64, (int)8>, cutlass::gemm::GemmShape<(int)1, (int)1, (int)1>, cutlass::epilogue::thread::LinearCombination<float, (int)1, float, float, (cutlass::epilogue::thread::ScaleType::Kind)0, (cutlass::FloatRoundStyle)2, float>, cutlass::gemm::threadblock::GemmIdentityThreadblockSwizzle<(int)1>, (int)2, cutlass::arch::OpMultiplyAdd, (cutlass::gemm::SharedMemoryClearOption)0, (bool)0, (bool)0, (bool)0, cutlass::layout::NoPermute, cutlass::layout::NoPermute, cutlass::layout::NoPermute, void>::SelectBase<cutlass::gemm::threadblock::GemmIdentityThreadblockSwizzle<(int)1>, void>>(T1::Params)"
+4.2,3143891,10,314389.1,314312.5,313736,315272,439.9,void cutlass::Kernel2<cutlass_80_simt_sgemm_256x128_8x4_nn_align1>(T1::Params)
+3.0,2208764,10,220876.4,220854.0,220614,221158,201.1,void cutlass::Kernel2<cutlass_80_tensorop_s1688gemm_128x256_16x3_nn_align4>(T1::Params)
+

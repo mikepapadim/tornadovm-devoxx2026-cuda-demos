@@ -814,7 +814,8 @@ Full findings with evidence: `results/raw/35-accuracy-audit-7.0.0/MANIFEST.md`.
 
 - **Root cause:** upstream #1066 (payload alignment), #1079 (load batching, default-on)
   and #1022 (stack-frame upload skip) all shipped in `v7.0.0` (ancestry checked).
-- **Stale, measured:** demo 17 rung 3 is **~0.98x** hand-written CUDA (repo: 1.43x
+- **Stale, measured:** demo 17 rung 3 is **~0.98x** *(corrected in batch 36: 1.02x —
+  the 0.98x was one low run)* hand-written CUDA (repo: 1.43x
   slower); demo 15 memory-bound kernels are **1.02x / 1.03x** (repo: 1.31x / 1.24x);
   #1065 sectors/request is **4.00** (repo: 5.00). Talk narratives for demos 15 and 17
   describe 6.0.0. Not rewritten — editorial call.
@@ -835,8 +836,46 @@ Full findings with evidence: `results/raw/35-accuracy-audit-7.0.0/MANIFEST.md`.
 
 ### Next invocation
 
-- Decide how demos 15 and 17 should tell their story on 7.0.0, then rewrite them.
+- ~~Decide how demos 15 and 17 should tell their story on 7.0.0, then rewrite them.~~ Done in batch 36.
 - Add a correctness check to `demos/18-matmul-ladder-fp16/MatMulLadderFP16.cu`.
 - Backfill `STATE.md` for batches 24–32 and a MANIFEST for batch 32.
 - Re-capture demo 14's sector counts and demo 01's instruction/bandwidth comparison.
+
+## Batch 36 — Demos 15 and 17 reworked on TornadoVM 7.0.0 (2026-09-22)
+
+Both READMEs rewritten around fresh 7.0.0 measurements at their own parameters.
+Evidence: `results/raw/36-demo15-demo17-on-7.0.0/MANIFEST.md`. All Observed.
+
+- **Demo 15** (3 nsys runs per side, spread < 0.7%): memory-bound kernels **1.03x /
+  1.03x** of hand-written CUDA (6.0.0: 1.31x / 1.24x); compute-bound TornadoVM **1.15x
+  faster** (6.0.0: 1.13x). `ncu`: every load/store sector count now **equals** CUDA's
+  exactly, 4.00 sectors/request, DRAM within 0.03%. The generated code is byte-identical
+  (`+ 4L` still present) — #1066 moved the buffer, not the index.
+- **Demo 15 residual ~3%:** TornadoVM executes 1.20x / 1.43x the instructions on the two
+  memory-bound kernels, same memory instructions and registers. Reported as observed,
+  **not** as the cause.
+- **Demo 15 specialisation:** probe under nsys gives 1.14x (every run) vs TornadoVM's
+  1.15x win — replaces the old cross-kernel "34.7 vs 35.24 µs" comparison.
+- **Demo 17** (nsys, n=2048): register-tiled rung **1.02x** of hand-written CUDA,
+  median 499.8 µs of 13 runs; every JIT rung within 2%. Register tile now worth 5.2x
+  over tiling (6.0.0: 3.8x).
+- **Live toggle:** `-Dtornado.cuda.batchGlobalLoads=false` on 7.0.0 brings rung 3 back
+  to ~679 µs (1.39x); interleaved with the 6.0.0 release (697.8 µs, 1.43x). The README
+  now shows the before/after on the pinned SDK.
+- **New finding — CUTLASS rung ~7.6% slower on 7.0.0** (426.3 vs 396–398 µs,
+  interleaved, identical kernel template, naive rung flat). Cause not investigated.
+- **Correction to batch 35:** its "~0.98x, parity" for rung 3 was one low run (480.3 µs).
+  Annotated in the batch 35 manifest, README and STATE; not rewritten.
+- **Also fixed in demo 17's README:** default size is 1024, not 2048; and the warning
+  that `setup-env.sh` only works from the repo root was false (it resolves its own path).
+- Demo 15's README no longer says `ncu` is blocked on this machine (unblocked 09-03).
+- Updated: `demos/README.md` rows 15 and 17; main README demo 15 section and
+  "Measured on TornadoVM 7.0.0" table. Demo sources untouched (README-only change).
+
+### Next invocation
+
+- Investigate the CUTLASS rung's ~7.6% slowdown on 7.0.0.
+- The main README's CUDA-equivalents wall-clock table (demos 06, 07, 11, 13, 14) still
+  carries 6.0.0 TornadoVM numbers next to CUDA numbers.
+- Demo 14 sector counts and demo 01's instruction/bandwidth rows still 6.0.0.
 

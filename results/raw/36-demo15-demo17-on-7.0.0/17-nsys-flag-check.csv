@@ -1,0 +1,6 @@
+plain run1 kcRegisterTiled=498.6 void cutlass::Kernel2<=425.1
+nosample run1 kcRegisterTiled=500.0 void cutlass::Kernel2<=426.5
+plain run2 kcRegisterTiled=499.5 void cutlass::Kernel2<=426.3
+nosample run2 kcRegisterTiled=487.7 void cutlass::Kernel2<=416.2
+plain run3 kcRegisterTiled=501.2 void cutlass::Kernel2<=427.5
+nosample run3 kcRegisterTiled=501.1 void cutlass::Kernel2<=427.6

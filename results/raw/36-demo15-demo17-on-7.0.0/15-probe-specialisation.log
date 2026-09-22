@@ -1,0 +1,2 @@
+degree as runtime argument         median 37.1 us
+degree as compile-time constant    median 32.7 us

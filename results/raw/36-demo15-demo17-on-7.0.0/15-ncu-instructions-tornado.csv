@@ -1,0 +1,37 @@
+==PROF== Connected to process 626585 (/home/michalis/.sdkman/candidates/java/25.0.2-open/bin/java)
+Kernel-time comparison: n=4194304, polynomial degree=256, 2 executions
+  block size 256 (identical to the CUDA version)
+  kernels: elementwise (memory-bound) -> polynomial (compute-bound) -> stencil (memory-bound)
+  NOTE: the wall-clock below includes host dispatch and transfers.
+        Compare kernel time with nsys -- see this demo's README.
+
+first execution (JIT compile): 562258 us
+steady-state median wall-clock (n=1): 263630 us
+validation PASSED (max abs err 0.0000001, 0/4194304 elements out of tol)
+Result is correct
+==PROF== Disconnected from process 626585
+"ID","Process ID","Process Name","Host Name","Kernel Name","Context","Stream","Block Size","Grid Size","Device","CC","Section Name","Metric Name","Metric Unit","Metric Value"
+"0","626585","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","launch__registers_per_thread","register/thread","16"
+"0","626585","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","smsp__inst_executed.sum","inst","2,359,296"
+"0","626585","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","smsp__sass_inst_executed_op_global_ld.sum","inst","131,072"
+"0","626585","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","smsp__sass_inst_executed_op_global_st.sum","inst","131,072"
+"1","626585","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","launch__registers_per_thread","register/thread","16"
+"1","626585","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","smsp__inst_executed.sum","inst","35,782,656"
+"1","626585","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","smsp__sass_inst_executed_op_global_ld.sum","inst","131,072"
+"1","626585","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","smsp__sass_inst_executed_op_global_st.sum","inst","131,072"
+"2","626585","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","launch__registers_per_thread","register/thread","16"
+"2","626585","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","smsp__inst_executed.sum","inst","5,242,880"
+"2","626585","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","smsp__sass_inst_executed_op_global_ld.sum","inst","393,216"
+"2","626585","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","smsp__sass_inst_executed_op_global_st.sum","inst","131,072"
+"3","626585","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","launch__registers_per_thread","register/thread","16"
+"3","626585","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","smsp__inst_executed.sum","inst","2,359,296"
+"3","626585","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","smsp__sass_inst_executed_op_global_ld.sum","inst","131,072"
+"3","626585","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","smsp__sass_inst_executed_op_global_st.sum","inst","131,072"
+"4","626585","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","launch__registers_per_thread","register/thread","16"
+"4","626585","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","smsp__inst_executed.sum","inst","35,782,656"
+"4","626585","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","smsp__sass_inst_executed_op_global_ld.sum","inst","131,072"
+"4","626585","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","smsp__sass_inst_executed_op_global_st.sum","inst","131,072"
+"5","626585","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","launch__registers_per_thread","register/thread","16"
+"5","626585","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","smsp__inst_executed.sum","inst","5,242,880"
+"5","626585","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","smsp__sass_inst_executed_op_global_ld.sum","inst","393,216"
+"5","626585","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(16384, 1, 1)","0","8.9","Command line profiler metrics","smsp__sass_inst_executed_op_global_st.sum","inst","131,072"

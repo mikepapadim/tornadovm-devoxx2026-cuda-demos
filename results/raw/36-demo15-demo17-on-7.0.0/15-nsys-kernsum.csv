@@ -1,0 +1,36 @@
+# TornadoVM run 1
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+60.5,700022,20,35001.1,34961.5,34625,36001,269.9,polynomial
+20.6,238215,20,11910.8,11840.0,11744,12768,232.5,stencil
+18.9,219335,20,10966.8,10912.0,10880,11520,170.8,elementwise
+
+# CUDA run 1
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+64.3,805274,20,40263.7,40257.5,40193,40353,36.8,"polynomial(const float *, float *, int, int)"
+18.6,232328,20,11616.4,11584.0,11520,12193,142.1,"stencil(const float *, float *, int)"
+17.1,213928,20,10696.4,10688.0,10624,11105,99.6,"elementwise(const float *, float *, int)"
+
+# TornadoVM run 2
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+60.5,704790,20,35239.5,35217.0,34913,36289,274.2,polynomial
+20.6,239849,20,11992.5,11904.5,11808,12865,227.1,stencil
+18.9,220452,20,11022.6,10976.0,10912,11585,174.6,elementwise
+
+# CUDA run 2
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+64.3,805434,20,40271.7,40257.5,40193,40322,36.9,"polynomial(const float *, float *, int, int)"
+18.6,232709,20,11635.5,11616.0,11456,12257,155.4,"stencil(const float *, float *, int)"
+17.1,213797,20,10689.9,10688.0,10624,11136,110.0,"elementwise(const float *, float *, int)"
+
+# TornadoVM run 3
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+60.5,700470,20,35023.5,34977.5,34625,35905,263.3,polynomial
+20.6,239111,20,11955.5,11920.0,11713,12768,245.5,stencil
+18.9,219111,20,10955.5,10881.0,10848,11585,192.2,elementwise
+
+# CUDA run 3
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+64.3,805212,20,40260.6,40257.5,40161,40321,38.7,"polynomial(const float *, float *, int, int)"
+18.6,232867,20,11643.4,11632.0,11521,11968,85.7,"stencil(const float *, float *, int)"
+17.1,213894,20,10694.7,10657.0,10624,11168,114.4,"elementwise(const float *, float *, int)"
+

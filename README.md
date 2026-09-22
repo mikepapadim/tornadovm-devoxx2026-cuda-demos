@@ -205,9 +205,10 @@ shape and says explicitly not to run it live.
 ## Measured on TornadoVM 7.0.0 (Observed — this machine, these runs)
 
 RTX 4090, driver 610.57.04, CUDA 12.6.85, JDK 25.0.2. Not general claims.
-Wall-clock only — `nsys` kernel-time and `ncu` counter rows were not re-captured and
-keep their 6.0.0 provenance in the table below. Evidence:
-`results/raw/34-tornadovm-7-timings/`.
+Wall-clock rows: `results/raw/34-tornadovm-7-timings/`. Demo 15 and 17 kernel-time
+and counter rows: `results/raw/36-demo15-demo17-on-7.0.0/`. Other `nsys`/`ncu` rows
+(demos 01, 08, 12, 13, 14, 16) were not re-captured and keep their 6.0.0 provenance
+in the table below.
 
 Demos 06, 07 and 11 were run five times each; 12, 14, 17 and 18 once, matching how
 the 6.0.0-era batches captured them. Same arguments as those batches, so the two
@@ -224,6 +225,11 @@ sets are directly comparable.
 | 14-warp-async-shared | optimised vs. naive, wall-clock | 2.17x | **2.44x** (237 → 97 µs) |
 | 17-matmul-ladder | ladder, wall-clock GFLOP/s @2048 | 3783 / 4641 / 9723 / 12670 / 13075 / 14449 | **3835 / 4439 / 10495 / 11955 / 12946 / 14187** — within a few % |
 | 18-matmul-ladder-fp16 | ladder, wall-clock GFLOP/s @1024 | — (batch 30 captured kernel time) | **2750 / 3441 / 3933 / 10374 / 10579 / 6608** |
+| 15-kernel-time-comparison | kernel time (`nsys`), memory-bound | CUDA 1.31x / 1.24x faster | **CUDA 1.03x / 1.03x** |
+| 15-kernel-time-comparison | kernel time (`nsys`), compute-bound | TornadoVM 1.13x faster | **TornadoVM 1.15x faster** |
+| 15-kernel-time-comparison | `ncu` load sectors/request | 5.00 vs CUDA 4.00 | **4.00 vs 4.00** — every sector count equal |
+| 17-matmul-ladder | kernel time, register-tiled vs hand-written CUDA | 1.43x | **1.02x** (499.8 vs 489 µs, median of 13) |
+| 17-matmul-ladder | kernel time, CUTLASS rung | 396 µs | **426 µs — ~7.6% slower**, same kernel, cause not investigated |
 | all 16 demos | compile + run, both paths | 36/36 (12 demos) | **48/48** |
 
 **The two ratio changes are not regressions in the feature each demo is about.**
@@ -239,7 +245,7 @@ replay is unchanged.
 
 > Several kernel-time and counter rows below are **stale on 7.0.0**: upstream fixes
 > #1066 and #1079 shipped in it. Measured in `results/raw/35-accuracy-audit-7.0.0/`:
-> demo 17's register-tiled rung is now ~0.98x hand-written CUDA (not 1.43x), demo 15's
+> demo 17's register-tiled rung is now 1.02x hand-written CUDA (not 1.43x), demo 15's
 > memory-bound kernels 1.02x / 1.03x (not 1.31x / 1.24x), and #1065's sectors/request
 > 4.00 (not 5.00). The demo 14 sector and demo 01 instruction rows rest on the same
 > misalignment and were not re-measured.
@@ -320,29 +326,31 @@ faster everywhere** — the interesting part is the pattern, not the direction:
 | 14 | naive → optimised | 228 → 105 µs (2.17x) | 64 → 14 µs (4.47x) |
 
 **Demo 15 measures kernel time alone** and finds the picture is different once
-host overhead is excluded — see its README for the full analysis:
+host overhead is excluded — see its README for the full analysis. On the pinned
+TornadoVM 7.0.0 (`results/raw/36-demo15-demo17-on-7.0.0/`, 3 runs, spread < 0.7%):
 
-| Kernel | TornadoVM | CUDA | |
-|---|---|---|---|
-| `elementwise` (memory-bound) | 13.94 µs | 10.62 µs | CUDA 1.31x faster |
-| `stencil` (memory-bound) | 14.32 µs | 11.55 µs | CUDA 1.24x faster |
-| `polynomial` (compute-bound) | 35.24 µs | 39.93 µs | **TornadoVM 1.13x faster** |
+| Kernel | TornadoVM | CUDA | | on 6.0.0 |
+|---|---|---|---|---|
+| `elementwise` (memory-bound) | 10.98 µs | 10.69 µs | CUDA 1.03x faster | CUDA 1.31x |
+| `stencil` (memory-bound) | 11.95 µs | 11.63 µs | CUDA 1.03x faster | CUDA 1.24x |
+| `polynomial` (compute-bound) | 35.09 µs | 40.27 µs | **TornadoVM 1.15x faster** | TornadoVM 1.13x |
 
-Both differences were attributed to a specific cause with a standalone probe,
-rather than left as "the compiler is better/worse":
+Both effects were attributed to a specific cause with a standalone probe, rather
+than left as "the compiler is better/worse":
 
-- The memory-bound gap is **entirely** TornadoVM's 16-byte `FloatArray` header,
-  which misaligns warp-coalesced 128-byte accesses. Nsight Compute measures it
-  on the generated kernels directly: every global load and store reports **5.00
-  sectors per request against hand-written CUDA's 4.00**, a count identical to
-  the same CUDA kernel deliberately run at a 4-float offset. Running that
-  offset kernel also reproduces the wall-clock ratio (1.28x / 1.27x vs the
-  measured 1.31x / 1.24x). Filed as
-  [#1065](https://github.com/beehive-lab/TornadoVM/issues/1065).
-- The compute-bound win is **entirely** JIT specialisation: `degree` is a task
-  argument, so Graal unrolls the FMA chain on its actual value. Give nvcc the
-  same information via a template parameter and it lands at 34.7 µs against
-  TornadoVM's 35.24 µs — equal.
+- **The 6.0.0 memory-bound gap was TornadoVM's 16-byte `FloatArray` header**,
+  which misaligned warp-coalesced 128-byte accesses: Nsight Compute measured
+  **5.00 sectors per request against hand-written CUDA's 4.00**, and the same CUDA
+  kernel run at a 4-float offset reproduces the cost (1.29x / 1.26x). Filed as
+  [#1065](https://github.com/beehive-lab/TornadoVM/issues/1065) and **fixed in
+  7.0.0** by [#1066](https://github.com/beehive-lab/TornadoVM/pull/1066), which
+  pads the allocation rather than changing the generated code. On 7.0.0 every
+  sector count equals hand-written CUDA's exactly. The ~3% left coincides with
+  TornadoVM executing 1.20x / 1.43x the instructions — observed, not attributed.
+- **The compute-bound win is JIT specialisation**: `degree` is a task argument,
+  so Graal unrolls the FMA chain on its actual value. Giving nvcc the same
+  information via a template parameter is worth 1.14x; TornadoVM's measured win
+  is 1.15x.
 
 Controlling for both, **the generated arithmetic is equivalent**. Two things
 also follow from the wall-clock table above, both worth saying out loud rather
