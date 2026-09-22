@@ -1,0 +1,94 @@
+fp8.cu(10): error: no operator "+" matches these operands
+            operand types are: cuda::tiles::__1::tile<__nv_fp8_e4m3, cuda::tiles::__1::extents<cuda::tiles::__1::uint32_t, 128UL>> + cuda::tiles::__1::tile<__nv_fp8_e4m3, cuda::tiles::__1::extents<cuda::tiles::__1::uint32_t, 128UL>>
+      cv.store(av.load(ct::bid().x) + bv.load(ct::bid().x), ct::bid().x);
+                                    ^
+/home/michalis/.local/lib/python3.11/site-packages/nvidia/cu13/bin/../include/cuda_bf16.hpp(335): note #3322-D: number of parameters of function "operator+(const __nv_bfloat162 &)" does not match the call
+  __attribute__((host)) __attribute__((device)) __inline__ __attribute__((always_inline)) __nv_bfloat162 operator+(const __nv_bfloat162 &h) { return h; }
+                                                                                                         ^
+/home/michalis/.local/lib/python3.11/site-packages/nvidia/cu13/bin/../include/cuda_bf16.hpp(301): note #3326-D: function "operator+(const __nv_bfloat162 &, const __nv_bfloat162 &)" does not match because argument #1 does not match parameter
+  __attribute__((host)) __attribute__((device)) __inline__ __attribute__((always_inline)) __nv_bfloat162 operator+(const __nv_bfloat162 &lh, const __nv_bfloat162 &rh) { return __hadd2(lh, rh); }
+                                                                                                         ^
+/home/michalis/.local/lib/python3.11/site-packages/nvidia/cu13/bin/../include/cuda_bf16.hpp(216): note #3322-D: number of parameters of function "operator+(const __nv_bfloat16 &)" does not match the call
+  __attribute__((host)) __attribute__((device)) __inline__ __attribute__((always_inline)) __attribute__((tile)) __attribute__((tile_builtin)) __nv_bfloat16 operator+(const __nv_bfloat16 &h) { return h; }
+                                                                                                                                                            ^
+/home/michalis/.local/lib/python3.11/site-packages/nvidia/cu13/bin/../include/cuda_bf16.hpp(182): note #3326-D: function "operator+(const __nv_bfloat16 &, const __nv_bfloat16 &)" does not match because argument #1 does not match parameter
+  __attribute__((host)) __attribute__((device)) __inline__ __attribute__((always_inline)) __attribute__((tile)) __attribute__((tile_builtin)) __nv_bfloat16 operator+(const __nv_bfloat16 &lh, const __nv_bfloat16 &rh) { return __hadd(lh, rh); }
+                                                                                                                                                            ^
+/home/michalis/.local/lib/python3.11/site-packages/nvidia/cu13/bin/../include/cuda_fp16.hpp(321): note #3322-D: number of parameters of function "operator+(const __half2 &)" does not match the call
+  __attribute__((host)) __attribute__((device)) __inline__ __attribute__((always_inline)) __half2 operator+(const __half2 &h) { return h; }
+                                                                                                  ^
+/home/michalis/.local/lib/python3.11/site-packages/nvidia/cu13/bin/../include/cuda_fp16.hpp(287): note #3326-D: function "operator+(const __half2 &, const __half2 &)" does not match because argument #1 does not match parameter
+  __attribute__((host)) __attribute__((device)) __inline__ __attribute__((always_inline)) __half2 operator+(const __half2 &lh, const __half2 &rh) { return __hadd2(lh, rh); }
+                                                                                                  ^
+/home/michalis/.local/lib/python3.11/site-packages/nvidia/cu13/bin/../include/cuda_fp16.hpp(233): note #3322-D: number of parameters of function "operator+(const __half &)" does not match the call
+  __attribute__((host)) __attribute__((device)) __inline__ __attribute__((always_inline)) __attribute__((tile)) __attribute__((tile_builtin)) __half operator+(const __half &h) { return h; }
+                                                                                                                                                     ^
+/home/michalis/.local/lib/python3.11/site-packages/nvidia/cu13/bin/../include/cuda_fp16.hpp(201): note #3326-D: function "operator+(const __half &, const __half &)" does not match because argument #1 does not match parameter
+  __attribute__((host)) __attribute__((device)) __inline__ __attribute__((always_inline)) __attribute__((tile)) __attribute__((tile_builtin)) __half operator+(const __half &lh, const __half &rh) { return __hadd(lh, rh); }
+                                                                                                                                                     ^
+/home/michalis/.local/lib/python3.11/site-packages/nvidia/cu13/bin/../include/crt/cuda_tile.h(2226): note #3322-D: number of parameters of function template "cuda::tiles::__1::operator+(T) noexcept" does not match the call
+      __attribute__((tile_builtin)) arithmetic_tile_promotion_t<T> operator+(T x) noexcept;
+                                                                   ^
+/home/michalis/.local/lib/python3.11/site-packages/nvidia/cu13/bin/../include/crt/cuda_tile.h(2202): note #3473-D: substituting "<cuda::tiles::__1::tile<__nv_fp8_e4m3, cuda::tiles::__1::extents<cuda::tiles::__1::uint32_t, 128UL>>, cuda::tiles::__1::tile<__nv_fp8_e4m3, cuda::tiles::__1::extents<cuda::tiles::__1::uint32_t, 128UL>>>" for function template "cuda::tiles::__1::operator+(Lhs, Rhs) noexcept" failed constraints
+      operator+(Lhs lhs, Rhs rhs) noexcept;
+      ^
+/home/michalis/.local/lib/python3.11/site-packages/nvidia/cu13/bin/../include/crt/cuda_tile.h(2198): note #3474-D: concept "cuda::tiles::__1::arithmetic_tile" not satisfied for "<cuda::tiles::__1::tile<__nv_fp8_e4m3, cuda::tiles::__1::extents<cuda::tiles::__1::uint32_t, 128UL>>>"
+      template<arithmetic_tile Lhs,
+               ^
+/home/michalis/.local/lib/python3.11/site-packages/nvidia/cu13/bin/../include/crt/cuda_tile.h(1019): note #3043-D: atomic constraint evaluates to false
+    template<typename T> concept arithmetic_tile = detail::arithmetic_tile<T> && numeric_tile<T>;
+                                                   ^
+/home/michalis/.local/lib/python3.11/site-packages/nvidia/cu13/bin/../include/crt/cuda_tile.h(2128): note #3473-D: substituting "<cuda::tiles::__1::tile<__nv_fp8_e4m3, cuda::tiles::__1::extents<cuda::tiles::__1::uint32_t, 128UL>>, cuda::tiles::__1::tile<__nv_fp8_e4m3, cuda::tiles::__1::extents<cuda::tiles::__1::uint32_t, 128UL>>>" for function template "cuda::tiles::__1::operator+(Lhs, Rhs) noexcept" failed constraints
+      operator+(Lhs lhs, Rhs rhs) noexcept;
+      ^
+/home/michalis/.local/lib/python3.11/site-packages/nvidia/cu13/bin/../include/crt/cuda_tile.h(2125): note #3474-D: concept "cuda::tiles::__1::pointer_tile" not satisfied for "<cuda::tiles::__1::tile<__nv_fp8_e4m3, cuda::tiles::__1::extents<cuda::tiles::__1::uint32_t, 128UL>>>"
+      template<pointer_tile Lhs, integral_tile Rhs>
+               ^
+/home/michalis/.local/lib/python3.11/site-packages/nvidia/cu13/bin/../include/crt/cuda_tile.h(1017): note #3043-D: atomic constraint evaluates to false
+    template<typename T> concept pointer_tile = detail::pointer_tile<T> && tile_like<T>;
+                                                ^
+/home/michalis/.local/lib/python3.11/site-packages/nvidia/cu13/bin/../include/crt/cuda_tile.h(2123): note #3473-D: substituting "<cuda::tiles::__1::tile<__nv_fp8_e4m3, cuda::tiles::__1::extents<cuda::tiles::__1::uint32_t, 128UL>>, cuda::tiles::__1::tile<__nv_fp8_e4m3, cuda::tiles::__1::extents<cuda::tiles::__1::uint32_t, 128UL>>>" for function template "cuda::tiles::__1::operator+(Lhs, Rhs) noexcept" failed constraints
+      __attribute__((tile_builtin)) mutual_broadcast_t<Lhs, Rhs, tile_element_t<Rhs>> operator+(Lhs lhs, Rhs rhs) noexcept;
+                                                                                      ^
+/home/michalis/.local/lib/python3.11/site-packages/nvidia/cu13/bin/../include/crt/cuda_tile.h(2121): note #3474-D: concept "cuda::tiles::__1::integral_tile" not satisfied for "<cuda::tiles::__1::tile<__nv_fp8_e4m3, cuda::tiles::__1::extents<cuda::tiles::__1::uint32_t, 128UL>>>"
+      template<integral_tile Lhs, pointer_tile Rhs>
+               ^
+/home/michalis/.local/lib/python3.11/site-packages/nvidia/cu13/bin/../include/crt/cuda_tile.h(1021): note #3043-D: atomic constraint evaluates to false
+    template<typename T> concept integral_tile = detail::integral_tile<T> && arithmetic_tile<T>;
+                                                 ^
+/home/michalis/.local/lib/python3.11/site-packages/nvidia/cu13/bin/../include/crt/cuda_tile.h(2118): note #3322-D: number of parameters of function template "cuda::tiles::__1::operator+(Tile) noexcept" does not match the call
+      template<pointer_tile Tile> __attribute__((tile)) Tile operator+(Tile x) noexcept { return x; }
+                                                             ^
+/home/michalis/.local/lib/python3.11/site-packages/nvidia/cu13/bin/../include/crt/cuda_tile.h(449): note #3322-D: number of parameters of function template "cuda::tiles::__1::operator+(cuda::tiles::__1::integral_constant<x>) noexcept" does not match the call
+    __attribute__((tile)) __attribute__((host)) __attribute__((device)) constexpr integral_constant<+x> operator+(integral_constant<x>) noexcept {
+                                                                                                        ^
+/home/michalis/.local/lib/python3.11/site-packages/nvidia/cu13/bin/../include/crt/cuda_tile.h(394): note #3327-D: candidate function template "cuda::tiles::__1::operator+(cuda::tiles::__1::integral_constant<x>, cuda::tiles::__1::integral_constant<y>) noexcept" failed deduction
+    __attribute__((tile)) __attribute__((host)) __attribute__((device)) constexpr integral_constant<x + y> operator+(integral_constant<x>, integral_constant<y>) noexcept {
+                                                                                                           ^
+fp8.cu(10): note #3328-D: built-in operator+(<promoted arithmetic>, <promoted arithmetic>) does not match because argument #1 does not match parameter
+      cv.store(av.load(ct::bid().x) + bv.load(ct::bid().x), ct::bid().x);
+                                    ^
+fp8.cu(10): note #3328-D: built-in operator+(<pointer to object>, <ptrdiff_t>) does not match because argument #1 does not match parameter
+      cv.store(av.load(ct::bid().x) + bv.load(ct::bid().x), ct::bid().x);
+                                    ^
+fp8.cu(10): note #3328-D: built-in operator+(<ptrdiff_t>, <pointer to object>) does not match because argument #1 does not match parameter
+      cv.store(av.load(ct::bid().x) + bv.load(ct::bid().x), ct::bid().x);
+                                    ^
+
+fp8.cu(10): error: no instance of function template "cuda::tiles::__1::partition_view<Span, TileShape>::store [with Span=cuda::tiles::__1::tensor_span<__nv_fp8_e4m3, cuda::tiles::__1::extents<unsigned int, 18446744073709551615UL>, cuda::tiles::__1::layout_right, cuda::tiles::__1::default_accessor<__nv_fp8_e4m3>>, TileShape=cuda::tiles::__1::extents<cuda::tiles::__1::uint32_t, 128UL>]" matches the argument list
+            argument types are: (<error-type>, unsigned int)
+            object type is: cuda::tiles::__1::partition_view<cuda::tiles::__1::tensor_span<__nv_fp8_e4m3, cuda::tiles::__1::extents<unsigned int, 18446744073709551615UL>, cuda::tiles::__1::layout_right, cuda::tiles::__1::default_accessor<__nv_fp8_e4m3>>, cuda::tiles::__1::extents<cuda::tiles::__1::uint32_t, 128UL>>
+      cv.store(av.load(ct::bid().x) + bv.load(ct::bid().x), ct::bid().x);
+         ^
+/home/michalis/.local/lib/python3.11/site-packages/nvidia/cu13/bin/../include/crt/cuda_tile.h(3993): note #3473-D: substituting "<<error-type>, unsigned int, cuda::tiles::__1::tile<__nv_fp8_e4m3, cuda::tiles::__1::extents<cuda::tiles::__1::uint32_t, 128UL>>, cuda::tiles::__1::extents<unsigned int, 18446744073709551615UL>, cuda::tiles::__1::strides<unsigned int, 1UL>, cuda::tiles::__1::partition_view<cuda::tiles::__1::tensor_span<__nv_fp8_e4m3, cuda::tiles::__1::extents<unsigned int, 18446744073709551615UL>, cuda::tiles::__1::layout_right, cuda::tiles::__1::default_accessor<__nv_fp8_e4m3>>, cuda::tiles::__1::extents<cuda::tiles::__1::uint32_t, 128UL>>::__get_extent, cuda::tiles::__1::partition_view<cuda::tiles::__1::tensor_span<__nv_fp8_e4m3, cuda::tiles::__1::extents<unsigned int, 18446744073709551615UL>, cuda::tiles::__1::layout_right, cuda::tiles::__1::default_accessor<__nv_fp8_e4m3>>, cuda::tiles::__1::extents<cuda::tiles::__1::uint32_t, 128UL>>::__get_stride, cuda::tiles::__1::partition_view<cuda::tiles::__1::tensor_span<__nv_fp8_e4m3, cuda::tiles::__1::extents<unsigned int, 18446744073709551615UL>, cuda::tiles::__1::layout_right, cuda::tiles::__1::default_accessor<__nv_fp8_e4m3>>, cuda::tiles::__1::extents<cuda::tiles::__1::uint32_t, 128UL>>::__get_base_ptr>" for function template "cuda::tiles::__1::partition_view<Span, TileShape>::store [with Span=cuda::tiles::__1::tensor_span<__nv_fp8_e4m3, cuda::tiles::__1::extents<unsigned int, 18446744073709551615UL>, cuda::tiles::__1::layout_right, cuda::tiles::__1::default_accessor<__nv_fp8_e4m3>>, TileShape=cuda::tiles::__1::extents<cuda::tiles::__1::uint32_t, 128UL>]" failed constraints
+      __attribute__((tile_builtin)) void store(Value tile, Idx... idx) const noexcept;
+                                         ^
+/home/michalis/.local/lib/python3.11/site-packages/nvidia/cu13/bin/../include/crt/cuda_tile.h(3981): note #3474-D: concept "cuda::tiles::__1::tile_like" not satisfied for "<<error-type>>"
+      template<tile_like Value,
+               ^
+/home/michalis/.local/lib/python3.11/site-packages/nvidia/cu13/bin/../include/crt/cuda_tile.h(1016): note #3041-D: atomic constraint failed substitution
+    template<typename T> concept tile_like = detail::tile_like<T>;
+                                             ^
+
+2 errors detected in the compilation of "fp8.cu".
+fp8.cu exit=2

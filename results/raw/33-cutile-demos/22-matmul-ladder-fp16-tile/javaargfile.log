@@ -1,0 +1,32 @@
+FP16 matrix-multiply ladder with a CUDA Tile rung: C = A * B, 256x256
+  5 executions per rung, steady-state median wall-clock (first excluded)
+
+1. naive @Parallel
+[TornadoVM] Warning: The loop bounds will be configured by the GridScheduler. Check the grid by using the flag --threadInfo.
+     naive                            PASSED (max abs err 0.0002, 0/65536 out of tol)
+2. KernelContext tiled
+     KernelContext tiled              PASSED (max abs err 0.0002, 0/65536 out of tol)
+3. KernelContext MMA (mma.sync)
+     KernelContext MMA                PASSED (max abs err 0.0000, 0/65536 out of tol)
+4. TileContext (CUDA Tile, ct::mma)
+     TileContext (CUDA Tile)          PASSED (max abs err 0.0000, 0/65536 out of tol)
+5. CUTLASS hgemm
+     CUTLASS hgemm                    PASSED (max abs err 0.0002, 0/65536 out of tol)
+6. cuBLAS GemmEx FP16
+     cuBLAS GemmEx FP16               PASSED (max abs err 0.0002, 0/65536 out of tol)
+7. cuBLAS GemmEx FP16->FP32
+     cuBLAS GemmEx FP16->FP32         PASSED (max abs err 0.0000, 0/65536 out of tol)
+
+=== Summary (steady-state median wall-clock, this run / this GPU) ===
+rung                                  median us      GFLOP/s   vs naive
+1. naive @Parallel                          170          197       1.0x
+2. KernelContext tiled                      233          144       0.7x
+3. KernelContext MMA (mma.sync)             219          153       0.8x
+4. TileContext (CUDA Tile, ct::mma)         236          142       0.7x
+5. CUTLASS hgemm                            135          249       1.3x
+6. cuBLAS GemmEx FP16                        80          419       2.1x
+7. cuBLAS GemmEx FP16->FP32                 172          195       1.0x
+
+Wall-clock includes host dispatch. For kernel time alone use nsys;
+scripts/compare-ladder.sh 22 collects both.
+All rungs produced correct results

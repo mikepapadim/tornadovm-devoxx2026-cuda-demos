@@ -1,0 +1,21 @@
+size=4096 stages=6 executions=50 mode=both
+
+=== NOGRAPH (plain stream) ===
+execution 0: correct, wall=80 us
+execution 1: correct, wall=23 us
+execution 2: correct, wall=23 us
+execution 49: correct, wall=23 us
+NOGRAPH (plain stream) first execution (warm-up): 80 us
+NOGRAPH (plain stream) steady-state median wall-clock (excl. first execution, n=49): 23 us
+NOGRAPH (plain stream): All executions correct
+
+=== GRAPH (cudaGraphLaunch) ===
+execution 0: correct, wall=19 us
+execution 1: correct, wall=12 us
+execution 2: correct, wall=12 us
+execution 49: correct, wall=11 us
+GRAPH (cudaGraphLaunch) first execution (graph capture + instantiate): 19 us
+GRAPH (cudaGraphLaunch) steady-state median wall-clock (excl. first execution, n=49): 11 us
+GRAPH (cudaGraphLaunch): All executions correct
+
+steady-state median: nograph=22.8 us, graph=11.4 us, speedup=2.00x

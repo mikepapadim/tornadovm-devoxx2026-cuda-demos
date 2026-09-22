@@ -94,6 +94,18 @@ __global__ void kcMma(const __half *a, const __half *b, float *c, int n) {
     }
 }
 
+// Every rung is checked against the same CPU reference, so a fast wrong rung cannot look
+// like a win -- and so scripts/run-all-cuda.sh has a verdict to grep for.
+static bool validate(const char *label, const std::vector<float> &expected,
+                     const std::vector<float> &actual, float tol) {
+    double worst = 0.0;
+    for (size_t i = 0; i < expected.size(); i++)
+        worst = std::max(worst, (double) fabsf(expected[i] - actual[i]));
+    bool ok = worst <= tol;
+    printf("   %-28s max abs error %8.4f  %s\n", label, worst, ok ? "correct" : "WRONG");
+    return ok;
+}
+
 template <typename F> static double timeIt(F f, int reps) {
     for (int i = 0; i < 3; i++) f();
     CK(cudaDeviceSynchronize());
@@ -124,6 +136,26 @@ int main(int argc, char **argv) {
     CK(cudaMemcpy(dA, hA.data(), sz * sizeof(__half), cudaMemcpyHostToDevice));
     CK(cudaMemcpy(dB, hB.data(), sz * sizeof(__half), cudaMemcpyHostToDevice));
 
+    // CPU reference in FP32 from the FP16 inputs, as the Java demo does.
+    std::vector<float> expected(sz, 0.0f);
+    for (int i = 0; i < n; i++)
+        for (int k = 0; k < n; k++) {
+            float av = __half2float(hA[(size_t) i * n + k]);
+            for (int j = 0; j < n; j++)
+                expected[(size_t) i * n + j] += av * __half2float(hB[(size_t) k * n + j]);
+        }
+    std::vector<__half> outH(sz);
+    std::vector<float> outF(sz);
+    auto readHalf = [&]{ CK(cudaMemcpy(outH.data(), dC, sz * sizeof(__half), cudaMemcpyDeviceToHost));
+                         for (size_t i = 0; i < sz; i++) outF[i] = __half2float(outH[i]); return outF; };
+    auto readFloat = [&]{ CK(cudaMemcpy(outF.data(), dCf, sz * sizeof(float), cudaMemcpyDeviceToHost));
+                          return outF; };
+    // FP16 storage of the result costs about three decimal digits, so the half-output rungs
+    // get a looser tolerance than the FP32-output ones. Both are far tighter than a wrong
+    // kernel would land.
+    const float tolHalf = 0.35f, tolFloat = 0.05f;
+    bool ok = true;
+
     double gflop = 2.0 * n * n * n / 1e9;
     printf("FP16 matmul ladder (hand-written CUDA): C = A * B, %dx%d, %d reps\n\n", n, n, reps);
     printf("%-32s %10s %12s\n", "rung", "median us", "GFLOP/s");
@@ -131,13 +163,16 @@ int main(int argc, char **argv) {
     dim3 bn(16, 16), gn((n + 15) / 16, (n + 15) / 16);
     double t1 = timeIt([&]{ naive<<<gn, bn>>>(dA, dB, dC, n); }, reps);
     printf("%-32s %10.1f %12.0f\n", "1. naive", t1, gflop / (t1 / 1e6));
+    ok &= validate("naive", expected, readHalf(), tolHalf);
 
     double t2 = timeIt([&]{ kcTiled<<<gn, bn>>>(dA, dB, dC, n); }, reps);
     printf("%-32s %10.1f %12.0f\n", "2. tiled", t2, gflop / (t2 / 1e6));
+    ok &= validate("tiled", expected, readHalf(), tolHalf);
 
     int warps = (n / 16) * (n / 16);
     double t3 = timeIt([&]{ kcMma<<<warps, WARP>>>(dA, dB, dCf, n); }, reps);
     printf("%-32s %10.1f %12.0f\n", "3. MMA (tensor core)", t3, gflop / (t3 / 1e6));
+    ok &= validate("MMA (tensor core)", expected, readFloat(), tolFloat);
 
     cublasHandle_t h; CB(cublasCreate(&h));
     float alpha = 1.0f, beta = 0.0f;
@@ -147,6 +182,7 @@ int main(int argc, char **argv) {
                         CUBLAS_GEMM_DEFAULT));
     }, reps);
     printf("%-32s %10.1f %12.0f\n", "5. cuBLAS GemmEx FP16", t5, gflop / (t5 / 1e6));
+    ok &= validate("cuBLAS FP16", expected, readHalf(), tolHalf);
 
     double t6 = timeIt([&]{
         CB(cublasGemmEx(h, CUBLAS_OP_N, CUBLAS_OP_N, n, n, n, &alpha, dB, CUDA_R_16F, n,
@@ -154,9 +190,11 @@ int main(int argc, char **argv) {
                         CUBLAS_GEMM_DEFAULT));
     }, reps);
     printf("%-32s %10.1f %12.0f\n", "6. cuBLAS GemmEx FP16->FP32", t6, gflop / (t6 / 1e6));
+    ok &= validate("cuBLAS FP16->FP32", expected, readFloat(), tolFloat);
 
     printf("\n(rung 4, CUTLASS, is omitted here so this builds with the plain toolkit)\n");
+    printf("\n%s\n", ok ? "All rungs correct." : "At least one rung is WRONG.");
     cublasDestroy(h);
     cudaFree(dA); cudaFree(dB); cudaFree(dC); cudaFree(dCf);
-    return 0;
+    return ok ? 0 : 1;
 }

@@ -1,0 +1,6 @@
+TORNADO_SDK_PROFILE = sdkman-7.0.0 (sdkman, 7.0.0)
+JAVA_HOME           = /home/michalis/.sdkman/candidates/java/25.0.2-open
+TORNADOVM_HOME      = /home/michalis/.sdkman/candidates/tornadovm/7.0.0-jdk22plus-cuda
+TORNADO_ARGFILE     = /home/michalis/.sdkman/candidates/tornadovm/7.0.0-jdk22plus-cuda/tornado-argfile
+extra LD path       = /home/michalis/.local/lib/python3.10/site-packages/nvidia/cu13/lib
+tile API            = yes (needs nvcc >= 13003, using /home/michalis/.local/lib/python3.10/site-packages/nvidia/cu13/bin/nvcc)

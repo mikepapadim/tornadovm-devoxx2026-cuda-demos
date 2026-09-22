@@ -707,11 +707,267 @@ driver, toolkit, gcc and OS, and sm_89 was not re-run.
   number is worse than a zero in a profiler.
 - The sm_89 baseline's Step 7 `find` count (batch 22, correction 1) is still un-re-run.
 
-## Batch 33 — TornadoVM 7.0.0 CUDA migration (2026-09-22)
+## Batch 24 — CUDA Tile demos (19, 20, 21) added (2026-09-11)
+
+Three new Track A demos for the `TileContext` API, which compiles a TornadoVM task through
+**NVIDIA CUDA Tile** instead of the SIMT path. All Observed, all validated against a CPU
+reference over the same FP16-rounded inputs; evidence in `results/raw/33-cutile-demos/`.
+
+- **Separate pin, on purpose.** These demos do not run on the 6.0.0 SDK at all —
+  `TileContext` exists in no released TornadoVM. They are built against a source build of
+  branch `feat/cutile` (6.1.1-jdk21-dev, [PR #1083](https://github.com/beehive-lab/TornadoVM/pull/1083)),
+  need CUDA Toolkit 13.3+ (userspace pip wheel, no root) and driver R580+, and compile with
+  `--release 21 --enable-preview`. Recorded in `env/versions.env` under *CUDA Tile*; the
+  6.0.0 pin and every other demo are untouched. They are deliberately **not** in
+  `scripts/run-all-demos.sh` (which must keep passing on the 6.0.0 SDK) — there is a
+  separate `scripts/run-cutile-demos.sh`, and it reports **9 passed, 0 failed** (three demos
+  × compile + `tornado` launcher + `java @argfile`).
+- `demos/19-cutile-matmul` — the same FP16 GEMM three ways: naive, hand-tiled
+  `KernelContext`, and `TileContext`. Wall clock at n=256: 0.446 / 0.321 / 0.221 ms
+  (1.00x / 1.39x / 2.02x). The hand-written `TileMatMul.cu` measures the same three kernels
+  with CUDA events — 0.031 / 0.048 / 0.014 ms — where the hand-tiled rung is *slower* than
+  naive, so the two sets of numbers are quoted together rather than either alone.
+- `demos/20-cutile-hybrid` — one `TaskGraph`, four stages: `KernelContext` JIT → CUDA Tile
+  GEMM → cuBLAS `sgemv` → `@Parallel` JIT, on shared device buffers. `withCUDAGraph()`
+  captures all four, tile task included: 0.396 → 0.073 ms per execution (**5.44x**). The
+  CUDA equivalent captures the identical four stages and gets **1.14x** at the kernel level,
+  which is what shows that the Java figure is host dispatch, not faster kernels.
+- `demos/21-cutile-flash-attention` — flash attention with online softmax in fifteen lines,
+  ported from NVIDIA TileGym's `ops/tilecpp/attention.cuh`, against a materialised
+  three-kernel path that is also GPU-resident (three tile tasks in one graph, so the
+  comparison is fair): 0.378 → 0.253 ms (**1.49x**), 1.18x at the kernel level in CUDA. The
+  cubin holds **128 × HMMA.16816.F32** and the generated source has **zero** `asm volatile`
+  occurrences — tensor cores with no hand-written PTX. Causal masking is not implemented and
+  the README says why: it needs `ct::select`, which the Java API declares but does not lower.
+- **Side finding, filed not fixed:** `results/failures/09-kernelcontext-halffloat-write.md`.
+  An in-place `new HalfFloat(...)` write from a `KernelContext` kernel leaves the buffer
+  zeroed — no exception, no bailout, silent wrong answer. 25-line reproducer at
+  `results/raw/33-cutile-demos/HalfWrite.java`; contains no tile code, so it is a
+  pre-existing CUDA-backend issue. It cost demo 20 its first correct run. Not diagnosed
+  further (the generated SIMT kernel has not been inspected), and deliberately not reported
+  upstream from here.
+
+### Next invocation
+
+- Diagnose `results/failures/09-...` far enough to say where the zeros come from (start with
+  `--printKernel` on the reproducer) before it is worth reporting.
+- Demo 21's causal-masking gap tracks `ct::select` lowering on the cuTile branch; revisit
+  when that lands.
+- Nothing in batches 00–23 was re-run or rewritten for this batch.
+
+## Batch 25 — FP16 ladder with a CUDA Tile rung (demo 22) (2026-09-11)
+
+Demo 18's FP16 matmul ladder with a fourth rung inserted: the same GEMM written against
+`TileContext` and compiled through CUDA Tile, so the hand-written tensor-core rung, the tile
+rung and the vendor libraries are all measured the same way. All Observed; evidence in
+`results/raw/34-cutile-ladder/`.
+
+- `demos/22-matmul-ladder-fp16-tile/MatMulLadderFP16Tile.java` — seven rungs, all validated
+  against a CPU reference over the same FP16-rounded inputs, all PASSED at n=1024.
+- **Kernel time (nsys, `scripts/compare-ladder.sh 22 1024 20`, steady state):** naive
+  537.2 µs → `kcTiled` 331.3 µs → `kcMma` (hand-written `mma.sync`) 181.7 µs → **`tiles`
+  (CUDA Tile) 65.7 µs** → CUTLASS 29.9 µs → cuBLAS `ampere_*_s1688gemm_fp16` 20.2 µs. The
+  tile rung is **2.8x faster than the hand-written MMA rung** and **3.3x slower than cuBLAS**.
+  Both halves are the finding: the tile compiler beats a careful hand-written `mma.sync`
+  kernel against the same tensor cores, and a per-architecture vendor library is still ahead
+  of one 32x32 tile shape with no pipelining hints.
+- Wall clock on the same run is much flatter (2.0x for the tile rung, not 8.2x) because every
+  rung pays the same JVM-side dispatch at this size. The demo prints both and says which to
+  quote; `results/raw/34-cutile-ladder/wallclock-n1024.log` holds the flatter one.
+- Nsight Compute explains the ranking: `kcMma` 810 752 instructions / 292 558 bank conflicts
+  / 15.90 gmem-stall / 48 registers, versus `tiles` 214 784 / 7 717 / 0.50 / 110. The
+  hand-written rung spends its time on staging the tile compiler does not need, and the tile
+  kernel pays for it in registers.
+- `scripts/compare-ladder.sh` now takes `22` (with the `--release 21 --enable-preview` flags
+  that build needs), and `scripts/run-cutile-demos.sh` covers four demos: **12 passed, 0
+  failed**.
+
+### Next invocation
+
+- The tile rung uses one 32x32 shape and no hints. CUDA Tile takes `num_ctas`, `occupancy`
+  and `latency` hints, and TornadoVM knows the shapes at JIT time; sweeping them is the
+  obvious next measurement and the one NVIDIA asked about.
+- Nothing in batches 00-24 was re-run or rewritten for this batch.
+
+## Batch 35 — cuTile on upstream develop, demos 23 & 24, switchable SDK config (2026-09-18)
+
+### The tile demos no longer need a feature branch
+
+`env/versions.env` pinned the tile demos to `feat/cutile` (`6.1.1-jdk21-dev`, PR #1083
+unmerged), which forced JDK 21, `--release 21 --enable-preview`, and a second runner
+script. **PR #1083 is merged**: its merge commit `ec970e26d` is an ancestor of upstream
+`develop`. Cloning `develop` at `8d592d6fbaafe42d66e1e22c27057cb1cdcf9097` and building
+`make jdk22plus BACKEND=cuda` removes all three constraints at once.
+
+Verified: demos 19-22 compile with plain `javac` and run on JDK 25. Their READMEs and the
+runner were updated; the old `CUTILE_*` pins are kept, annotated as superseded, so batches
+33/34 stay interpretable.
+
+### Switchable SDK config
+
+`TORNADO_SDK_PROFILE` in `env/versions.env` names a file in `env/sdk/`. Each profile
+declares the same variables including capability flags, so no consumer branches on the
+profile name. `run-all-demos.sh` gained a `requires` field and a third verdict,
+`SKIPPED_REQUIREMENT` — it had only pass/fail, so a demo the active SDK cannot run scored
+as a *failure*.
+
+- `develop` → **66 passed, 0 failed, 0 skipped** (22 demos × 3 checks)
+- `sdkman-6.0.0` → **48 passed, 0 failed, 6 skipped** (19-24 skip)
+
+`scripts/run-cutile-demos.sh` is now redundant and marked LEGACY rather than deleted.
+
+### The trap that would have faked a pass
+
+`TornadoOptions.RECOVER_BAILOUT` defaults **true** and every `TileContext` method has a JVM
+fallback. A tile task that fails to compile runs on the host, computes the right answer, and
+prints `correct` — **the exact word the runners grep for**. The old `run-cutile-demos.sh`
+did not disable it, so batches 33/34 could not have distinguished a working tile path from a
+silently-host-executed one on verdict alone. Every run now passes
+`-Dtornado.recover.bailout=False`.
+
+### sm_120 works, proved before any demo was written
+
+A hand-written cuTile GEMM compiled straight to a cubin with
+`nvcc -tilecubin --tile-only -std=c++20 -arch=sm_120` → **32 `HMMA.16816.F32`**. Then
+`tornado-test TestTileMatmul` → 7/7. Only then were the demos written.
+
+Two toolchain facts worth not rediscovering:
+
+- **`nvcc` spawns `tileiras` by bare name.** Without it on `PATH` the compile dies late with
+  `sh: 1: tileiras: not found`. `scripts/setup-env.sh` now handles it.
+- **CUDA 13.0's `crt/cuda_tile.h` is a 50-line stub** declaring only `cuda::cutile::print`.
+  The real 5,493-line `cuda::tiles` header comes with the 13.4 wheel.
+
+### Demos 23 and 24 — both PASS
+
+Chosen against what 19-22 actually exercise. Before these two, **nothing in the repo used a
+scan, a masked load or store, a loop-carried reduction, any predicate, or any of the ten
+atomic operations**.
+
+- **23-cutile-row-scan** — per-row prefix sum over a **ragged** extent, 1000 cols against a
+  128-wide tile: `prefixSum`, `loadMasked`/`storeMasked`, a `[1,1]` loop-carried carry and
+  implicit broadcast. Bit-exact (0/4096000 and 0/4096). Codegen shows `ct::partial_sum` ×8.
+- **24-cutile-histogram** — `PartitionView.atomicAdd`, 4096 blocks folding into 256 bins,
+  ~1M contended adds. Also answers "what replaces a scatter?" — a predicate over the whole
+  tile, since CUDA Tile has no gather/scatter. Codegen shows `ct::atomic_add` ×8,
+  `ct::select`, `ct::iota`, `ct::broadcast`.
+
+Each ships a pure cuTile C++ twin adapted from NVIDIA/TileGym at `ec339c0d` (MIT), linked
+and attributed rather than vendored, with a translation table that is explicit where the two
+differ. Demo 24's twin needed
+`atomic_add(tile, ct::memory_order_relaxed_t{}, ct::thread_scope_device_t{}, idx...)` — the
+Java API fixes relaxed/device and does not expose the shorter form.
+
+Two bugs found while writing them, both in my own code and both recorded in the source:
+a rank-2 partition needs a two-index `load` (the rank-1 form produced 49 downstream template
+errors), and an atomic accumulator must be cleared on the **host** each execution or the
+bins keep summing across iterations.
+
+### Bug found: FP8 tile arithmetic
+
+212 of 219 tile unit tests pass on sm_120. **All 7 failures are FP8 arithmetic** in
+`TestTileOpLevel`. Root cause, reduced to pure C++ in
+`results/raw/35-develop-cutile-baseline/fp8-probe/`: **CUDA Tile C++ 13.4 defines no
+arithmetic operators for FP8 tile element types**, and the backend emits the operator form
+directly. `fp8.cu` fails with `no operator "+" matches these operands`; the same kernel with
+an `element_cast` round-trip through f32 compiles clean. Not the documented "fp8 below CC
+9.0" limitation — this GPU is CC 12.0. Two defensible fixes upstream: emit the cast, or gate
+the ops so they report `[UNSUPPORTED]`.
+
+**Filed: [#1105](https://github.com/beehive-lab/TornadoVM/issues/1105)** — with the pure-C++
+reduction, the working `element_cast` round-trip, and both fix options laid out rather than
+guessed between. Also notes that the unit-test reporter truncates the nvcc log out of the
+bailout message, which is why the first-line symptom is a bare "The CUDA Tile compiler
+failed".
+
+### A near-miss worth recording
+
+This batch was first built against a clone that was **31 commits stale** — it predated demos
+17-22 entirely. Working from it, I planned demos numbered 17/18 and built a one-commit-per-demo
+history rewrite. `git push --force-with-lease` **rejected** the push with `stale info`, which
+is the only reason demos 17-22 still exist. `--force` would have destroyed them. Fetch before
+planning; use `--force-with-lease`, never `--force`.
+
+### Both twin suites were lying, and are now green
+
+`verify.sh` had been red since demo 22 landed — it was the only demo without a CUDA twin.
+Written: `MatMulLadderFP16Tile.cu`, demo 18's ladder plus the tile rung, built with
+`--enable-tile` so tile kernels and host code share one translation unit and the result is
+an executable. (TornadoVM cannot do that: with no host TU to put the launch in, it drives
+`nvcc -tilecubin --tile-only` to a bare cubin and loads it itself.) `verify.sh`: **21/21**.
+
+Writing it exposed two defects in `run-all-cuda.sh`, both of which scored answers wrongly:
+
+1. **Demo 18's twin never validated anything** — it only timed — so the runner's "no verdict
+   in output" branch failed it, and a numerically wrong rung would have gone unnoticed.
+   Every rung is now checked against a CPU reference.
+2. **`check()` grepped for the bare substring `error`**, so a correct run printing
+   `max abs error 0.0002` was scored a **FAILURE**. This is why demos 19-21 could never have
+   been added to that runner. It now matches real diagnostics (`error:`, `cuda err`,
+   `Segmentation fault`) and explicit verdicts.
+
+With both fixed, demos 19-24 join the runner: **44 passed, 0 failed, 1 skipped** (CUTLASS,
+which needs `CUTLASS_DIR`). Demos 23 and 24's twins were kernel-only cubins and are now
+executables that validate their own output, so the reference and the TornadoVM
+implementation can actually be compared rather than merely both compiling.
+
+### Upstream: bailout should not default to on
+
+**Filed: [#1107](https://github.com/beehive-lab/TornadoVM/pull/1107)** (PR) — flip
+`tornado.recover.bailout` to `False` by default.
+
+The argument is that the project has already decided this four times over and only the
+default was left behind: `tornado-test:478` and `tornado-benchmarks.py:63` both hardcode
+`-Dtornado.recover.bailout=False`, `docs/source/tile-api.rst` tells readers to, and
+`TestTileDTypes`'s javadoc says the test *depends* on it. Every first-party harness that
+needs a trustworthy answer turns it off.
+
+Measured both arms rather than asserting no regression. Full `make tests`, both 201
+classes / 1483 tests / 91 unsupported:
+
+| arm | failed |
+| --- | --- |
+| unpatched `develop` @ `8d592d6` | **17** |
+| patched | **16** |
+
+**16 failures common to both, zero unique to the patch** — the direction that matters. The
+single difference, `TestReductionsFloats#testComputePi`, is **flaky on unpatched develop**:
+re-run six times on the unpatched build it failed twice (runs 1 and 6) and passed four
+times, with the patch nowhere in the picture.
+
+That the arms agree is expected rather than lucky — `tornado-test` sets the flag
+explicitly, so the default cannot reach the suite — and the run is there to show it, not to
+discover it. A sample of `tornado-examples` with the flag forced both ways showed no
+behavioural difference either.
+
+**Correction worth recording:** the PR first claimed "16 vs 16, identical test-for-test".
+That came from comparing only the five classes that failed in the *patched* run, which can
+only detect failures the patch adds, never ones it appears to remove. The full baseline run
+showed 17. The PR body was corrected in place; the conclusion did not change, but the
+evidence behind it now actually supports the claim.
+
+The PR says plainly that this is a behaviour change for applications and belongs in release
+notes: code that silently falls back today will now see the exception instead of a slow
+correct answer.
+
+### Next invocation
+
+- FP8 finding filed upstream as #1105; watch for which fix the maintainers prefer.
+- Bailout default filed as #1107.
+- Demo 22's missing `.cu` twin keeps `verify.sh` red.
+- No performance claim is made for demos 23/24. First execution pays an nvcc process spawn
+  per kernel/shape/arch, so any timing needs warm-up separation.
+
+> **Numbering note (merge, 2026-09-22):** batches 40–43 below were first committed as
+> 33–36 on a line of work that ran in parallel with the CUDA Tile batches above, whose
+> result directories already use 33–39. They were renumbered to 40–43 when the two were
+> merged; directory names and every reference were updated.
+
+## Batch 40 — TornadoVM 7.0.0 CUDA migration (2026-09-22)
 
 Track A migrated from the `6.0.0-jdk22plus-cuda` pin to the **7.0.0-jdk22plus-cuda**
 SDKMAN release (commit `65eb834`, tag `v7.0.0`, published 2026-09-22). Evidence:
-`results/raw/33-tornadovm-7-migration/`. All Observed.
+`results/raw/40-tornadovm-7-migration/`. All Observed.
 
 - **48/48 checks pass** — all sixteen Track A demos compile and run correctly under
   both run paths (`tornado` launcher and `java @$TORNADOVM_HOME/tornado-argfile`),
@@ -758,7 +1014,7 @@ first. Not attempted; no claim made.
 
 ### Next invocation
 
-- ~~Decide whether to re-measure the demo timings on 7.0.0.~~ Done in batch 34
+- ~~Decide whether to re-measure the demo timings on 7.0.0.~~ Done in batch 41
   (wall-clock only; `nsys`/`ncu` rows still 6.0.0).
 - The CUDA 13 dependency currently resolves to a pip wheel inside
   `~/.local/lib/python3.10/site-packages`. A real CUDA 13 runtime install would be
@@ -766,10 +1022,10 @@ first. Not attempted; no claim made.
 - `demos/README.md`'s demo table still omits rows for 16 and 18, and its
   CUDA-equivalents section still says "thirteen" — pre-existing, unrelated to 7.0.0.
 
-## Batch 34 — Track A wall-clock timings re-measured on 7.0.0 (2026-09-22)
+## Batch 41 — Track A wall-clock timings re-measured on 7.0.0 (2026-09-22)
 
-Closes the "7.0.0 for correctness, 6.0.0 for numbers" split left by batch 33, for
-wall-clock. Evidence: `results/raw/34-tornadovm-7-timings/`. All Observed.
+Closes the "7.0.0 for correctness, 6.0.0 for numbers" split left by batch 40, for
+wall-clock. Evidence: `results/raw/41-tornadovm-7-timings/`. All Observed.
 
 Every timed demo re-run on 7.0.0 with the **same arguments** the 6.0.0-era batches
 used (06/07/11 from batch 18, 12/14 from batch 19, 17 from batch 28), so the sets are
@@ -806,15 +1062,15 @@ wall-clock counterparts only are refreshed here.
   wall clock alone does not say whether replay got cheaper or dispatch did.
 - Demo 06's faster sequential path is unexplained. Worth a dispatch-level look before
   it goes in a talk, since it changes a headline number.
-- Track B (demos 09, 10) still on the 5.2.1 pin; unchanged by batches 33–34.
+- Track B (demos 09, 10) still on the 5.2.1 pin; unchanged by batches 40–41.
 
-## Batch 35 — Accuracy audit against TornadoVM 7.0.0 (2026-09-22)
+## Batch 42 — Accuracy audit against TornadoVM 7.0.0 (2026-09-22)
 
-Full findings with evidence: `results/raw/35-accuracy-audit-7.0.0/MANIFEST.md`.
+Full findings with evidence: `results/raw/42-accuracy-audit-7.0.0/MANIFEST.md`.
 
 - **Root cause:** upstream #1066 (payload alignment), #1079 (load batching, default-on)
   and #1022 (stack-frame upload skip) all shipped in `v7.0.0` (ancestry checked).
-- **Stale, measured:** demo 17 rung 3 is **~0.98x** *(corrected in batch 36: 1.02x —
+- **Stale, measured:** demo 17 rung 3 is **~0.98x** *(corrected in batch 43: 1.02x —
   the 0.98x was one low run)* hand-written CUDA (repo: 1.43x
   slower); demo 15 memory-bound kernels are **1.02x / 1.03x** (repo: 1.31x / 1.24x);
   #1065 sectors/request is **4.00** (repo: 5.00). Talk narratives for demos 15 and 17
@@ -830,21 +1086,21 @@ Full findings with evidence: `results/raw/35-accuracy-audit-7.0.0/MANIFEST.md`.
   flag it. `demos/README.md` now says so instead of "all ... produce the same results".
 - **Evidence trail:** `STATE.md` has no entries for batches 24–32; batch 32 has no
   MANIFEST.
-- **Own errors fixed:** batch-number collision (31/32 → 33/34), the "never loads
+- **Own errors fixed:** batch-number collision (31/32 → 33/34, later → 40/41 at the merge), the "never loads
   libtornado-cudnn" overstatement (SDPA does load it, and needs GLIBC_2.38), and an
   untested SDPA claim in demo 13's README.
 
 ### Next invocation
 
-- ~~Decide how demos 15 and 17 should tell their story on 7.0.0, then rewrite them.~~ Done in batch 36.
+- ~~Decide how demos 15 and 17 should tell their story on 7.0.0, then rewrite them.~~ Done in batch 43.
 - Add a correctness check to `demos/18-matmul-ladder-fp16/MatMulLadderFP16.cu`.
 - Backfill `STATE.md` for batches 24–32 and a MANIFEST for batch 32.
 - Re-capture demo 14's sector counts and demo 01's instruction/bandwidth comparison.
 
-## Batch 36 — Demos 15 and 17 reworked on TornadoVM 7.0.0 (2026-09-22)
+## Batch 43 — Demos 15 and 17 reworked on TornadoVM 7.0.0 (2026-09-22)
 
 Both READMEs rewritten around fresh 7.0.0 measurements at their own parameters.
-Evidence: `results/raw/36-demo15-demo17-on-7.0.0/MANIFEST.md`. All Observed.
+Evidence: `results/raw/43-demo15-demo17-on-7.0.0/MANIFEST.md`. All Observed.
 
 - **Demo 15** (3 nsys runs per side, spread < 0.7%): memory-bound kernels **1.03x /
   1.03x** of hand-written CUDA (6.0.0: 1.31x / 1.24x); compute-bound TornadoVM **1.15x
@@ -864,8 +1120,8 @@ Evidence: `results/raw/36-demo15-demo17-on-7.0.0/MANIFEST.md`. All Observed.
   now shows the before/after on the pinned SDK.
 - **New finding — CUTLASS rung ~7.6% slower on 7.0.0** (426.3 vs 396–398 µs,
   interleaved, identical kernel template, naive rung flat). Cause not investigated.
-- **Correction to batch 35:** its "~0.98x, parity" for rung 3 was one low run (480.3 µs).
-  Annotated in the batch 35 manifest, README and STATE; not rewritten.
+- **Correction to batch 42:** its "~0.98x, parity" for rung 3 was one low run (480.3 µs).
+  Annotated in the batch 42 manifest, README and STATE; not rewritten.
 - **Also fixed in demo 17's README:** default size is 1024, not 2048; and the warning
   that `setup-env.sh` only works from the repo root was false (it resolves its own path).
 - Demo 15's README no longer says `ncu` is blocked on this machine (unblocked 09-03).
@@ -878,4 +1134,29 @@ Evidence: `results/raw/36-demo15-demo17-on-7.0.0/MANIFEST.md`. All Observed.
 - The main README's CUDA-equivalents wall-clock table (demos 06, 07, 11, 13, 14) still
   carries 6.0.0 TornadoVM numbers next to CUDA numbers.
 - Demo 14 sector counts and demo 01's instruction/bandwidth rows still 6.0.0.
+
+## Batch 44 — Merged with the CUDA Tile work; every demo green on 7.0.0 (2026-09-22)
+
+Evidence: `results/raw/44-merged-7.0.0-all-demos/MANIFEST.md`. All Observed.
+
+- Merged the 7.0.0 line (batches 40–43, first numbered 33–36) with the CUDA Tile line
+  (demos 19–24, SDK profiles, batches 33–39). Adopted the profile system; added
+  `env/sdk/sdkman-7.0.0.env` and made it the default, as `env/sdk/README.md` prescribed
+  for the first release with the tile API. 7.0.0 carries PR #1083.
+- New profile variable `TORNADO_LD_LIBRARY_PATH` (documented in `env/sdk/README.md`)
+  replaces the earlier top-level `CUDA13_RUNTIME_LIB` logic in `setup-env.sh`.
+- **`run-all-demos.sh`: 66 passed, 0 failed, 0 skipped** on sm_89 — including all six
+  tile demos, with bailout disabled. `nsys` confirms demo 19's `tiles` kernel on the GPU.
+- **`run-all-cuda.sh`: 43 passed, 2 failed** on sm_89 (upstream: 44/0/1 on sm_120). 05 fails
+  when built by the pip-wheel `nvcc` 13.3 (no cuFFT; links system `libcufft.so.10`); 24
+  does not compile against this box's CUDA Tile headers (no `partition_view::atomic_add`).
+  Toolchain effects on this machine; neither caused by the merge.
+- Demo 18's `.cu` now validates (upstream 3ade5c5), closing that batch 42 finding.
+
+### Next invocation
+
+- Make `run-all-cuda.sh` build non-tile twins with the toolkit `nvcc` and only tile twins
+  with `TORNADO_NVCC`, so 05 passes with a tile profile active.
+- Update this box's CUDA Tile wheel and re-check demo 24's `.cu`.
+- `env/sdk/develop.env` still points `TORNADO_NVCC` at a python3.11 path (sm_120 machine).
 

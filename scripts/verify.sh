@@ -68,7 +68,9 @@ fi
 preview_hits=$(grep -rn -- '--enable-preview' demos/*/README.md 2>/dev/null \
   | grep -v 'No `--enable-preview`' \
   | grep -v 'still needs preview flags' \
-  | grep -v 'preview features enabled')
+  | grep -v 'preview features enabled' \
+  | grep -v 'flags this demo used to need are' \
+  | grep -v 'no preview flags are needed')
 if [ -n "$preview_hits" ]; then
   echo "$preview_hits"
   bad "a demo README still instructs --enable-preview (not needed on the jdk22plus SDK)"

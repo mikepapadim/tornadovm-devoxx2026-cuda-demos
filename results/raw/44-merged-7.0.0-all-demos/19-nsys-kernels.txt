@@ -1,0 +1,3 @@
+  11 x    237.0 us  naive
+  11 x     46.8 us  tiledByHand
+  11 x      2.6 us  tiles

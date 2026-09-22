@@ -10,6 +10,13 @@
 # here. Fetch it once and point CUTLASS_DIR at it, or that demo is skipped:
 #   git clone --depth 1 --branch v3.5.1 https://github.com/NVIDIA/cutlass.git
 #   export CUTLASS_DIR=$PWD/cutlass
+#
+# Demos 19-24 are CUDA Tile kernels and need toolkit 13.3+ with tileiras on PATH.
+# A userspace install is enough and needs no root:
+#   pip install --user nvidia-cuda-nvcc 'cuda-tile[tileiras]' nvidia-cuda-cccl
+#   export PATH="$HOME/.local/lib/python3.11/site-packages/nvidia/cu13/bin:$PATH"
+# They build with --enable-tile, which mixes tile kernels and host code into one
+# executable; TornadoVM instead drives `nvcc -tilecubin --tile-only` to a bare cubin.
 set -u
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -31,7 +38,10 @@ pass=0
 skip=0
 
 check() { # label logfile
-  if grep -qE 'WRONG|FAILED|INCORRECT|error' "$2"; then
+  # Match real failure indicators, not the bare substring "error": a correct run that
+  # reports "max abs error 0.0002" must not be scored a failure. Matching diagnostics
+  # ("cuda err", "error:") and explicit verdicts instead.
+  if grep -qE 'WRONG|FAILED|INCORRECT|error:|cuda err|cublas err|cudnn err|Segmentation fault' "$2"; then
     echo "FAIL $1 (see $2)"; fail=$((fail + 1))
   elif grep -qE 'correct|PASSED|out: \[' "$2"; then
     echo "OK   $1"; pass=$((pass + 1))
@@ -81,6 +91,12 @@ done <<'DEMOS'
 16-tensor-core-datatypes|TensorCoreDataTypes.cu||
 17-matmul-ladder|MatMulLadder.cu|-lcublas|256 3
 18-matmul-ladder-fp16|MatMulLadderFP16.cu|-lcublas|256 3
+19-cutile-matmul|TileMatMul.cu|--enable-tile -std=c++20 -O3|256 10
+20-cutile-hybrid|TileHybridPipeline.cu|--enable-tile -std=c++20 -O3 -lcublas|256 20 both
+21-cutile-flash-attention|TileFlashAttention.cu|--enable-tile -std=c++20 -O3|128 256 20
+22-matmul-ladder-fp16-tile|MatMulLadderFP16Tile.cu|--enable-tile -std=c++20 -O3 -lcublas|256 20
+23-cutile-row-scan|CuTileRowScan.cu|--enable-tile -std=c++20 -O3|4096 1000 20
+24-cutile-histogram|CuTileHistogram.cu|--enable-tile -std=c++20 -O3|1048576 256 20
 DEMOS
 
 # Demo 15's two diagnostic probes: they attribute the kernel-time differences

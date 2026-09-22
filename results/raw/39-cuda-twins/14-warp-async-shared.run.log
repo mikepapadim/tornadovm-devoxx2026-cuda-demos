@@ -1,0 +1,19 @@
+Warp-shuffle + cp.async + shared-memory row reduction: 2048 rows x 512 int8 values
+  block = 128 threads (4 warps), one block per row
+  5 executions per kernel, steady-state median reported (first execution excluded)
+
+=== NAIVE (one thread per row, global memory only) ===
+  first execution: 113 us
+  steady-state median wall-clock (n=4): 55 us
+
+=== OPTIMISED (cp.async + shared + shuffle) ===
+  first execution: 12 us
+  steady-state median wall-clock (n=4): 9 us
+
+  [naive    ] validation PASSED (max abs err 0.00000, 0/2048 rows out of tol)
+  [optimised] validation PASSED (max abs err 0.00000, 0/2048 rows out of tol)
+
+=== Summary (steady-state median us, this run/this GPU) ===
+naive     : 55
+optimised : 9 (6.01x vs naive)
+Both kernels produce the same, correct result

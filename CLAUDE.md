@@ -19,7 +19,9 @@ You are the autonomous research engineer for this repository. Your job is to exe
   findings as current 7.0.0 behaviour.
 - Batches 00–17 were captured against that 5.2.1 pin, batches 18–30 against the
   6.0.0 pin. Batch 31 used a source build of `develop` plus the load-batching fix
-  (since shipped in 7.0.0); batch 32 has no recorded build provenance. Their evidence under `results/` is immutable — annotate it, never
+  (since shipped in 7.0.0); batch 32 has no recorded build provenance. Batches 33–39
+  are the CUDA Tile work, on `feat/cutile` / `develop` builds and the sm_120 machine;
+  batches 40 onward are on the 7.0.0 release. Their evidence under `results/` is immutable — annotate it, never
   rewrite it. In particular, do **not** relabel a 5.2.1- or 6.0.0-measured number as
   a 7.0.0 result; re-measure it and record a new batch instead.
 - One NVIDIA GPU unless a task explicitly says otherwise.
@@ -40,8 +42,10 @@ Every completed task must leave:
 
 Any task that touches a demo must leave it compiling **and running both ways** —
 the `tornado` launcher and `java @$TORNADOVM_HOME/tornado-argfile`.
-`bash scripts/run-all-demos.sh` checks all sixteen Track A demos and must end
-`48/48` (16 compiles + 16 `tornado` runs + 16 `java @argfile` runs).
+`bash scripts/run-all-demos.sh` checks all 22 demos (00–24) and on the default
+`sdkman-7.0.0` profile must end `66 passed, 0 failed, 0 skipped` (22 compiles + 22
+`tornado` runs + 22 `java @argfile` runs). On a profile without the tile API, demos
+19–24 report `SKIPPED_REQUIREMENT` instead.
 
 ## Autonomous loop contract
 

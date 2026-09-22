@@ -1,12 +1,16 @@
 # TornadoVM on NVIDIA CUDA
 
-Java GPU kernels on the **TornadoVM 7.0.0 CUDA release**, each paired with a
+Java GPU kernels on TornadoVM's **CUDA backend**, pinned to the **TornadoVM 7.0.0
+release**, each paired with a
 hand-written CUDA C++ equivalent and measured against it. Write GPU kernels in
 plain Java, drive CUDA-runtime behaviour (graph capture/replay, multi-stream
-concurrency) from `TornadoExecutionPlan`, and call cuBLAS/cuFFT without writing
-a line of JNI.
+concurrency) from `TornadoExecutionPlan`, call cuBLAS/cuFFT without writing a
+line of JNI — and, in demos 19-24, write **CUDA Tile (cuTile)** kernels that
+never name a thread.
 
-No source build required — TornadoVM 7.0.0 installs from SDKMAN in one command.
+No source build required: TornadoVM 7.0.0 installs from SDKMAN in one command, and it
+is the first release that ships the CUDA Tile API, so it runs **every** demo here,
+00-24. **Which SDK is used is one line** — see [SDK profiles](#sdk-profiles).
 
 Reading this as a compiler engineer? **[`docs/NVIDIA-BRIEF.md`](docs/NVIDIA-BRIEF.md)**
 is the start-here page: the compilation pipeline, what is measured and how, and
@@ -94,6 +98,65 @@ source scripts/setup-env.sh   # sets JAVA_HOME / TORNADOVM_HOME / PATH, generate
 tornado --devices
 ```
 
+## SDK profiles
+
+One line in `env/versions.env` decides which TornadoVM the demos run against:
+
+```
+TORNADO_SDK_PROFILE=sdkman-7.0.0   # or develop, sdkman-6.0.0
+```
+
+It names a file in [`env/sdk/`](env/sdk/), which pins the SDK and declares what it
+can do. A demo tagged `requires=tile` reports `SKIPPED_REQUIREMENT` — never a
+failure — on a profile without the tile API, so one demo set works across SDKs.
+
+| Profile | SDK | Tile API | `run-all-demos.sh` |
+| --- | --- | --- | --- |
+| **`sdkman-7.0.0`** (default) | released, `sdk install tornadovm 7.0.0-jdk22plus-cuda` | **yes** | **66 passed, 0 failed, 0 skipped** (sm_89) |
+| `develop` | source build of upstream `develop` in `vendor/tornadovm` | **yes** | 66 passed, 0 failed, 0 skipped (sm_120) |
+| `sdkman-6.0.0` | released, `sdk install tornadovm 6.0.0-jdk22plus-cuda` | no | 48 passed, 0 failed, **6 skipped** |
+
+Override for one shell — **export it first**, since `VAR=x source …` does not persist:
+
+```bash
+export TORNADO_SDK_PROFILE=sdkman-6.0.0
+source scripts/setup-env.sh
+```
+
+7.0.0 is the first release that ships the tile API, so `env/sdk/sdkman-7.0.0.env` was
+added with `TORNADO_HAS_TILE_API=1` and the selector moved to it — no demo or script
+changes. It also sets `TORNADO_LD_LIBRARY_PATH`: 7.0.0's CUTLASS bridge links CUDA 13,
+so demos 12, 17 and 18 need a CUDA 13 runtime (the same pip wheel as below provides it).
+
+### Running the CUDA Tile demos (19-24)
+
+They need CUDA Toolkit **13.3+** — the tile path drives `nvcc`, not NVRTC. A
+userspace toolkit is enough and needs no root:
+
+```bash
+pip install --user nvidia-cuda-nvcc 'cuda-tile[tileiras]' nvidia-cuda-cccl
+
+source scripts/setup-env.sh          # default profile `sdkman-7.0.0`: nothing to build
+```
+
+`TORNADO_NVCC` in the profile points at that wheel's `nvcc`; adjust the path if your
+`pip --user` installs under a different Python. To use a source build of `develop`
+instead:
+
+```bash
+git clone --branch develop https://github.com/beehive-lab/TornadoVM.git vendor/tornadovm
+cd vendor/tornadovm && make jdk22plus BACKEND=cuda && cd -
+export TORNADO_SDK_PROFILE=develop && source scripts/setup-env.sh
+```
+
+`--release 21 --enable-preview` is **no longer needed**: PR #1083 is merged and shipped
+in 7.0.0, a jdk22plus build, so the tile demos run on the same JDK as the rest.
+
+Always run a tile demo with `-Dtornado.recover.bailout=False` (the runner does).
+Every `TileContext` method has a plain-Java fallback, so with the default a tile
+kernel that fails to compile runs on the **host**, prints `correct`, and looks
+like a pass. See [`docs/cutile-api.md`](docs/cutile-api.md).
+
 ```
 Number of Tornado drivers: 1
 Driver: CUDADriver
@@ -164,13 +227,22 @@ and JDK-specific — `-XX:+EnableJVMCI` is required on JDK ≤ 26 and fatal on J
 
 Each demo is one self-contained Java file, paired with a hand-written CUDA C++
 equivalent in the same folder (see **CUDA equivalents** below). Every row below is
-verified to compile and run on the pinned **TornadoVM 7.0.0** / JDK 25 / RTX 4090 —
-48/48 checks, `results/raw/33-tornadovm-7-migration/run-all-demos.log`.
+verified on the pinned **TornadoVM 7.0.0** / JDK 25 / RTX 4090 (sm_89): **66/66** — 22
+demos × compile, `tornado` launcher and `java @argfile`, nothing skipped
+(`results/raw/44-merged-7.0.0-all-demos/run-all-demos.log`).
 
-Wall-clock timings were re-measured on 7.0.0 — see "Measured on TornadoVM 7.0.0"
-below and `results/raw/34-tornadovm-7-timings/`. The `nsys` kernel-time and `ncu`
-hardware-counter numbers quoted in the demo READMEs were **not** re-captured; they
-keep their 5.2.1 or 6.0.0 provenance and are labelled as such.
+Wall-clock timings for demos 00-18 were re-measured on 7.0.0 — see "Measured on
+TornadoVM 7.0.0" below and `results/raw/41-tornadovm-7-timings/`. Other `nsys` and
+`ncu` numbers quoted in demo READMEs keep the provenance they are labelled with.
+
+**†** marks the **CUDA Tile** demos. They need an SDK with the tile API (7.0.0 has it)
+and CUDA Toolkit 13.3+ — see [SDK profiles](#sdk-profiles) — and on a profile without
+the tile API they report `SKIPPED_REQUIREMENT` rather than failing. Run them with
+`-Dtornado.recover.bailout=False` (`scripts/run-all-demos.sh` does): every
+`TileContext` method has a plain-Java fallback, so otherwise a tile kernel that fails
+to compile runs on the **host**, prints `correct`, and looks like a pass. Verified on
+an RTX 5070 Ti (sm_120, `develop` profile, `results/raw/37-demo-matrix-develop/`) and
+on an RTX 4090 (sm_89, `sdkman-7.0.0`, `results/raw/44-merged-7.0.0-all-demos/`).
 
 **Demos 12, 13 and 14 each document how to profile them with Nsight Systems**,
 with the exact commands and captured output in their README. For 12 and 14 the
@@ -192,7 +264,12 @@ profiler, not the wall clock, is what shows the effect at all.
 | [14](demos/14-warp-async-shared/) | `WarpAsyncSharedReduce.java` | `cp.async` + shared memory + `__shfl_down_sync` from Java, verified in the generated CUDA | `tornado --classpath . WarpAsyncSharedReduce` |
 | [17](demos/17-matmul-ladder/) | `MatMulLadder.java` | **The matmul ladder**: naive → KernelContext tiled → register-tiled → CUTLASS → cuBLAS → cuBLAS TF32, one problem, six rungs, kernel-time compared | `tornado --classpath . MatMulLadder` |
 | [18](demos/18-matmul-ladder-fp16/) | `MatMulLadderFP16.java` | **FP16 ladder** — one GEMM, six rungs, naive → `ctx.mma` tensor cores → CUTLASS → cuBLAS; measure with `scripts/compare-ladder.sh 18` | `tornado --classpath . MatMulLadderFP16` |
-| [17](demos/17-matmul-ladder/) | `MatMulLadder.java` | **FP32 ladder** — the same climb with a register-tiled rung; measure with `scripts/compare-ladder.sh 17` | `tornado --classpath . MatMulLadder` |
+| [19](demos/19-cutile-matmul/) † | `TileMatMul.java` | **CUDA Tile**: the same FP16 GEMM with threads, then with tiles — `tc.partition` / `tc.mma`, no thread index anywhere | `tornado --jvm="-Dtornado.recover.bailout=False" --classpath . TileMatMul 256 10` |
+| [20](demos/20-cutile-hybrid/) † | `TileHybridPipeline.java` | **CUDA Tile** + JIT + cuBLAS in one `TaskGraph`, one stream, shared buffers — a tile task chains and captures like any other | `tornado --jvm="-Dtornado.recover.bailout=False" --classpath . TileHybridPipeline 256 20 both` |
+| [21](demos/21-cutile-flash-attention/) † | `TileFlashAttention.java` | **CUDA Tile**: flash attention with online softmax, ported from NVIDIA's TileGym, against a materialised three-kernel path | `tornado --jvm="-Dtornado.recover.bailout=False" --classpath . TileFlashAttention 128 256 20` |
+| [22](demos/22-matmul-ladder-fp16-tile/) † | `MatMulLadderFP16Tile.java` | **FP16 ladder with a CUDA Tile rung** inserted between hand-written `mma.sync` and the vendor libraries; measure with `scripts/compare-ladder.sh 22` | `tornado --jvm="-Dtornado.recover.bailout=False" --classpath . MatMulLadderFP16Tile 1024 20` |
+| [23](demos/23-cutile-row-scan/) † | `CuTileRowScan.java` | **CUDA Tile scan**: a per-row prefix sum is one call, `tc.prefixSum`. 1000 columns against a 128-wide tile, so `loadMasked`/`storeMasked` handle the ragged tail and a `[1,1]` carry rides the loop | `tornado --jvm="-Dtornado.recover.bailout=False" --classpath . CuTileRowScan 4096 1000 20` |
+| [24](demos/24-cutile-histogram/) † | `CuTileHistogram.java` | **CUDA Tile atomics**: `PartitionView.atomicAdd`, 4096 blocks folding into 256 bins. Also what replaces a scatter — a predicate over the whole tile, since CUDA Tile has no gather/scatter | `tornado --jvm="-Dtornado.recover.bailout=False" --classpath . CuTileHistogram 1048576 256 20` |
 | [16](demos/16-tensor-core-datatypes/) | `TensorCoreDataTypes.java` | **BF16, int8, FP8 e4m3 and FP8 e5m2** MMA from Java — every operand type the backend can emit, each validated and counted | `tornado --classpath . TensorCoreDataTypes` |
 | [15](demos/15-kernel-time-comparison/) | `KernelTimeComparison.java` | **Start here.** Kernel time only, TornadoVM vs hand-written CUDA over 3 kernels; both deltas root-caused with `nsys` + Nsight Compute counters | `tornado --classpath . KernelTimeComparison` |
 
@@ -205,8 +282,8 @@ shape and says explicitly not to run it live.
 ## Measured on TornadoVM 7.0.0 (Observed — this machine, these runs)
 
 RTX 4090, driver 610.57.04, CUDA 12.6.85, JDK 25.0.2. Not general claims.
-Wall-clock rows: `results/raw/34-tornadovm-7-timings/`. Demo 15 and 17 kernel-time
-and counter rows: `results/raw/36-demo15-demo17-on-7.0.0/`. Other `nsys`/`ncu` rows
+Wall-clock rows: `results/raw/41-tornadovm-7-timings/`. Demo 15 and 17 kernel-time
+and counter rows: `results/raw/43-demo15-demo17-on-7.0.0/`. Other `nsys`/`ncu` rows
 (demos 01, 08, 12, 13, 14, 16) were not re-captured and keep their 6.0.0 provenance
 in the table below.
 
@@ -244,7 +321,7 @@ replay is unchanged.
 ## Measured on TornadoVM 6.0.0 (Historical)
 
 > Several kernel-time and counter rows below are **stale on 7.0.0**: upstream fixes
-> #1066 and #1079 shipped in it. Measured in `results/raw/35-accuracy-audit-7.0.0/`:
+> #1066 and #1079 shipped in it. Measured in `results/raw/42-accuracy-audit-7.0.0/`:
 > demo 17's register-tiled rung is now 1.02x hand-written CUDA (not 1.43x), demo 15's
 > memory-bound kernels 1.02x / 1.03x (not 1.31x / 1.24x), and #1065's sectors/request
 > 4.00 (not 5.00). The demo 14 sector and demo 01 instruction rows rest on the same
@@ -297,19 +374,50 @@ unblocked: `results/raw/22-ncu-alignment-counters/` (#1065) and
 
 Every Track A demo ships a hand-written CUDA C++ version in the same folder
 (`Hello.java` next to `Hello.cu`, and so on), so the Java and the CUDA can be
-read side by side. All twelve compile and run, and each produces the same
-result as its Java counterpart:
+read side by side. Each compiles, runs, and validates its own output against a
+reference — a fast wrong kernel cannot pass as a win:
 
 ```bash
-bash scripts/run-all-cuda.sh          # 16 compiles + 16 runs + 2 probes, no JDK needed (33/34: demo 18 never validates)
+bash scripts/run-all-cuda.sh          # no JDK needed; see the note below on results per machine
 ```
 
-Demo 12 additionally needs CUTLASS, which is header-only and not vendored here:
+**Results differ by machine, because the toolchains differ:**
+
+| Machine | Result | Notes |
+|---|---|---|
+| RTX 5070 Ti (sm_120), `develop` profile | 44 passed, 0 failed, 1 skipped | demo 12 skipped without a CUTLASS checkout (`results/raw/39-cuda-twins/`) |
+| RTX 4090 (sm_89), `sdkman-7.0.0` profile, CUTLASS 3.5.1 | **43 passed, 2 failed** | see below (`results/raw/44-merged-7.0.0-all-demos/`) |
+
+The two sm_89 failures are toolchain effects, not demo bugs:
+
+- **05's `.cu` fails when built by the pip-wheel CUDA 13.3 `nvcc`.** `setup-env.sh`
+  puts a tile profile's `nvcc` first on `PATH`, `run-all-cuda.sh` uses whichever
+  `nvcc` is first, and that wheel ships no cuFFT — so the binary links the system's
+  old `libcufft.so.10` and fails with `cuFFT error 5`. Built with the toolkit's
+  `nvcc` 12.6 it passes.
+- **24's `.cu` does not compile against this box's CUDA Tile headers**
+  (`partition_view` has no member `atomic_add`); it compiles on the sm_120 machine.
+
+Demo 12 additionally needs CUTLASS, which is header-only and not vendored here
+(it is the one skipped when `CUTLASS_DIR` is unset):
 
 ```bash
 git clone --depth 1 --branch v3.5.1 https://github.com/NVIDIA/cutlass.git
 export CUTLASS_DIR=$PWD/cutlass
 ```
+
+The CUDA Tile equivalents (demos 19–24) need toolkit 13.3+ with `tileiras` on
+`PATH`, and build with `--enable-tile`, which mixes tile kernels and host code
+into one executable:
+
+```bash
+pip install --user nvidia-cuda-nvcc 'cuda-tile[tileiras]' nvidia-cuda-cccl
+export PATH="$HOME/.local/lib/python3.11/site-packages/nvidia/cu13/bin:$PATH"
+```
+
+TornadoVM itself cannot build them that way: with no host translation unit to put
+the launch in, it drives `nvcc -tilecubin --tile-only` to a bare cubin and loads
+it itself.
 
 ### What the comparison actually shows
 
@@ -327,7 +435,7 @@ faster everywhere** — the interesting part is the pattern, not the direction:
 
 **Demo 15 measures kernel time alone** and finds the picture is different once
 host overhead is excluded — see its README for the full analysis. On the pinned
-TornadoVM 7.0.0 (`results/raw/36-demo15-demo17-on-7.0.0/`, 3 runs, spread < 0.7%):
+TornadoVM 7.0.0 (`results/raw/43-demo15-demo17-on-7.0.0/`, 3 runs, spread < 0.7%):
 
 | Kernel | TornadoVM | CUDA | | on 6.0.0 |
 |---|---|---|---|---|
@@ -400,8 +508,8 @@ convention (demo 12). Each of those is a silent-wrong-answer bug if you miss it.
 
 ## Upstream issues filed
 
-Three reproducible bugs were found in TornadoVM 6.0.0 while building demos 12–15
-and reported upstream with minimal test cases:
+Reproducible bugs found while building these demos and reported upstream with minimal
+test cases. The last two came out of the CUDA Tile work on `develop`:
 
 | Issue | Summary | Effect here |
 |---|---|---|
@@ -410,6 +518,8 @@ and reported upstream with minimal test cases:
 
 | [beehive-lab/TornadoVM#1065](https://github.com/beehive-lab/TornadoVM/issues/1065) | `FloatArray`'s 16-byte header misaligns warp-coalesced accesses, costing ~25–30% on bandwidth-bound kernels | quantified in demo 15 and measured with Nsight Compute counters (5.00 vs 4.00 sectors/request) |
 | [beehive-lab/TornadoVM#1067](https://github.com/beehive-lab/TornadoVM/issues/1067) | A `KernelContext` kernel that fails to compile silently falls back to a sequential run that returns **wrong results**; `execute()` raises nothing and the process exits 0 | found while adding demo 16's shape validation; minimal reproducer filed |
+| [beehive-lab/TornadoVM#1105](https://github.com/beehive-lab/TornadoVM/issues/1105) | **CUDA Tile FP8 arithmetic does not compile**: CUDA Tile C++ 13.4 defines no arithmetic operators for FP8 tile element types, and the backend emits the operator form directly. 7 of `TestTileOpLevel`'s tests fail on sm_120 | reduced to pure C++ with a working `element_cast` round-trip; see [`docs/cutile-api.md`](docs/cutile-api.md) |
+| [beehive-lab/TornadoVM#1107](https://github.com/beehive-lab/TornadoVM/pull/1107) (PR) | **`tornado.recover.bailout` should default to `False`.** A failed task silently re-runs as sequential Java, so a broken device path is indistinguishable from a working one by the program's own output. `tornado-test`, `tornado-benchmarks.py`, `tile-api.rst` and `TestTileDTypes` already all disable it | measured both arms of `make tests`: 16 failures common to both, zero unique to the patch |
 
 One further problem was **observed but not filed**, because it could not be
 reduced to a reliable reproducer: an `@Parallel` reduction over a `ByteArray`
@@ -422,7 +532,7 @@ Worth revisiting with a dedicated reproducer before reporting.
 
 ## What changed migrating 6.0.0 → 7.0.0
 
-Verified 2026-09-22 — `results/raw/33-tornadovm-7-migration/`.
+Verified 2026-09-22 — `results/raw/40-tornadovm-7-migration/`.
 
 | | Before (6.0.0) | Now (7.0.0) |
 |---|---|---|
@@ -436,12 +546,12 @@ Verified 2026-09-22 — `results/raw/33-tornadovm-7-migration/`.
 
 The only migration blocker was the CUTLASS/CUDA 13 link. With a CUDA 13 runtime on
 `LD_LIBRARY_PATH` the harness is **48/48**
-(`results/raw/33-tornadovm-7-migration/run-all-demos.log`); without one it is 42/48,
+(`results/raw/40-tornadovm-7-migration/run-all-demos.log`); without one it is 42/48,
 demos 12, 17 and 18 failing identically
 (`.../run-all-demos-without-cuda13.log`).
 
 Wall-clock timings were then re-measured on 7.0.0 in batch 34
-(`results/raw/34-tornadovm-7-timings/`) with the same arguments the 6.0.0-era batches
+(`results/raw/41-tornadovm-7-timings/`) with the same arguments the 6.0.0-era batches
 used — see "Measured on TornadoVM 7.0.0". Kernel-time (`nsys`) and hardware-counter
 (`ncu`) numbers were not re-captured and keep their 5.2.1 or 6.0.0 provenance.
 
@@ -490,7 +600,7 @@ Track B on 6.0.0 is open work, not a result — nothing here claims it now works
 
 - `demos/` — Track A demos, one directory and one README each.
 - `scripts/setup-env.sh` — sets `JAVA_HOME`/`TORNADOVM_HOME`, generates the argfile.
-- `scripts/run-all-demos.sh` — compiles and runs all 16 Track A demos both ways (48 checks). Needs a GPU.
+- `scripts/run-all-demos.sh` — compiles and runs all 22 demos both ways (66 checks), skipping any the active SDK profile cannot run. Needs a GPU.
 - `scripts/run-all-cuda.sh` — builds and runs the hand-written CUDA equivalents. Needs a GPU and the CUDA toolkit, but no JDK.
 - `scripts/verify.sh` — validates deliverables and cited evidence paths. No GPU needed.
 - `docs/NVIDIA-BRIEF.md` — start-here page for compiler engineers: lowering path, measurements, ceiling.

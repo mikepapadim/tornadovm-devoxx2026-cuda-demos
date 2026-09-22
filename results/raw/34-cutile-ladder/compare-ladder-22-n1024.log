@@ -1,0 +1,31 @@
+== FP16+tile matmul ladder (demo 22), n=1024, 20 executions
+   GPU: NVIDIA GeForce RTX 4090, 8.9
+
+-- building
+-- Nsight Systems: per-kernel GPU time
+
+   kernel                                 GPU avg     GFLOP/s  vs slowest
+   ----------------------------------------------------------------------
+   naive                                  537.2us        3997        1.0x
+   kcTiled                                331.3us        6482        1.6x
+   kcMma                                  181.7us       11821        3.0x
+   tiles                                   65.7us       32666        8.2x
+   CUTLASS                                 29.9us       71916       18.0x
+   ampere_s1688gemm_fp16_128x64_sl...      20.2us      106444       26.6x
+   ampere_fp16_s1688gemm_fp16_128x...      20.2us      106488       26.6x
+
+   nsys steady-state kernel time. Wall clock is higher: it includes host dispatch.
+
+-- Nsight Compute: why (counters, NOT comparable with the times above)
+   kernel                          instrs        regs       spill   bank-conf  gmem-stall      issue%
+   --------------------------------------------------------------------------------------------------
+   naive                          4450304          40           0          48       39.54        8.89
+   kcTiled                        2701312          40           0       64226        5.75       28.45
+   kcMma                           810752          48           0      293030       15.77        5.06
+   tiles                           214784         110           0        7444        0.57       14.88
+   void cutlass::Kernel2<c...       42736         230           0        7865        0.43       11.54
+   void cutlass::Kernel2<c...      173056          80           0       15837        1.95       11.74
+
+   spill=0 means private arrays stayed in registers. gmem-stall is the
+   global-memory dependency stall per issue-active; issue% is the issue
+   rate. A high gmem-stall with a low issue% is latency that is not hidden.

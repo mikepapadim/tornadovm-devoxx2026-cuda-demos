@@ -22,6 +22,12 @@ Each demo directory has its own `README.md` with build/run commands, a
 | [16-tensor-core-datatypes](16-tensor-core-datatypes/) | `TensorCoreDataTypes.java` | The same tensor-core GEMM through the four operand types demo 08 does not cover — BF16, int8, FP8 e4m3, FP8 e5m2 — each validated against a CPU reference, with the emitted `mma.sync` variant for each. |
 | [17-matmul-ladder](17-matmul-ladder/) | `MatMulLadder.java` | The same FP32 GEMM six ways — naive `@Parallel`, `KernelContext` tiled, `KernelContext` register-tiled, CUTLASS, cuBLAS, cuBLAS TF32 — validated identically and compared at the kernel level. The register micro-tile buys 5.2x over plain tiling; on 7.0.0 every JIT-compiled rung is within 2% of hand-written CUDA, including the register-tiled one that was 1.43x on 6.0.0 — and the fix can be toggled off live to show the gap. |
 | [18-matmul-ladder-fp16](18-matmul-ladder-fp16/) | `MatMulLadderFP16.java` | Demo 17's climb in FP16, with the rung FP32 cannot have: a `KernelContext` kernel using `ctx.mma` to reach tensor cores directly from Java, alongside CUTLASS `hgemm` and cuBLAS `GemmEx`. |
+| [19-cutile-matmul](19-cutile-matmul/) | `TileMatMul.java` | **CUDA Tile**: the same FP16 GEMM as a naive kernel, a hand-tiled `KernelContext` kernel, and a `TileContext` kernel that says only `tc.mma(a, b, acc)`. Rung 3 compiles through NVIDIA CUDA Tile — `ct::mma`, no inline PTX, tensor cores chosen by `tileiras`. |
+| [20-cutile-hybrid](20-cutile-hybrid/) | `TileHybridPipeline.java` | One `TaskGraph`, four stages: `KernelContext` JIT → **CUDA Tile** GEMM → cuBLAS `sgemv` → `@Parallel` JIT, then all four captured into one CUDA graph. A tile task chains and captures like any other task. |
+| [21-cutile-flash-attention](21-cutile-flash-attention/) | `TileFlashAttention.java` | Flash attention with online softmax in fifteen lines of Java, ported from NVIDIA's TileGym, against a materialised three-kernel path. 128× `HMMA.16816.F32` in the cubin, no `mma.sync` written by hand. |
+| [22-matmul-ladder-fp16-tile](22-matmul-ladder-fp16-tile/) | `MatMulLadderFP16Tile.java` | Demo 18's FP16 ladder with a **`TileContext`** rung inserted between the hand-written `mma.sync` rung and the vendor libraries. At n=1024 the tile rung is 2.8x faster than hand-written MMA and 3.3x slower than cuBLAS, in nsys kernel time. |
+| [23-cutile-row-scan](23-cutile-row-scan/) | `CuTileRowScan.java` | A per-row prefix sum is one call, `tc.prefixSum`. The row is 1000 wide against a 128-wide tile, so `loadMasked`/`storeMasked` handle the 24-lane ragged tail and a `[1,1]` carry tile rides the loop. The first demo here with a **scan, a masked load/store and a loop-carried reduction**. |
+| [24-cutile-histogram](24-cutile-histogram/) | `CuTileHistogram.java` | A value histogram with **`PartitionView.atomicAdd`** — 4096 tile blocks folding into 256 bins, ~1M contended adds. Also the answer to "what replaces a scatter?": a predicate over the whole tile, since CUDA Tile has no gather/scatter. The only demo using the tile atomics. |
 
 ## Building and running
 
@@ -49,21 +55,57 @@ Demos 12, 17 and 18 additionally need a **CUDA 13 runtime** on `LD_LIBRARY_PATH`
 the installed SDK, not to this repo. `scripts/setup-env.sh` regenerates it for
 whichever JDK is active.
 
-`bash ../scripts/run-all-demos.sh` compiles and runs all sixteen Track A demos both ways
-and exits non-zero on any failure.
+`bash ../scripts/run-all-demos.sh` compiles and runs every demo both ways and exits
+non-zero on any failure.
+
+### The CUDA Tile demos (19-24)
+
+They are in the same runner now. Which SDK is active is one line -- `TORNADO_SDK_PROFILE`
+in `env/versions.env` -- and a demo the active SDK cannot run is **skipped**, not failed:
+
+```bash
+source ../scripts/setup-env.sh              # default profile `sdkman-7.0.0`: has the tile API
+bash ../scripts/run-all-demos.sh
+# 66 passed, 0 failed, 0 skipped            (22 demos x compile + launcher + java @argfile)
+
+export TORNADO_SDK_PROFILE=sdkman-6.0.0     # the released SDK: no tile API
+source ../scripts/setup-env.sh
+bash ../scripts/run-all-demos.sh
+# 48 passed, 0 failed, 6 skipped            (19-24 report SKIPPED_REQUIREMENT)
+```
+
+The tile demos need CUDA Toolkit 13.3+ and driver R580+ on top of that; see
+[`docs/cutile-api.md`](../docs/cutile-api.md) for the userspace toolchain install.
+
+> `--release 21 --enable-preview` is **no longer needed**. Those flags existed because the
+> tile demos were pinned to the `feat/cutile` branch, a jdk21-dev build. PR #1083 is merged
+> and shipped in 7.0.0, a jdk22plus build, so the tile demos compile and run on the same
+> JDK 25 as everything else. `scripts/run-cutile-demos.sh` is kept only for the old
+> feature-branch SDK.
+
+Every run passes `-Dtornado.recover.bailout=False`. Without it a tile kernel that fails to
+compile falls back to the JVM, computes the right answer and prints `correct` -- the exact
+word the runner greps for -- so a wholly blocked GPU path would score as a pass.
 
 ## CUDA equivalents
 
 Each demo folder also contains a hand-written CUDA C++ version of the same
 program, named after the Java file (`Hello.java` / `Hello.cu`). They exist to be
-read side by side. All sixteen compile and run, and fifteen check their result
-against a reference. Demo 18's `MatMulLadderFP16.cu` prints timings only and never
-validates, so `run-all-cuda.sh` reports it as `FAIL -- no verdict` and the script ends
-**33/34** (checked 2026-09-22, `results/raw/35-accuracy-audit-7.0.0/`):
+read side by side, and every one checks its result against a reference (demo 18's
+`.cu` used to print timings only; it validates since 3ade5c5).
 
 ```bash
-bash ../scripts/run-all-cuda.sh   # 16 compiles + 16 runs + 2 probes; CUDA toolkit only, no JDK
+bash ../scripts/run-all-cuda.sh   # 22 compiles + 22 runs + 2 probes; CUDA toolkit only, no JDK
 ```
+
+Results depend on the machine's toolchain — on the sm_89 box it ends 43 passed,
+2 failed (demos 05 and 24, both toolchain effects); see "CUDA equivalents" in the repo
+README for why.
+
+The three CUDA Tile demos also have `.cu` versions, but they are not in that script either:
+they need `nvcc --enable-tile` from CUDA 13.3+, not the system 12.6. Each demo's README has
+its own one-line build command, and all three compile and run — they report **kernel time**
+with CUDA events, which is the honest companion to the Java demos' wall clock.
 
 Demo 12 needs a CUTLASS checkout (header-only, not vendored):
 `git clone --depth 1 --branch v3.5.1 https://github.com/NVIDIA/cutlass.git`
@@ -78,10 +120,12 @@ only 1.28x. The repo README has the full table.
 
 ## Evidence
 
-All sixteen Track A demos run on the pinned TornadoVM 7.0.0 / JDK 25.0.2 /
-RTX 4090: **48/48** checks pass (16 compiles + 16 `tornado` runs + 16
-`java @argfile` runs) — `results/raw/33-tornadovm-7-migration/run-all-demos.log`.
-This is a correctness re-verification only; no timing was re-measured on 7.0.0.
+All 22 demos, CUDA Tile demos included, run on the pinned TornadoVM 7.0.0 / JDK 25.0.2 /
+RTX 4090: **66/66** checks pass (22 compiles + 22 `tornado` runs + 22 `java @argfile`
+runs, nothing skipped) — `results/raw/44-merged-7.0.0-all-demos/run-all-demos.log`.
+Before the CUDA Tile demos were merged in, demos 00-18 alone were 48/48
+(`results/raw/40-tornadovm-7-migration/`); wall-clock timings for them were re-measured
+on 7.0.0 in `results/raw/41-tornadovm-7-timings/`.
 Logs for the nine demos migrated to 6.0.0: `results/raw/18-tornadovm-6-migration/`.
 Logs for demos 12–14, including Nsight Systems kernel summaries:
 `results/raw/19-cutlass-cudnn-warp-demos/`.

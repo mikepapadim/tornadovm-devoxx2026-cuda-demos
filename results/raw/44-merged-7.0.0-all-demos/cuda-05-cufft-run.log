@@ -1,0 +1,2 @@
+cuFFT error 5 at demos/05-cufft-hybrid/CuFftLowPassHybrid.cu:95
+Low-pass filter via hybrid cuFFT pipeline: n=4096, cutoff bin=16, iterations=5

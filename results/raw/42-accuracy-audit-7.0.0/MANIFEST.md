@@ -1,14 +1,14 @@
-# Batch 35 — Accuracy audit of the repo against TornadoVM 7.0.0
+# Batch 42 — Accuracy audit of the repo against TornadoVM 7.0.0
 
-> **Correction (batch 36):** the demo 17 rung 3 figure below (480.3 µs, "~0.98x,
+> **Correction (batch 43):** the demo 17 rung 3 figure below (480.3 µs, "~0.98x,
 > parity") came from a single low run. Over 13 runs on 7.0.0 the median is
 > **499.8 µs, 1.02x** of hand-written CUDA — see
-> `results/raw/36-demo15-demo17-on-7.0.0/MANIFEST.md`. The rest of this audit stands.
+> `results/raw/43-demo15-demo17-on-7.0.0/MANIFEST.md`. The rest of this audit stands.
 
 Captured 2026-09-22. Checks the repo's claims against its own evidence, against
 upstream state, and — where a claim depends on the TornadoVM version — against
 fresh measurements on the pinned `7.0.0-jdk22plus-cuda` SDK. Same machine and
-environment as batches 33–34 (RTX 4090, driver 610.57.04, CUDA 12.6.85, JDK 25.0.2).
+environment as batches 40–41 (RTX 4090, driver 610.57.04, CUDA 12.6.85, JDK 25.0.2).
 
 ## Root cause of most findings
 
@@ -66,7 +66,7 @@ Fails loudly before running (`sdpa-benchmark.log`): SDPA now goes through
 `lib/libtornado-cudnn.so`, which needs `libnvrtc.so.13` **and** `GLIBC_2.38`; Ubuntu
 22.04 has 2.35 (`libtornado-cudnn-glibc-requirements.txt`). So whether 7.0.0 fixed
 #1063's silent all-zero result is untestable on this machine. This also corrects
-batch 33's statement that 7.0.0 "never loads" `libtornado-cudnn.so` — true only for
+batch 40's statement that 7.0.0 "never loads" `libtornado-cudnn.so` — true only for
 the conv2d/relu path demo 13 uses.
 
 ## Stale counts and instructions (text only, no measurement needed)
@@ -91,17 +91,23 @@ other `.cu` validates against a reference. Present since demo 18 was added (2e8f
 ## Evidence-trail gaps
 
 - `STATE.md` has **no entries for batches 24–32**, though all nine directories exist
-  under `results/raw/`. The ledger jumps from batch 23 to batch 33.
+  under `results/raw/`. The ledger jumped from batch 23 straight to this work.
+  *(Merge note: work done in parallel on another machine later added STATE entries
+  headed "Batch 24", "Batch 25" and "Batch 35", but those describe the CUDA Tile work
+  in `results/raw/33-*`, `34-*` and `35-*`, not the `24-*`/`25-*` directories — the
+  heading numbers and directory numbers disagree. The gap for 24–32 still stands.)*
 - `results/raw/32-host-overhead/` has three CSVs and **no MANIFEST** — no recorded
   environment, build, or method.
 
-## Errors in batches 33–34 found and fixed by this audit
+## Errors in batches 40–41 found and fixed by this audit
 
 - Batch numbers **31 and 32 collided** with existing `31-load-batching-reorder` and
-  `32-host-overhead`. Renamed to 33 and 34; every reference updated.
+  `32-host-overhead`. Renamed to 33 and 34 — which then collided with the CUDA Tile
+  batches 33–36 committed in parallel. Renumbered again to **40–43** when the two lines
+  of work were merged; every reference updated.
 - The cuDNN statement above ("never loads") and an unsupported contrast in the README
   migration table (that 6.0.0 loaded `libtornado-cudnn.so` via JNI — never observed).
-- Demo 13's SDPA paragraph, edited in batch 33 to assert a 7.0.0 all-zero result that
+- Demo 13's SDPA paragraph, edited in batch 40 to assert a 7.0.0 all-zero result that
   was never tested.
 
 ## Files

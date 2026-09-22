@@ -1,0 +1,17 @@
+WARNING: module-info.class ignored in patch: /home/michalis/tornadovm-devoxx2026-cuda-demos/vendor/tornadovm/dist/tornadovm-6.1.1-jdk22plus-dev-cuda-linux-amd64/tornadovm-6.1.1-jdk22plus-dev-cuda/share/java/jvmci/jvmci-21.0.2.jar
+n = 256, 10 executions per rung
+
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess (file:/home/michalis/tornadovm-devoxx2026-cuda-demos/vendor/tornadovm/dist/tornadovm-6.1.1-jdk22plus-dev-cuda-linux-amd64/tornadovm-6.1.1-jdk22plus-dev-cuda/share/java/tornado/tornado-runtime-6.1.1-jdk22plus-dev.jar)
+WARNING: Please consider reporting this to the maintainers of class uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+
+rung                                         ms/execution     vs naive   max error   result
+1. @Parallel-style naive (KernelContext)            0.545        1.00x      0.0000   correct
+2. KernelContext tiled (shared memory)              0.171        3.18x      0.0000   correct
+3. TileContext (CUDA Tile, ct::mma)                 0.125        4.35x      0.0000   correct
+
+Wall clock above includes host dispatch, which at these sizes is most of it:
+all three rungs submit the same number of launches, so the column compares
+dispatch as much as kernels. For kernel time use nsys (see README.md), and for
+what actually differs use --printKernel: rung 3 has no thread indices at all.

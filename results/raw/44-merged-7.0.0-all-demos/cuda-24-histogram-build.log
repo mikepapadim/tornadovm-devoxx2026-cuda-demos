@@ -1,0 +1,5 @@
+demos/24-cutile-histogram/CuTileHistogram.cu(50): error: class "cuda::tiles::__1::partition_view<cuda::tiles::__1::tensor_span<float, cuda::tiles::__1::extents<unsigned int, 18446744073709551615UL, 18446744073709551615UL>, cuda::tiles::__1::layout_right, cuda::tiles::__1::default_accessor<float>>, cuda::tiles::__1::extents<cuda::tiles::__1::uint32_t, 1UL, 1UL>>" has no member "atomic_add"
+          bv.atomic_add(count, ct::memory_order_relaxed_t{}, ct::thread_scope_device_t{}, 0, bin);
+             ^
+
+1 error detected in the compilation of "demos/24-cutile-histogram/CuTileHistogram.cu".

@@ -1,0 +1,7 @@
+CUDA Tile row scan (hand-written CUDA): 4096 rows x 1000 cols, tile width 128
+  last tile of each row has 24 padded lane(s) handled by load_masked/store_masked
+
+kernel time (CUDA events, median of 20): 33.2 us
+
+scan mismatches 0/4096000, row-total mismatches 0/4096
+result is correct (bit-exact prefix sums and row totals)

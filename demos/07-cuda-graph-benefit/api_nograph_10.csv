@@ -1,0 +1,22 @@
+Generating SQLite file d07_nograph_10.sqlite from d07_nograph_10.nsys-rep
+Processing [d07_nograph_10.sqlite] with [/opt/nvidia/nsight-systems/2025.3.2/host-linux-x64/reports/cuda_api_sum.py]... 
+Time (%),Total Time (ns),Num Calls,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+92.6,100406487,1,100406487.0,100406487.0,100406487,100406487,0.0,cuCtxCreate_v2
+2.2,2382615,522,4564.4,4636.5,1796,19032,999.3,cuMemcpyDtoHAsync_v2
+1.0,1050203,1054,996.4,287.5,190,3313,1105.1,cuStreamSynchronize
+0.9,967860,1682,575.4,657.0,177,27381,860.9,cuEventRecord
+0.8,907997,588,1544.2,1284.0,1042,16770,1339.3,cuMemcpyHtoDAsync_v2
+0.7,790017,8,98752.1,84074.5,56026,199704,44397.2,cuMemHostRegister_v2
+0.3,348761,1682,207.3,151.0,85,7268,399.4,cuEventCreate
+0.3,312753,8,39094.1,33436.5,22137,93895,23264.0,cuMemHostUnregister
+0.2,259226,6,43204.3,39398.0,37121,65129,10829.4,cuModuleLoadDataEx
+0.2,252758,12,21063.2,7589.5,4416,118533,33474.5,cuMemAlloc_v2
+0.2,208958,1682,124.2,97.0,63,2849,93.5,cuEventDestroy_v2
+0.2,197410,60,3290.2,2200.5,1724,22569,3297.4,cuLaunchKernel
+0.1,129255,2,64627.5,64627.5,8961,120294,78724.3,cuStreamCreate
+0.1,80362,1204,66.7,47.0,40,1957,112.2,cuCtxSetCurrent
+0.1,72954,5,14590.8,4951.0,2989,54463,22345.3,cuMemFree_v2
+0.0,47954,1034,46.4,43.0,36,407,16.6,cuStreamIsCapturing
+0.0,29698,6,4949.7,3867.5,2912,10886,2985.7,cuModuleUnload
+0.0,9622,11,874.7,432.0,290,4366,1190.4,cuCtxSynchronize
+0.0,7668,1,7668.0,7668.0,7668,7668,0.0,cuStreamDestroy_v2
