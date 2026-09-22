@@ -1,0 +1,18 @@
+1. naive                       3390       5068.3       1.0x
+2. tiled                       2593       6624.7       1.3x
+3. register-tiled               489      35125.5       6.9x
+4. cuBLAS sgemm                 314      54758.0      10.8x
+5. cuBLAS sgemm TF32            208      82771.8      16.3x
+
+1. naive                       3389       5068.9       1.0x
+2. tiled                       2598       6613.8       1.3x
+3. register-tiled               490      35046.8       6.9x
+4. cuBLAS sgemm                 314      54749.4      10.8x
+5. cuBLAS sgemm TF32            223      76938.7      15.2x
+
+1. naive                       3384       5077.5       1.0x
+2. tiled                       2593       6625.5       1.3x
+3. register-tiled               489      35131.1       6.9x
+4. cuBLAS sgemm                 314      54733.7      10.8x
+5. cuBLAS sgemm TF32            223      76964.9      15.2x
+

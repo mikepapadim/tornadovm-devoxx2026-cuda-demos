@@ -1,0 +1,15 @@
+#1022 [PR] state=closed merged=2026-09-07T11:09:49Z :: [cuda] Skip the per-launch kernel stack-frame upload when the device copy is unchanged (~2x on short task graphs)
+#1028 [issue] state=open merged=- :: [perf] Host-side runtime overhead: where the time actually goes, the fixes, and what is left
+#1063 [issue] state=open merged=- :: [CUDA] CuDnn.sdpaForward launches no kernel: silently returns an all-zero result (shipped BenchmarkSdpa fails on 6.0.0)
+#1064 [issue] state=open merged=- :: [CUDA] Lowering fails with "Node implementing Lowerable not handled: NewInstance" when a ternary precedes an allocation (Math.max works)
+#1065 [issue] state=closed merged=- :: [CUDA][perf] FloatArray's 16-byte header misaligns warp-coalesced accesses, costing ~25-30% on bandwidth-bound kernels
+#1066 [PR] state=closed merged=2026-09-07T09:12:34Z :: [cuda] Align native array payload to 32 bytes to restore coalesced access
+#1067 [issue] state=closed merged=- :: [bug] A KernelContext kernel that fails to compile silently returns wrong results via the sequential fallback
+#1071 [issue] state=open merged=- :: [cuda][profiler] Dispatch times are structurally 0 and copy-out time is never recorded, failing three non-whitelisted TestProfiler tests
+#1072 [PR] state=closed merged=2026-09-07T08:54:57Z :: [test] Say which profiler counter was zero instead of failing with a null reason
+#1078 [issue] state=closed merged=- :: [perf] KernelContext shared-memory tiled kernels stall on global memory that nvcc hides
+#1079 [PR] state=closed merged=2026-09-08T19:42:10Z :: Batch the global loads of a shared-memory staging sequence in the CUDA backend
+#1022 merge=bb19d9e7e4a420ec4e99523189b0371d1df84182 in-v7.0.0=ahead
+#1066 merge=c0c9ed8899e8fc0b8429da9ee92c5c3e92498b48 in-v7.0.0=ahead
+#1079 merge=b5ead7e75de47466c317b3904e9cecd1e5333787 in-v7.0.0=ahead
+#1072 merge=8f265087ec0ad149833402a7572bd21edcb15531 in-v7.0.0=ahead

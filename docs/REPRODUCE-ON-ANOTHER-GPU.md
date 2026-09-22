@@ -90,7 +90,7 @@ D=results/nvidia-meeting-<arch>; mkdir -p $D/env
 
 ```bash
 sdk install java 25.0.2-open
-sdk install tornadovm 6.0.0-jdk22plus-cuda
+sdk install tornadovm 7.0.0-jdk22plus-cuda
 git clone https://github.com/mikepapadim/tornadovm-devoxx2026-cuda-demos
 cd tornadovm-devoxx2026-cuda-demos
 source scripts/setup-env.sh      # MUST be run from the repo root — see traps

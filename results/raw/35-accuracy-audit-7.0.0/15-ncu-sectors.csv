@@ -1,0 +1,31 @@
+==PROF== Connected to process 620748 (/home/michalis/.sdkman/candidates/java/25.0.2-open/bin/java)
+Kernel-time comparison: n=1048576, polynomial degree=128, 2 executions
+  block size 256 (identical to the CUDA version)
+  kernels: elementwise (memory-bound) -> polynomial (compute-bound) -> stencil (memory-bound)
+  NOTE: the wall-clock below includes host dispatch and transfers.
+        Compare kernel time with nsys -- see this demo's README.
+
+first execution (JIT compile): 559695 us
+steady-state median wall-clock (n=1): 214916 us
+validation PASSED (max abs err 0.0000001, 0/1048576 elements out of tol)
+Result is correct
+==PROF== Disconnected from process 620748
+"ID","Process ID","Process Name","Host Name","Kernel Name","Context","Stream","Block Size","Grid Size","Device","CC","Section Name","Metric Name","Metric Unit","Metric Value"
+"0","620748","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","4"
+"0","620748","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","131,072"
+"0","620748","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum","sector","131,072"
+"1","620748","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","4"
+"1","620748","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","131,072"
+"1","620748","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum","sector","131,072"
+"2","620748","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","4.67"
+"2","620748","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","458,750"
+"2","620748","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum","sector","131,072"
+"3","620748","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","4"
+"3","620748","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","131,072"
+"3","620748","java","127.0.0.1","elementwise","1","14","(256, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum","sector","131,072"
+"4","620748","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","4"
+"4","620748","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","131,072"
+"4","620748","java","127.0.0.1","polynomial","1","14","(256, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum","sector","131,072"
+"5","620748","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","l1tex__average_t_sectors_per_request_pipe_lsu_mem_global_op_ld.ratio","sector/1","4.67"
+"5","620748","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum","sector","458,750"
+"5","620748","java","127.0.0.1","stencil","1","14","(256, 1, 1)","(4096, 1, 1)","0","8.9","Command line profiler metrics","l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum","sector","131,072"

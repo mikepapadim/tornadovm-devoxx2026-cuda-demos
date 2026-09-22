@@ -18,9 +18,9 @@ javac -cp "$TORNADOVM_HOME/share/java/tornado/*" \
   -d . Hello.java
 ```
 
-No `--enable-preview` anywhere: the pinned `6.0.0-jdk22plus-cuda` SDK is a
+No `--enable-preview` anywhere: the pinned `7.0.0-jdk22plus-cuda` SDK is a
 non-preview build (`etc/tornado.jdk`: floor 22, preview false), so any JDK 22+
-compiles and runs it. The JDK-21-only `6.0.0-jdk21-cuda` SDK is the one that
+compiles and runs it. The JDK-21-only `7.0.0-jdk21-cuda` SDK is the one that
 still needs preview flags — this repo does not use it.
 
 ## Run
@@ -103,5 +103,5 @@ jbang -cp "$TORNADOVM_HOME/share/java/tornado/*" \
   the environment, not the demo, is broken; fall back to showing the
   captured logs in `results/raw/02-hello-kernel/`.
 - If the JVM refuses to start with "built for JDK 21 with preview features
-  enabled", `TORNADOVM_HOME` points at `6.0.0-jdk21-cuda` instead of
-  `6.0.0-jdk22plus-cuda`; re-run `source scripts/setup-env.sh`.
+  enabled", `TORNADOVM_HOME` points at `7.0.0-jdk21-cuda` instead of
+  `7.0.0-jdk22plus-cuda`; re-run `source scripts/setup-env.sh`.

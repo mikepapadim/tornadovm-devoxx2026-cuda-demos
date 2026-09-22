@@ -1,0 +1,30 @@
+== FP16 matmul ladder (demo 18), n=1024, 10 executions
+   GPU: NVIDIA GeForce RTX 4090, 8.9
+
+-- building
+-- Nsight Systems: per-kernel GPU time
+
+   kernel                                 GPU avg     GFLOP/s  vs slowest
+   ----------------------------------------------------------------------
+   naive                                  535.3us        4012        1.0x
+   kcTiled                                331.3us        6482        1.6x
+   kcMma                                  180.2us       11919        3.0x
+   CUTLASS                                 29.9us       71882       17.9x
+   ampere_s1688gemm_fp16_128x64_sl...      20.0us      107598       26.8x
+   ampere_fp16_s1688gemm_fp16_128x...      19.9us      107701       26.8x
+
+   nsys steady-state kernel time. Wall clock is higher: it includes host dispatch.
+
+-- Nsight Compute: why (counters, NOT comparable with the times above)
+   kernel                          instrs        regs       spill   bank-conf  gmem-stall      issue%
+   --------------------------------------------------------------------------------------------------
+   naive                          4450304          40           0          52       39.28        9.05
+   kcTiled                        2701312          40           0       64302        5.94       27.91
+   kcMma                           810752          48           0      293630       15.71        5.08
+   void cutlass::Kernel2<c...       42736         230           0       12388        0.39       11.39
+   void cutlass::Kernel2<c...      173056          80           0       17568        1.88       11.84
+   void cutlass::Kernel2<c...      172032          80           0       16602        1.73       12.19
+
+   spill=0 means private arrays stayed in registers. gmem-stall is the
+   global-memory dependency stall per issue-active; issue% is the issue
+   rate. A high gmem-stall with a low issue% is latency that is not hidden.

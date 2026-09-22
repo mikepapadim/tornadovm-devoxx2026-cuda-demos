@@ -288,7 +288,7 @@ sdk install tornadovm 6.0.0-jdk22plus-cuda
 git clone https://github.com/mikepapadim/tornadovm-devoxx2026-cuda-demos
 cd tornadovm-devoxx2026-cuda-demos
 source scripts/setup-env.sh
-bash scripts/run-all-demos.sh        # Java side, 36/36 checks
+bash scripts/run-all-demos.sh        # Java side, 48/48 checks
 bash scripts/run-all-cuda.sh         # CUDA side, no JDK needed
 ```
 

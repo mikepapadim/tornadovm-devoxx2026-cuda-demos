@@ -3,7 +3,7 @@
 For a Java developer who has never touched TornadoVM or Nsight before.
 
 The build/run commands in §0–§1 were re-run on 2026-09-02 against the current
-pinned environment in `env/versions.env`: TornadoVM `6.0.0-jdk22plus-cuda`
+pinned environment in `env/versions.env`: TornadoVM `7.0.0-jdk22plus-cuda`
 (SDKMAN release), JDK 25.0.2, RTX 4090, driver `565.57.01`. The Nsight
 sections (§2 onward) were captured on 2026-08-22 against the earlier 5.2.1
 source-built pin (`99549c9862eda8d584e35e99924f9c865501eb3a`, Nsight Systems
@@ -19,7 +19,7 @@ quick-install), then point the shell at it:
 
 ```bash
 sdk install java 25.0.2-open
-sdk install tornadovm 6.0.0-jdk22plus-cuda
+sdk install tornadovm 7.0.0-jdk22plus-cuda
 
 cd /path/to/tornadovm-devoxx2026-cuda-demos
 source scripts/setup-env.sh
@@ -28,7 +28,7 @@ tornado --devices        # must list exactly one CUDA device
 nvidia-smi --query-gpu=utilization.gpu,memory.used,memory.total --format=csv,noheader
 ```
 
-Install `6.0.0-jdk22plus-cuda`, **not** `6.0.0-jdk21-cuda`: the latter is
+Install `7.0.0-jdk22plus-cuda`, **not** `7.0.0-jdk21-cuda`: the latter is
 compiled with JDK 21 preview features and runs on JDK 21 only.
 
 Run the `nvidia-smi` check before any timed or profiled run — a busy GPU
@@ -47,7 +47,7 @@ javac -cp "$TORNADOVM_HOME/share/java/tornado/*" -d . Hello.java
 
 No `--enable-preview`: the pinned `jdk22plus` SDK is a non-preview build. The
 wildcard classpath covers the vendor-library jars some demos need
-(`tornado-cublas-6.0.0.jar` for `04-cublas-hybrid`, `tornado-cufft-6.0.0.jar`
+(`tornado-cublas-7.0.0.jar` for `04-cublas-hybrid`, `tornado-cufft-7.0.0.jar`
 for `05-cufft-hybrid`).
 
 **Way 1 — `tornado` launcher (canonical, resolves the CUDA backend automatically):**

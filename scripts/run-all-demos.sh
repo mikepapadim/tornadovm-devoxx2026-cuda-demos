@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Compile and run every Track A demo on the pinned TornadoVM 6.0.0 CUDA SDK,
+# Compile and run every Track A demo on the pinned TornadoVM 7.0.0 CUDA SDK,
 # BOTH ways: the `tornado` launcher and the `java @argfile` reproducibility path.
 # Requires a CUDA GPU. Exits non-zero if any demo fails to compile or run.
 #

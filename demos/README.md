@@ -1,4 +1,4 @@
-# Track A demos — Java + TornadoVM 6.0.0 CUDA
+# Track A demos — Java + TornadoVM 7.0.0 CUDA
 
 Presenter-friendly demos, one concept per class, increasing in complexity.
 Each demo directory has its own `README.md` with build/run commands, a
@@ -19,7 +19,9 @@ Each demo directory has its own `README.md` with build/run commands, a
 | [13-cudnn-jit-convblock](13-cudnn-jit-convblock/) | `CuDnnConvBlockHybrid.java` | A CNN block alternating vendor and JIT kernels in one graph: JIT `scale` → cuDNN `conv2d` → JIT `addBias` → cuDNN `relu`. Nsight Systems shows all four as separate kernels, the two JIT ones under their own Java method names. |
 | [14-warp-async-shared](14-warp-async-shared/) | `WarpAsyncSharedReduce.java` | Three hand-tuned CUDA optimisations written in Java in one kernel: async copy (`cp.async.ca.shared.global`), shared memory (`__shared__`) and warp shuffle (`__shfl_down_sync`) — all three confirmed in the `--printKernel` dump. 26.6x faster than the naive kernel at the kernel level. |
 | [15-kernel-time-comparison](15-kernel-time-comparison/) | `KernelTimeComparison.java` | **Kernel time only**, TornadoVM vs hand-written CUDA, measured with `nsys`: three kernels with different bottlenecks, both differences attributed to a specific cause with a standalone probe. Memory-bound gap is the `FloatArray` header offset; compute-bound win is JIT specialisation. |
+| [16-tensor-core-datatypes](16-tensor-core-datatypes/) | `TensorCoreDataTypes.java` | The same tensor-core GEMM through the four operand types demo 08 does not cover — BF16, int8, FP8 e4m3, FP8 e5m2 — each validated against a CPU reference, with the emitted `mma.sync` variant for each. |
 | [17-matmul-ladder](17-matmul-ladder/) | `MatMulLadder.java` | The same FP32 GEMM six ways — naive `@Parallel`, `KernelContext` tiled, `KernelContext` register-tiled, CUTLASS, cuBLAS, cuBLAS TF32 — validated identically and compared at the kernel level. The register micro-tile buys 3.8x over plain tiling; generated code is within 1-2% of hand-written CUDA on the simple rungs and 1.43x on the register-tiled one. |
+| [18-matmul-ladder-fp16](18-matmul-ladder-fp16/) | `MatMulLadderFP16.java` | Demo 17's climb in FP16, with the rung FP32 cannot have: a `KernelContext` kernel using `ctx.mma` to reach tensor cores directly from Java, alongside CUTLASS `hgemm` and cuBLAS `GemmEx`. |
 
 ## Building and running
 
@@ -32,10 +34,14 @@ tornado --classpath . Hello                          # canonical launcher
 java @$TORNADOVM_HOME/tornado-argfile -cp . Hello    # reproducibility path
 ```
 
-No `--enable-preview` anywhere: the pinned `6.0.0-jdk22plus-cuda` SDK is a
+No `--enable-preview` anywhere: the pinned `7.0.0-jdk22plus-cuda` SDK is a
 non-preview build (`etc/tornado.jdk`: floor 22, preview false), unlike
-`6.0.0-jdk21-cuda`, which is JDK-21-only. See the repo README for why that
+`7.0.0-jdk21-cuda`, which is JDK-21-only. See the repo README for why that
 distinction matters.
+
+Demos 12, 17 and 18 additionally need a **CUDA 13 runtime** on `LD_LIBRARY_PATH`:
+7.0.0's `libtornado-cutlass.so` is linked against `libcudart.so.13`.
+`scripts/setup-env.sh` handles this and warns if it cannot find one.
 
 **The argfile is not committed.** `tornado --generate-argfile` writes it to
 `$TORNADOVM_HOME/tornado-argfile` with absolute, JDK-specific flags
@@ -43,17 +49,20 @@ distinction matters.
 the installed SDK, not to this repo. `scripts/setup-env.sh` regenerates it for
 whichever JDK is active.
 
-`bash ../scripts/run-all-demos.sh` compiles and runs all thirteen demos both ways
+`bash ../scripts/run-all-demos.sh` compiles and runs all sixteen Track A demos both ways
 and exits non-zero on any failure.
 
 ## CUDA equivalents
 
 Each demo folder also contains a hand-written CUDA C++ version of the same
 program, named after the Java file (`Hello.java` / `Hello.cu`). They exist to be
-read side by side, and all thirteen compile and produce the same results:
+read side by side. All sixteen compile and run, and fifteen check their result
+against a reference. Demo 18's `MatMulLadderFP16.cu` prints timings only and never
+validates, so `run-all-cuda.sh` reports it as `FAIL -- no verdict` and the script ends
+**33/34** (checked 2026-09-22, `results/raw/35-accuracy-audit-7.0.0/`):
 
 ```bash
-bash ../scripts/run-all-cuda.sh   # 13 compiles + 13 runs + 2 probes; CUDA toolkit only, no JDK
+bash ../scripts/run-all-cuda.sh   # 16 compiles + 16 runs + 2 probes; CUDA toolkit only, no JDK
 ```
 
 Demo 12 needs a CUTLASS checkout (header-only, not vendored):
@@ -69,9 +78,11 @@ only 1.28x. The repo README has the full table.
 
 ## Evidence
 
-All twelve demos run on TornadoVM 6.0.0 / JDK 25.0.2 / RTX 4090: **36/36**
-checks pass (12 compiles + 12 `tornado` runs + 12 `java @argfile` runs).
-Logs for the nine migrated demos: `results/raw/18-tornadovm-6-migration/`.
+All sixteen Track A demos run on the pinned TornadoVM 7.0.0 / JDK 25.0.2 /
+RTX 4090: **48/48** checks pass (16 compiles + 16 `tornado` runs + 16
+`java @argfile` runs) — `results/raw/33-tornadovm-7-migration/run-all-demos.log`.
+This is a correctness re-verification only; no timing was re-measured on 7.0.0.
+Logs for the nine demos migrated to 6.0.0: `results/raw/18-tornadovm-6-migration/`.
 Logs for demos 12–14, including Nsight Systems kernel summaries:
 `results/raw/19-cutlass-cudnn-warp-demos/`.
 
@@ -82,7 +93,8 @@ the exact `nsys profile` / `nsys stats` commands and the captured output — for
 Earlier evidence from the 5.2.1 source-built pin is kept unmodified under
 `results/raw/02-hello-kernel/` … `results/raw/17-final-rehearsal/` for
 historical comparison. Where a per-demo README cites numbers, it cites the
-6.0.0 run and says so.
+5.2.1 or 6.0.0 run it was measured on and says so — those numbers predate the
+7.0.0 pin and have not been re-measured.
 
 Nsight Systems traces from the 5.2.1 pass (kernel/memcpy timing, stream
 overlap timelines) remain valid as mechanism evidence and are still cited:

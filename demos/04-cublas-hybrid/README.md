@@ -126,5 +126,5 @@ jbang -cp "$TORNADOVM_HOME/share/java/tornado/*" \
 - Re-run `tornado --devices` first — if it does not show exactly one CUDA
   device, the environment, not the demo, is broken.
 - `NoClassDefFoundError` for `uk.ac.manchester.tornado.cublas.*` usually
-  means the classpath is missing `tornado-cublas-6.0.0.jar` — add
-  it alongside `tornado-api-6.0.0.jar` (see Build above).
+  means the classpath is missing `tornado-cublas-7.0.0.jar` — add
+  it alongside `tornado-api-7.0.0.jar` (see Build above).

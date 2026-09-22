@@ -1,0 +1,19 @@
+WARNING: module-info.class ignored in patch: /home/michalis/.sdkman/candidates/tornadovm/7.0.0-jdk22plus-cuda/share/java/jvmci/jvmci-21.0.2.jar
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess (file:/home/michalis/.sdkman/candidates/tornadovm/7.0.0-jdk22plus-cuda/share/java/tornado/tornado-runtime-7.0.0.jar)
+WARNING: Please consider reporting this to the maintainers of class uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+
+Number of Tornado drivers: 1
+Driver: [32mCUDADriver[0m
+  Total number of CUDADriver devices  : 1
+  Tornado device=0:0  (DEFAULT)
+	[32mCUDA[0m --  [NVIDIA CUDA] -- NVIDIA GeForce RTX 4090
+		Global Memory Size: 23.5 GB
+		Local Memory Size: 48.0 KB
+		Workgroup Dimensions: 3
+		Total Number of Block Threads: [1024]
+		Max WorkGroup Configuration: [1024, 1024, 64]
+		Device OpenCL C version: CUDA C 1.0
+
+

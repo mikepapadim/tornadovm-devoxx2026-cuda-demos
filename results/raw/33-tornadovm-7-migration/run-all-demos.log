@@ -1,0 +1,10 @@
+OK   16-tensor-core-datatypes -- java @argfile
+== 17-matmul-ladder
+OK   17-matmul-ladder -- compile
+OK   17-matmul-ladder -- tornado launcher
+OK   17-matmul-ladder -- java @argfile
+== 18-matmul-ladder-fp16
+OK   18-matmul-ladder-fp16 -- compile
+OK   18-matmul-ladder-fp16 -- tornado launcher
+OK   18-matmul-ladder-fp16 -- java @argfile
+== Summary: 48 passed, 0 failed ==

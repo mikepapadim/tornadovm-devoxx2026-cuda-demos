@@ -706,3 +706,137 @@ driver, toolkit, gcc and OS, and sm_89 was not re-run.
   figures real, but it is a design change and must not be guessed at — a wrong
   number is worse than a zero in a profiler.
 - The sm_89 baseline's Step 7 `find` count (batch 22, correction 1) is still un-re-run.
+
+## Batch 33 — TornadoVM 7.0.0 CUDA migration (2026-09-22)
+
+Track A migrated from the `6.0.0-jdk22plus-cuda` pin to the **7.0.0-jdk22plus-cuda**
+SDKMAN release (commit `65eb834`, tag `v7.0.0`, published 2026-09-22). Evidence:
+`results/raw/33-tornadovm-7-migration/`. All Observed.
+
+- **48/48 checks pass** — all sixteen Track A demos compile and run correctly under
+  both run paths (`tornado` launcher and `java @$TORNADOVM_HOME/tornado-argfile`),
+  driven from a clean shell through the repo's own `scripts/setup-env.sh`.
+  Log: `run-all-demos.log`. `scripts/verify.sh` is 21/21.
+- **No demo source needed an API change.** All sixteen compile unmodified against
+  `tornado-api-7.0.0`. Verified by `javap` that `MMAShape` is unchanged
+  (`M16N8K16`, `M16N8K32`) and `CuDnn` still exposes `cudnnConv2d`, `cudnnRelu`,
+  `cudnnMaxPool2d`, `cudnnSigmoid`, `cudnnSoftmax`, `cudnnTanh`, `sdpaForward`.
+- **The one blocker: 7.0.0's CUTLASS bridge is linked against CUDA 13.**
+  `lib/libtornado-cutlass.so` needs `libcudart.so.13`; this box's toolkit is 12.6.
+  Without a CUDA 13 runtime on `LD_LIBRARY_PATH`, demos **12, 17 and 18** bail out
+  at the CUTLASS library task (`Unable to load libtornado-cutlass ... libcudart.so.13:
+  cannot open shared object file`) — 42/48, `run-all-demos-without-cuda13.log`.
+  Any CUDA 13 runtime on the loader path fixes all three with no source change.
+  `scripts/setup-env.sh` now resolves one (`CUDA13_RUNTIME_LIB` in `env/versions.env`,
+  currently satisfied by the pip `nvidia-cu13` wheel) and warns if it cannot.
+- **cuDNN is unaffected, for a non-obvious reason.** `lib/libtornado-cudnn.so` is
+  *also* CUDA-13-linked and additionally needs `GLIBC_2.38` (this box has 2.35), so it
+  is unloadable here — yet demo 13 passes, because its conv2d/relu path never loads it
+  (`CuDnn.sdpaForward` does, and fails — corrected in the accuracy audit below). `strace`
+  shows the process dlopening the system `libcudnn.so.9` and its
+  `libcudnn_{graph,ops,cnn,...}` engines directly. Only CUTLASS still goes through a
+  TornadoVM-shipped JNI `.so`. Detail: `native-lib-ldd.log`.
+- New in the 7.0.0 SDK: `tornado-cudf` and `tornado-curand` jars. Not exercised by
+  any demo; no claim made about them.
+- **Correctness only — no timing was re-measured on 7.0.0.** Every performance number
+  in this repo keeps its 5.2.1 or 6.0.0 provenance and is labelled as such; nothing
+  was relabelled. Docs were migrated only where they state the *pin* or give
+  *instructions to follow now* (README, `demos/README.md`, per-demo build/troubleshoot
+  sections, `docs/profiling-quickstart.md`, `docs/REPRODUCE-ON-ANOTHER-GPU.md`,
+  `CLAUDE.md`, `env/versions.env`, the scripts).
+- Also corrected while here: `CLAUDE.md` still demanded `27/27` over "nine" demos;
+  the harness has covered sixteen demos / 48 checks since batch 30. `env/versions.env`
+  recorded driver 565.57.01; `nvidia-smi` now reports **610.57.04**.
+
+### Track B (demos 09, 10) — still not migrated
+
+Unchanged and still on the source-built `5.2.1-jdk21-dev` pin via the locally
+installed `gpu-llama3:1.0.0-jdk21-dev` artifact. TornadoVM **7.0.0 is on Maven
+Central** (`io.github.beehive-lab:tornado-api:7.0.0-jdk22plus`), so the dependency
+side is now available, but GPULlama3.java itself would have to be rebuilt against it
+first. Not attempted; no claim made.
+
+### Next invocation
+
+- ~~Decide whether to re-measure the demo timings on 7.0.0.~~ Done in batch 34
+  (wall-clock only; `nsys`/`ncu` rows still 6.0.0).
+- The CUDA 13 dependency currently resolves to a pip wheel inside
+  `~/.local/lib/python3.10/site-packages`. A real CUDA 13 runtime install would be
+  sturdier; `CUDA13_RUNTIME_LIB` exists to repoint it.
+- `demos/README.md`'s demo table still omits rows for 16 and 18, and its
+  CUDA-equivalents section still says "thirteen" — pre-existing, unrelated to 7.0.0.
+
+## Batch 34 — Track A wall-clock timings re-measured on 7.0.0 (2026-09-22)
+
+Closes the "7.0.0 for correctness, 6.0.0 for numbers" split left by batch 33, for
+wall-clock. Evidence: `results/raw/34-tornadovm-7-timings/`. All Observed.
+
+Every timed demo re-run on 7.0.0 with the **same arguments** the 6.0.0-era batches
+used (06/07/11 from batch 18, 12/14 from batch 19, 17 from batch 28), so the sets are
+directly comparable. Demos 06, 07, 11 run five times each (their headline numbers are
+ratios); 12, 14, 17, 18 once, as batches 19/28 did.
+
+- **Demo 11's CUDA-graph replay is ~1.85x faster**: 148 µs → **80–81 µs**, taking
+  graph-vs-baseline from 5.37–5.61x to **9.88–10.49x** on a 6-chain JIT+cuBLAS graph.
+  Demo 07's simpler single-chain replay is unchanged (36 → 34.7–35.8 µs). This is the
+  one clear performance improvement in the release, as far as these demos see it.
+- **Demo 06's concurrency benefit fell from ~2.3x to 1.29–1.43x — and that is not a
+  regression.** The concurrent path is flat (936–960 → 928–1015 µs); the *sequential*
+  baseline got ~1.7x faster (2174 → 1273–1330 µs). Less serial overhead left to
+  recover. Same effect retires demo 11's `concurrent` mode margin entirely
+  (1.08–1.12x → 0.95–1.02x), which was already called launch-overhead-bound at 6.0.0.
+- Demo 07 replay speedup 8.08–10.00x → **8.46–8.79x** (tighter band, same magnitude).
+- Demo 14 optimised-vs-naive 2.17x → **2.44x**. Demo 12 fused/unfused essentially
+  unchanged (0.96x → 0.97x). Demo 17's wall-clock ladder within a few % at every rung.
+- Demo 18 wall-clock captured for the first time; batch 30 had only `nsys` kernel
+  time, so there is **no comparable 6.0.0 wall-clock baseline** for it. Not compared.
+- README now carries a "Measured on TornadoVM 7.0.0" table above the 6.0.0 one; the
+  6.0.0 section is retitled Historical and explicitly kept as the current source for
+  kernel-time and counter rows.
+
+**Not re-captured:** every `nsys` kernel-time and `ncu` hardware-counter row
+(batches 19, 22–28, 30). Those keep 6.0.0 provenance and are still labelled as such —
+including demo 17's kernel-time TFLOP/s ladder and demo 18's kernel-time table, whose
+wall-clock counterparts only are refreshed here.
+
+### Next invocation
+
+- Re-capture the `nsys`/`ncu` rows on 7.0.0 if the split still matters. Demo 11's
+  graph-replay improvement in particular deserves a kernel-time/dispatch breakdown —
+  wall clock alone does not say whether replay got cheaper or dispatch did.
+- Demo 06's faster sequential path is unexplained. Worth a dispatch-level look before
+  it goes in a talk, since it changes a headline number.
+- Track B (demos 09, 10) still on the 5.2.1 pin; unchanged by batches 33–34.
+
+## Batch 35 — Accuracy audit against TornadoVM 7.0.0 (2026-09-22)
+
+Full findings with evidence: `results/raw/35-accuracy-audit-7.0.0/MANIFEST.md`.
+
+- **Root cause:** upstream #1066 (payload alignment), #1079 (load batching, default-on)
+  and #1022 (stack-frame upload skip) all shipped in `v7.0.0` (ancestry checked).
+- **Stale, measured:** demo 17 rung 3 is **~0.98x** hand-written CUDA (repo: 1.43x
+  slower); demo 15 memory-bound kernels are **1.02x / 1.03x** (repo: 1.31x / 1.24x);
+  #1065 sectors/request is **4.00** (repo: 5.00). Talk narratives for demos 15 and 17
+  describe 6.0.0. Not rewritten — editorial call.
+- **Holds, measured:** demo 15 polynomial (1.15x TornadoVM), demo 18 FP16 ladder,
+  demo 17's other rungs, every upstream ref and every cited results path.
+- **Stale text — fixed:** runbook `27/27` → `48/48`; brief `36/36` → `48/48`; README
+  layout list and `run-all-cuda.sh` comments → 16 demos; `docs/hybrid-api-inventory.md`
+  pin note → 7.0.0 (and now says its API list was *not* re-checked against 7.0.0);
+  `demos/README.md` gains rows for demos 16 and 18.
+- **Demo 18's `.cu` never validates.** `run-all-cuda.sh` ends 33/34 because
+  `MatMulLadderFP16.cu` prints timings with no correctness check; the script is right to
+  flag it. `demos/README.md` now says so instead of "all ... produce the same results".
+- **Evidence trail:** `STATE.md` has no entries for batches 24–32; batch 32 has no
+  MANIFEST.
+- **Own errors fixed:** batch-number collision (31/32 → 33/34), the "never loads
+  libtornado-cudnn" overstatement (SDPA does load it, and needs GLIBC_2.38), and an
+  untested SDPA claim in demo 13's README.
+
+### Next invocation
+
+- Decide how demos 15 and 17 should tell their story on 7.0.0, then rewrite them.
+- Add a correctness check to `demos/18-matmul-ladder-fp16/MatMulLadderFP16.cu`.
+- Backfill `STATE.md` for batches 24–32 and a MANIFEST for batch 32.
+- Re-capture demo 14's sector counts and demo 01's instruction/bandwidth comparison.
+

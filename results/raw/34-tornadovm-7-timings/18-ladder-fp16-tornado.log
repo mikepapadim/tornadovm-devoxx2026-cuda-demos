@@ -1,0 +1,39 @@
+WARNING: module-info.class ignored in patch: /home/michalis/.sdkman/candidates/tornadovm/7.0.0-jdk22plus-cuda/share/java/jvmci/jvmci-21.0.2.jar
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess (file:/home/michalis/.sdkman/candidates/tornadovm/7.0.0-jdk22plus-cuda/share/java/tornado/tornado-runtime-7.0.0.jar)
+WARNING: Please consider reporting this to the maintainers of class uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+FP16 matrix-multiply ladder: C = A * B, 1024x1024
+  10 executions per rung, steady-state median wall-clock (first excluded)
+
+1. naive @Parallel
+[TornadoVM] Warning: The loop bounds will be configured by the GridScheduler. Check the grid by using the flag --threadInfo.
+     naive                            PASSED (max abs err 0.0002, 0/1048576 out of tol)
+2. KernelContext tiled
+     KernelContext tiled              PASSED (max abs err 0.0002, 0/1048576 out of tol)
+3. KernelContext MMA (tensor core)
+     KernelContext MMA                PASSED (max abs err 0.0000, 0/1048576 out of tol)
+4. CUTLASS hgemm
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::loadLibrary has been called by uk.ac.manchester.tornado.cutlass.provider.CutlassNativeLib in module tornado.cutlass (file:/home/michalis/.sdkman/candidates/tornadovm/7.0.0-jdk22plus-cuda/share/java/tornado/tornado-cutlass-7.0.0.jar)
+WARNING: Use --enable-native-access=tornado.cutlass to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+     CUTLASS hgemm                    PASSED (max abs err 0.0002, 0/1048576 out of tol)
+5. cuBLAS GemmEx FP16
+     cuBLAS GemmEx FP16               PASSED (max abs err 0.0002, 0/1048576 out of tol)
+6. cuBLAS GemmEx FP16->FP32
+     cuBLAS GemmEx FP16->FP32         PASSED (max abs err 0.0000, 0/1048576 out of tol)
+
+=== Summary (steady-state median wall-clock, this run / this GPU) ===
+rung                                  median us      GFLOP/s   vs naive
+1. naive @Parallel                          781         2750       1.0x
+2. KernelContext tiled                      624         3441       1.3x
+3. KernelContext MMA (tensor core)          546         3933       1.4x
+4. CUTLASS hgemm                            207        10374       3.8x
+5. cuBLAS GemmEx FP16                       203        10579       3.8x
+6. cuBLAS GemmEx FP16->FP32                 325         6608       2.4x
+
+Wall-clock includes host dispatch. For kernel time alone use nsys;
+scripts/compare-ladder.sh 18 collects both.
+All rungs produced correct results

@@ -1,0 +1,30 @@
+== tvm run 1
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+60.5,700866,20,35043.3,34976.0,34848,36032,248.4,polynomial
+20.6,238752,20,11937.6,11872.5,11680,12704,246.0,stencil
+18.9,218913,20,10945.6,10880.0,10848,11520,177.8,elementwise
+== tvm run 2
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+60.4,699298,20,34964.9,34944.0,34336,35969,306.2,polynomial
+20.6,238304,20,11915.2,11872.0,11745,12769,211.0,stencil
+19.0,219232,20,10961.6,10912.0,10848,11424,151.0,elementwise
+== tvm run 3
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+60.5,700674,20,35033.7,34976.0,34848,35872,228.3,polynomial
+20.6,238335,20,11916.8,11856.0,11712,12736,223.5,stencil
+18.9,218977,20,10948.9,10912.0,10848,11424,158.7,elementwise
+== cu run 1
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+64.3,805378,20,40268.9,40256.5,40192,40352,42.0,"polynomial(const float *, float *, int, int)"
+18.6,232640,20,11632.0,11616.0,11392,12128,134.0,"stencil(const float *, float *, int)"
+17.1,213985,20,10699.3,10688.0,10624,11136,106.0,"elementwise(const float *, float *, int)"
+== cu run 2
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+64.3,805216,20,40260.8,40256.0,40192,40447,54.0,"polynomial(const float *, float *, int, int)"
+18.6,232670,20,11633.5,11616.0,11520,12096,116.8,"stencil(const float *, float *, int)"
+17.1,213951,20,10697.5,10672.0,10623,11168,115.7,"elementwise(const float *, float *, int)"
+== cu run 3
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+64.3,805026,20,40251.3,40256.0,40128,40416,56.2,"polynomial(const float *, float *, int, int)"
+18.6,232510,20,11625.5,11616.0,11488,12160,133.8,"stencil(const float *, float *, int)"
+17.1,213888,20,10694.4,10672.0,10624,11104,100.4,"elementwise(const float *, float *, int)"

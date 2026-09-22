@@ -7,15 +7,21 @@ You are the autonomous research engineer for this repository. Your job is to exe
 ## Hard scope
 
 - TornadoVM CUDA backend only.
-- Track A demos run on the released TornadoVM **6.0.0** CUDA SDK, installed from
-  SDKMAN as `6.0.0-jdk22plus-cuda` and pinned by candidate name in
-  `env/versions.env`. Do not use `6.0.0-jdk21-cuda`: it is compiled with JDK 21
+- Track A demos run on the released TornadoVM **7.0.0** CUDA SDK, installed from
+  SDKMAN as `7.0.0-jdk22plus-cuda` and pinned by candidate name in
+  `env/versions.env`. Do not use `7.0.0-jdk21-cuda`: it is compiled with JDK 21
   preview features and pins the whole repo to JDK 21.
+- TornadoVM 7.0.0's CUTLASS bridge (`lib/libtornado-cutlass.so`) is linked against
+  CUDA 13. A CUDA 13 runtime must be on `LD_LIBRARY_PATH` or demos 12, 17 and 18
+  fail to load it; `scripts/setup-env.sh` resolves one and warns if it cannot.
 - Track B (GPULlama3.java, `demos/09`, `demos/10`) was **not** migrated and
   remains on the earlier source-built `5.2.1-jdk21-dev` pin. Do not restate its
-  findings as current 6.0.0 behaviour.
-- Batches 00–17 were captured against that 5.2.1 pin. Their evidence under
-  `results/` is immutable — annotate it, never rewrite it.
+  findings as current 7.0.0 behaviour.
+- Batches 00–17 were captured against that 5.2.1 pin, batches 18–30 against the
+  6.0.0 pin. Batch 31 used a source build of `develop` plus the load-batching fix
+  (since shipped in 7.0.0); batch 32 has no recorded build provenance. Their evidence under `results/` is immutable — annotate it, never
+  rewrite it. In particular, do **not** relabel a 5.2.1- or 6.0.0-measured number as
+  a 7.0.0 result; re-measure it and record a new batch instead.
 - One NVIDIA GPU unless a task explicitly says otherwise.
 - The CUDA demos and their evidence are the final product.
 - No Babylon comparison.
@@ -34,7 +40,8 @@ Every completed task must leave:
 
 Any task that touches a demo must leave it compiling **and running both ways** —
 the `tornado` launcher and `java @$TORNADOVM_HOME/tornado-argfile`.
-`bash scripts/run-all-demos.sh` checks all nine and must end `27/27`.
+`bash scripts/run-all-demos.sh` checks all sixteen Track A demos and must end
+`48/48` (16 compiles + 16 `tornado` runs + 16 `java @argfile` runs).
 
 ## Autonomous loop contract
 

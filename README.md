@@ -1,12 +1,12 @@
 # TornadoVM on NVIDIA CUDA
 
-Java GPU kernels on the **TornadoVM 6.0.0 CUDA release**, each paired with a
+Java GPU kernels on the **TornadoVM 7.0.0 CUDA release**, each paired with a
 hand-written CUDA C++ equivalent and measured against it. Write GPU kernels in
 plain Java, drive CUDA-runtime behaviour (graph capture/replay, multi-stream
 concurrency) from `TornadoExecutionPlan`, and call cuBLAS/cuFFT without writing
 a line of JNI.
 
-No source build required — TornadoVM 6.0.0 installs from SDKMAN in one command.
+No source build required — TornadoVM 7.0.0 installs from SDKMAN in one command.
 
 Reading this as a compiler engineer? **[`docs/NVIDIA-BRIEF.md`](docs/NVIDIA-BRIEF.md)**
 is the start-here page: the compilation pipeline, what is measured and how, and
@@ -80,9 +80,9 @@ from Java). Captured evidence in `results/raw/28-matmul-ladder/` and
 curl -s "https://get.sdkman.io" | bash
 source "$HOME/.sdkman/bin/sdkman-init.sh"
 
-# 2. A JDK 22+ and the TornadoVM 6.0.0 CUDA SDK
+# 2. A JDK 22+ and the TornadoVM 7.0.0 CUDA SDK
 sdk install java 25.0.2-open
-sdk install tornadovm 6.0.0-jdk22plus-cuda
+sdk install tornadovm 7.0.0-jdk22plus-cuda
 ```
 
 That is the whole toolchain. Point the shell at it and confirm the GPU is visible:
@@ -102,21 +102,40 @@ Driver: CUDADriver
 	CUDA --  [NVIDIA CUDA] -- NVIDIA GeForce RTX 4090
 ```
 
-Run everything — compiles all twelve demos and runs each both via the `tornado`
-launcher and via `java @argfile`:
+Run everything — compiles all sixteen Track A demos and runs each both via the
+`tornado` launcher and via `java @argfile` (48 checks):
 
 ```bash
 bash scripts/run-all-demos.sh
 ```
 
+### TornadoVM 7.0.0 needs a CUDA 13 runtime for CUTLASS
+
+7.0.0 ships `lib/libtornado-cutlass.so` linked against CUDA 13 (`libcudart.so.13`).
+On a box whose CUDA toolkit is 12.x, demos **12, 17 and 18** abort at the CUTLASS
+library task with:
+
+```
+Unable to load libtornado-cutlass. Build TornadoVM with the CUDA backend:
+  .../lib/libtornado-cutlass.so: libcudart.so.13: cannot open shared object file
+```
+
+`scripts/setup-env.sh` puts a CUDA 13 runtime on `LD_LIBRARY_PATH` (see
+`CUDA13_RUNTIME_LIB` in `env/versions.env`) and warns if it cannot find one. The
+other thirteen demos are unaffected — including the cuDNN demo: its conv2d/relu
+path dlopens the system `libcudnn.so.9` directly and never touches
+`lib/libtornado-cudnn.so`. That library *is* needed by `CuDnn.sdpaForward` (which no
+demo uses), and it cannot load on Ubuntu 22.04 at all: besides CUDA 13's
+`libnvrtc.so.13` it requires `GLIBC_2.38`, and 22.04 ships 2.35.
+
 ### Pick the right SDK: `jdk22plus`, not `jdk21`
 
-TornadoVM 6.0.0 ships two CUDA SDKs and they are **not** interchangeable:
+TornadoVM 7.0.0 ships two CUDA SDKs and they are **not** interchangeable:
 
 | SDKMAN candidate | JDK contract | Use it? |
 |---|---|---|
-| `6.0.0-jdk22plus-cuda` | floor JDK 22, **no** preview features | **Yes** — what this repo pins |
-| `6.0.0-jdk21-cuda` | JDK 21 **only**, compiled `--enable-preview` | No — preview bytecode pins you to exactly JDK 21 |
+| `7.0.0-jdk22plus-cuda` | floor JDK 22, **no** preview features | **Yes** — what this repo pins |
+| `7.0.0-jdk21-cuda` | JDK 21 **only**, compiled `--enable-preview` | No — preview bytecode pins you to exactly JDK 21 |
 
 Picking `jdk21` and running it on anything but JDK 21 fails immediately with
 `This TornadoVM SDK was built for JDK 21 with preview features enabled`. The
@@ -144,10 +163,14 @@ and JDK-specific — `-XX:+EnableJVMCI` is required on JDK ≤ 26 and fatal on J
 ## Track A demos — Hybrid API (`demos/`)
 
 Each demo is one self-contained Java file, paired with a hand-written CUDA C++
-equivalent in the same folder (see **CUDA equivalents** below). Every row below runs on
-TornadoVM 6.0.0 / JDK 25 / RTX 4090; logs in
-`results/raw/18-tornadovm-6-migration/` (demos 00–11) and
-`results/raw/19-cutlass-cudnn-warp-demos/` (demos 12–14).
+equivalent in the same folder (see **CUDA equivalents** below). Every row below is
+verified to compile and run on the pinned **TornadoVM 7.0.0** / JDK 25 / RTX 4090 —
+48/48 checks, `results/raw/33-tornadovm-7-migration/run-all-demos.log`.
+
+Wall-clock timings were re-measured on 7.0.0 — see "Measured on TornadoVM 7.0.0"
+below and `results/raw/34-tornadovm-7-timings/`. The `nsys` kernel-time and `ncu`
+hardware-counter numbers quoted in the demo READMEs were **not** re-captured; they
+keep their 5.2.1 or 6.0.0 provenance and are labelled as such.
 
 **Demos 12, 13 and 14 each document how to profile them with Nsight Systems**,
 with the exact commands and captured output in their README. For 12 and 14 the
@@ -179,7 +202,47 @@ Every demo also runs as `java @$TORNADOVM_HOME/tornado-argfile -cp . <MainClass>
 machine (re-checked 2026-09-02). Each demo README documents the expected JBang
 shape and says explicitly not to run it live.
 
-## Measured on TornadoVM 6.0.0 (Observed — this machine, this run)
+## Measured on TornadoVM 7.0.0 (Observed — this machine, these runs)
+
+RTX 4090, driver 610.57.04, CUDA 12.6.85, JDK 25.0.2. Not general claims.
+Wall-clock only — `nsys` kernel-time and `ncu` counter rows were not re-captured and
+keep their 6.0.0 provenance in the table below. Evidence:
+`results/raw/34-tornadovm-7-timings/`.
+
+Demos 06, 07 and 11 were run five times each; 12, 14, 17 and 18 once, matching how
+the 6.0.0-era batches captured them. Same arguments as those batches, so the two
+sets are directly comparable.
+
+| Demo | Metric | 6.0.0 | 7.0.0 |
+|---|---|---|---|
+| 06-cuda-streams | concurrency benefit | ~2.3x (seq 2174 µs, conc 936–960 µs) | **1.29–1.43x** (seq 1273–1330 µs, conc 928–1015 µs) |
+| 07-cuda-graph-benefit | graph replay speedup | 8.08–10.00x | **8.46–8.79x** (nograph 298–309 µs, graph 34.7–35.8 µs) |
+| 11-integrated-showcase | graph vs. baseline | 5.37–5.61x (graph 148 µs) | **9.88–10.49x** (graph 80–81 µs) |
+| 11-integrated-showcase | combined vs. baseline | 5.66–5.69x | **9.94–10.49x** |
+| 11-integrated-showcase | concurrent vs. baseline | 1.08–1.12x | **0.95–1.02x** — benefit gone |
+| 12-cutlass-fused-epilogue | fused vs. unfused, wall-clock @1024³ | 317 / 304 µs | **303 / 294 µs** |
+| 14-warp-async-shared | optimised vs. naive, wall-clock | 2.17x | **2.44x** (237 → 97 µs) |
+| 17-matmul-ladder | ladder, wall-clock GFLOP/s @2048 | 3783 / 4641 / 9723 / 12670 / 13075 / 14449 | **3835 / 4439 / 10495 / 11955 / 12946 / 14187** — within a few % |
+| 18-matmul-ladder-fp16 | ladder, wall-clock GFLOP/s @1024 | — (batch 30 captured kernel time) | **2750 / 3441 / 3933 / 10374 / 10579 / 6608** |
+| all 16 demos | compile + run, both paths | 36/36 (12 demos) | **48/48** |
+
+**The two ratio changes are not regressions in the feature each demo is about.**
+Demo 06's 2.3x → ~1.35x is the *baseline* getting ~1.7x faster while the concurrent
+path stayed flat — there is less serial overhead left to recover, not worse
+concurrency. Demo 11's concurrent mode losing its 1.08–1.12x is the same effect where
+the margin was already inside noise; it was already described as launch-overhead-bound
+at 6.0.0. The one clear improvement is **demo 11's CUDA-graph replay, ~1.85x faster**
+(148 → 80 µs) on a 6-chain JIT+cuBLAS graph, while demo 07's simpler single-chain
+replay is unchanged.
+
+## Measured on TornadoVM 6.0.0 (Historical)
+
+> Several kernel-time and counter rows below are **stale on 7.0.0**: upstream fixes
+> #1066 and #1079 shipped in it. Measured in `results/raw/35-accuracy-audit-7.0.0/`:
+> demo 17's register-tiled rung is now ~0.98x hand-written CUDA (not 1.43x), demo 15's
+> memory-bound kernels 1.02x / 1.03x (not 1.31x / 1.24x), and #1065's sectors/request
+> 4.00 (not 5.00). The demo 14 sector and demo 01 instruction rows rest on the same
+> misalignment and were not re-measured.
 
 RTX 4090, driver 565.57.01, CUDA 12.6.85, JDK 25.0.2. Not general claims.
 
@@ -232,7 +295,7 @@ read side by side. All twelve compile and run, and each produces the same
 result as its Java counterpart:
 
 ```bash
-bash scripts/run-all-cuda.sh          # 13 compiles + 13 runs + 2 probes, no JDK needed
+bash scripts/run-all-cuda.sh          # 16 compiles + 16 runs + 2 probes, no JDK needed (33/34: demo 18 never validates)
 ```
 
 Demo 12 additionally needs CUTLASS, which is header-only and not vendored here:
@@ -349,6 +412,31 @@ reproduce under `--debug` or `--fullDebug`. Demo 14's baseline was rewritten to
 use `KernelContext` indexing instead, which is stable across every run since.
 Worth revisiting with a dedicated reproducer before reporting.
 
+## What changed migrating 6.0.0 → 7.0.0
+
+Verified 2026-09-22 — `results/raw/33-tornadovm-7-migration/`.
+
+| | Before (6.0.0) | Now (7.0.0) |
+|---|---|---|
+| SDKMAN candidate | `6.0.0-jdk22plus-cuda` | `7.0.0-jdk22plus-cuda` |
+| Release commit | `fadb20b` | `65eb834` (tag `v7.0.0`, published 2026-09-22) |
+| JDK contract | floor 22, no preview | unchanged — floor 22, no preview |
+| Demo sources | — | **no API change**: all sixteen compile unmodified against `tornado-api-7.0.0` |
+| CUTLASS bridge | `libtornado-cutlass.so` links CUDA 12 | links **CUDA 13** — needs `libcudart.so.13` on the loader path |
+| cuDNN bridge | conv2d/relu work | conv2d/relu still work (system `libcudnn.so.9`, no TornadoVM `.so`); `sdpaForward` now needs `lib/libtornado-cudnn.so`, which needs CUDA 13 **and** `GLIBC_2.38` — unloadable on Ubuntu 22.04 |
+| New SDK jars | — | `tornado-cudf`, `tornado-curand` |
+
+The only migration blocker was the CUTLASS/CUDA 13 link. With a CUDA 13 runtime on
+`LD_LIBRARY_PATH` the harness is **48/48**
+(`results/raw/33-tornadovm-7-migration/run-all-demos.log`); without one it is 42/48,
+demos 12, 17 and 18 failing identically
+(`.../run-all-demos-without-cuda13.log`).
+
+Wall-clock timings were then re-measured on 7.0.0 in batch 34
+(`results/raw/34-tornadovm-7-timings/`) with the same arguments the 6.0.0-era batches
+used — see "Measured on TornadoVM 7.0.0". Kernel-time (`nsys`) and hardware-counter
+(`ncu`) numbers were not re-captured and keep their 5.2.1 or 6.0.0 provenance.
+
 ## What changed migrating 5.2.1 → 6.0.0
 
 | | Before (5.2.1, source build) | Now (6.0.0, SDKMAN) |
@@ -394,7 +482,7 @@ Track B on 6.0.0 is open work, not a result — nothing here claims it now works
 
 - `demos/` — Track A demos, one directory and one README each.
 - `scripts/setup-env.sh` — sets `JAVA_HOME`/`TORNADOVM_HOME`, generates the argfile.
-- `scripts/run-all-demos.sh` — compiles and runs all 12 demos both ways. Needs a GPU.
+- `scripts/run-all-demos.sh` — compiles and runs all 16 Track A demos both ways (48 checks). Needs a GPU.
 - `scripts/run-all-cuda.sh` — builds and runs the hand-written CUDA equivalents. Needs a GPU and the CUDA toolkit, but no JDK.
 - `scripts/verify.sh` — validates deliverables and cited evidence paths. No GPU needed.
 - `docs/NVIDIA-BRIEF.md` — start-here page for compiler engineers: lowering path, measurements, ceiling.

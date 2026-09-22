@@ -23,7 +23,7 @@ source scripts/setup-env.sh
 echo "$TORNADOVM_HOME"                                   # must print a path
 nvidia-smi --query-gpu=utilization.gpu,memory.used,memory.total --format=csv,noheader
 tornado --devices                                        # must show exactly one CUDA device
-bash scripts/run-all-demos.sh                            # all 9 demos, both run paths, must end 27/27
+bash scripts/run-all-demos.sh                            # all 16 demos, both run paths, must end 48/48
 ```
 
 Running `scripts/run-all-demos.sh` once before the talk is the cheapest

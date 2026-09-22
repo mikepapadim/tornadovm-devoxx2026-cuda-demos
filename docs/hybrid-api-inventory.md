@@ -1,10 +1,10 @@
 # Hybrid API Inventory (TornadoVM CUDA, pinned SHA)
 
 > **Note:** this is a *source* inventory, read against the 5.2.1 `develop` checkout that
-> was pinned when it was written. The Track A demos now run on the TornadoVM 6.0.0
-> CUDA release and every API surface catalogued here still exists there (all nine demos
-> compile unmodified against `tornado-api-6.0.0`), but the file paths and line-level
-> citations below refer to the 5.2.1 tree, not to 6.0.0.
+> was pinned when it was written. The Track A demos now run on the TornadoVM 7.0.0
+> CUDA release and all sixteen compile unmodified against `tornado-api-7.0.0`. The
+> API surfaces catalogued here were re-checked against 6.0.0 but **not** against 7.0.0,
+> and the file paths and line-level citations below refer to the 5.2.1 tree.
 
 Pinned source: `beehive-lab/TornadoVM` `develop` @ `99549c9862eda8d584e35e99924f9c865501eb3a` (see the Track B pins in `env/versions.env`). All paths below are relative to that `vendor/tornadovm` checkout. Evidence classification per `PLAN.md` §6: **Observed** (reproduced locally, log captured), **Source-backed** (verified directly in this checkout, not run), **Hypothesis**, **Blocked**.
 

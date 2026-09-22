@@ -1,0 +1,38 @@
+WARNING: module-info.class ignored in patch: /home/michalis/.sdkman/candidates/tornadovm/7.0.0-jdk22plus-cuda/share/java/jvmci/jvmci-21.0.2.jar
+Causal SDPA benchmark: b=4, h=16, s=1024, d=128, 20 iterations (+10 warm-up)
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess (file:/home/michalis/.sdkman/candidates/tornadovm/7.0.0-jdk22plus-cuda/share/java/tornado/tornado-runtime-7.0.0.jar)
+WARNING: Please consider reporting this to the maintainers of class uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::loadLibrary has been called by uk.ac.manchester.tornado.cudnn.provider.CuDnnNativeLib in module tornado.cudnn (file:/home/michalis/.sdkman/candidates/tornadovm/7.0.0-jdk22plus-cuda/share/java/tornado/tornado-cudnn-7.0.0.jar)
+WARNING: Use --enable-native-access=tornado.cudnn to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+Exception in thread "main" uk.ac.manchester.tornado.api.exceptions.TornadoBailoutRuntimeException: [31m[TornadoVM] Error - Recover option disabled[0m
+	at tornado.runtime@7.0.0/uk.ac.manchester.tornado.runtime.tasks.TornadoTaskGraph.bailout(TornadoTaskGraph.java:1757)
+	at tornado.runtime@7.0.0/uk.ac.manchester.tornado.runtime.tasks.TornadoTaskGraph.execute(TornadoTaskGraph.java:1803)
+	at tornado.runtime@7.0.0/uk.ac.manchester.tornado.runtime.tasks.TornadoTaskGraph.execute(TornadoTaskGraph.java:1820)
+	at tornado.api@7.0.0/uk.ac.manchester.tornado.api.TaskGraph.execute(TaskGraph.java:1093)
+	at tornado.api@7.0.0/uk.ac.manchester.tornado.api.ImmutableTaskGraph.execute(ImmutableTaskGraph.java:50)
+	at tornado.api@7.0.0/uk.ac.manchester.tornado.api.TornadoExecutor.lambda$execute$0(TornadoExecutor.java:84)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at tornado.api@7.0.0/uk.ac.manchester.tornado.api.TornadoExecutor.execute(TornadoExecutor.java:84)
+	at tornado.api@7.0.0/uk.ac.manchester.tornado.api.TornadoExecutionPlan.execute(TornadoExecutionPlan.java:184)
+	at tornado.cudnn@7.0.0/uk.ac.manchester.tornado.cudnn.tests.BenchmarkSdpa.benchmark(BenchmarkSdpa.java:88)
+	at tornado.cudnn@7.0.0/uk.ac.manchester.tornado.cudnn.tests.BenchmarkSdpa.main(BenchmarkSdpa.java:153)
+Caused by: uk.ac.manchester.tornado.api.exceptions.TornadoRuntimeException: [ERROR] Unable to load libtornado-cudnn, which provides the fused SDPA path. Build TornadoVM with the CUDA backend against CUDA 12 or newer: /home/michalis/.sdkman/candidates/tornadovm/7.0.0-jdk22plus-cuda/lib/libtornado-cudnn.so: libnvrtc.so.13: cannot open shared object file: No such file or directory
+	at tornado.cudnn@7.0.0/uk.ac.manchester.tornado.cudnn.provider.CuDnnNativeLib.loadSdpaShim(CuDnnNativeLib.java:198)
+	at tornado.cudnn@7.0.0/uk.ac.manchester.tornado.cudnn.provider.CuDnnLibraryProvider.getOrCreateSdpaPlan(CuDnnLibraryProvider.java:174)
+	at tornado.cudnn@7.0.0/uk.ac.manchester.tornado.cudnn.provider.CuDnnLibraryProvider.prepare(CuDnnLibraryProvider.java:112)
+	at tornado.runtime@7.0.0/uk.ac.manchester.tornado.runtime.interpreter.TornadoVMInterpreter.compileTaskFromBytecodeToBinary(TornadoVMInterpreter.java:1224)
+	at tornado.runtime@7.0.0/uk.ac.manchester.tornado.runtime.interpreter.TornadoVMInterpreter.handleLaunch(TornadoVMInterpreter.java:679)
+	at tornado.runtime@7.0.0/uk.ac.manchester.tornado.runtime.interpreter.TornadoVMInterpreter.execute(TornadoVMInterpreter.java:387)
+	at tornado.runtime@7.0.0/uk.ac.manchester.tornado.runtime.interpreter.TornadoVMInterpreter.execute(TornadoVMInterpreter.java:1632)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.ReferencePipeline$Head.forEach(ReferencePipeline.java:803)
+	at tornado.runtime@7.0.0/uk.ac.manchester.tornado.runtime.TornadoVM.executeInterpreterSingleThreaded(TornadoVM.java:127)
+	at tornado.runtime@7.0.0/uk.ac.manchester.tornado.runtime.TornadoVM.execute(TornadoVM.java:114)
+	at tornado.runtime@7.0.0/uk.ac.manchester.tornado.runtime.tasks.TornadoTaskGraph.scheduleInner(TornadoTaskGraph.java:1113)
+	at tornado.runtime@7.0.0/uk.ac.manchester.tornado.runtime.tasks.TornadoTaskGraph.execute(TornadoTaskGraph.java:1800)
+	... 9 more

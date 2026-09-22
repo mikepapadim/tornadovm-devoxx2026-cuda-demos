@@ -1,0 +1,27 @@
+=== libtornado-cudnn.so ===
+/home/michalis/.sdkman/candidates/tornadovm/7.0.0-jdk22plus-cuda/lib/libtornado-cudnn.so: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.38' not found (required by /home/michalis/.sdkman/candidates/tornadovm/7.0.0-jdk22plus-cuda/lib/libtornado-cudnn.so)
+	linux-vdso.so.1 (0x00007ffeb471c000)
+	libcudnn.so.9 => /lib/x86_64-linux-gnu/libcudnn.so.9 (0x00007ff39d000000)
+	libcudart.so.13 => /home/michalis/.local/lib/python3.10/site-packages/nvidia/cu13/lib/libcudart.so.13 (0x00007ff39cc00000)
+	libnvrtc.so.13 => not found
+	libstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007ff39c800000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007ff39d319000)
+	libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007ff39d6b3000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007ff39c400000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007ff39d6f4000)
+	libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007ff39d6ae000)
+	libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007ff39d6a9000)
+	librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007ff39d6a4000)
+
+=== libtornado-cutlass.so ===
+	linux-vdso.so.1 (0x00007ffc921f1000)
+	libcudart.so.13 => /home/michalis/.local/lib/python3.10/site-packages/nvidia/cu13/lib/libcudart.so.13 (0x00007f6e6bc00000)
+	libstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007f6e6b800000)
+	libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007f6e6bbdc000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f6e6b400000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007f6e6bf98000)
+	libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f6e6bed0000)
+	libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f6e6bec9000)
+	librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007f6e6bec4000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f6e6baf5000)
+

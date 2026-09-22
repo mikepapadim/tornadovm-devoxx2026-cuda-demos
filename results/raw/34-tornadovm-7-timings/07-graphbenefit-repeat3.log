@@ -1,0 +1,26 @@
+WARNING: module-info.class ignored in patch: /home/michalis/.sdkman/candidates/tornadovm/7.0.0-jdk22plus-cuda/share/java/jvmci/jvmci-21.0.2.jar
+size=4096 stages=6 executions=50 mode=both
+
+=== NOGRAPH (plain execute) ===
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess (file:/home/michalis/.sdkman/candidates/tornadovm/7.0.0-jdk22plus-cuda/share/java/tornado/tornado-runtime-7.0.0.jar)
+WARNING: Please consider reporting this to the maintainers of class uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+execution 0: correct, wall=114425 us
+execution 1: correct, wall=594 us
+execution 2: correct, wall=561 us
+execution 49: correct, wall=186 us
+NOGRAPH (plain execute) first execution (JIT compile): 114425 us
+NOGRAPH (plain execute) steady-state median wall-clock (excl. first execution, n=49): 298 us
+NOGRAPH (plain execute): All executions correct
+
+=== GRAPH (withCUDAGraph) ===
+execution 0: correct, wall=29888 us
+execution 1: correct, wall=80 us
+execution 2: correct, wall=44 us
+execution 49: correct, wall=35 us
+GRAPH (withCUDAGraph) first execution (JIT compile + graph capture): 29888 us
+GRAPH (withCUDAGraph) steady-state median wall-clock (excl. first execution, n=49): 35 us
+GRAPH (withCUDAGraph): All executions correct
+
+steady-state median: nograph=298.0 us, graph=35.2 us, speedup=8.46x

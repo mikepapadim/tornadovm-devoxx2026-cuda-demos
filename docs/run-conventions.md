@@ -7,7 +7,7 @@ alongside the `tornado` launcher, and that form must be *run*, not just
 written down — `scripts/run-all-demos.sh` executes both paths for all nine
 demos and is the gate.
 
-On TornadoVM 6.0.0 the arg-file is produced by the SDK itself:
+On TornadoVM 6.0.0 and later the arg-file is produced by the SDK itself:
 
 ```bash
 tornado --generate-argfile                              # writes $TORNADOVM_HOME/tornado-argfile

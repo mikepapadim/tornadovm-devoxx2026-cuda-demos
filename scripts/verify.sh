@@ -56,7 +56,7 @@ else
 fi
 
 echo "== No machine-specific arg-file is committed =="
-# The 6.0.0 arg-file belongs to the installed SDK: it holds absolute paths and
+# The arg-file belongs to the installed SDK: it holds absolute paths and
 # JDK-specific flags, so a committed copy is wrong everywhere but its origin.
 if [ -e demos/tornado.args ]; then
   bad "demos/tornado.args is committed — generate it with 'tornado --generate-argfile' instead"

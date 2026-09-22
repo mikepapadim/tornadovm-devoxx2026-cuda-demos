@@ -12,7 +12,7 @@ each against a CPU reference:
 | **FP8 e4m3** | `M16N8K32` | `mma.sync.aligned.m16n8k32.row.col.f32.e4m3.e4m3.f32` | HMMA |
 | **FP8 e5m2** | `M16N8K32` | `mma.sync.aligned.m16n8k32.row.col.f32.e5m2.e5m2.f32` | HMMA |
 
-Together with demo 08's fp16, that is **every operand combination the 6.0.0 CUDA
+Together with demo 08's fp16, that is **every operand combination the 7.0.0 CUDA
 backend can generate** — the emitter carries exactly five, and this demo plus
 demo 08 exercise all five on real hardware.
 

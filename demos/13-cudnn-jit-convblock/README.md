@@ -115,12 +115,17 @@ Captured evidence: `results/raw/19-cutlass-cudnn-warp-demos/13-cudnn-nsys-kernsu
 
 ## Not used here: `CuDnn.sdpaForward`
 
-The 6.0.0 SDK also exposes a fused scaled-dot-product-attention task. It is
-**not** used in this demo because the SDK's own shipped benchmark
-(`tornado -m tornado.cudnn/uk.ac.manchester.tornado.cudnn.tests.BenchmarkSdpa`)
-returns an all-zero result on this machine and prints
-`Results DO NOT match`. Reported upstream — see the repo README's
-"Upstream issues filed" section. Do not demo it live.
+The SDK also exposes a fused scaled-dot-product-attention task. It is **not**
+used in this demo, and should not be demoed live:
+
+- On **6.0.0** the SDK's own shipped benchmark
+  (`tornado -m tornado.cudnn/uk.ac.manchester.tornado.cudnn.tests.BenchmarkSdpa`)
+  returned an all-zero result and printed `Results DO NOT match` — issue #1063,
+  still open upstream.
+- On **7.0.0** the same benchmark fails loudly before running: SDPA now goes through
+  `lib/libtornado-cudnn.so`, which needs `libnvrtc.so.13` and `GLIBC_2.38`, and
+  Ubuntu 22.04 has glibc 2.35. Whether 7.0.0 fixed the all-zero result is therefore
+  untested on this machine.
 
 ## CUDA equivalent
 
