@@ -106,6 +106,7 @@ demo compiles and passes under both run paths (`results/raw/45-tile-ladder/run-a
 | [24](demos/24-cutile-histogram/) † | `CuTileHistogram` | Tile atomics: `PartitionView.atomicAdd` into 256 bins |
 | [25](demos/25-tile-ladder/) † | `TileLadder` | **The TileContext ladder** vs. a fully optimised KernelContext GEMM vs. native CUDA Tile |
 | [26](demos/26-jvector-gpu-index/) ‡ | `JVectorGpuIndex` | A **JVector vector index built on the GPU** (cuVS + a tensor-core Java kernel) vs. JVector's own CPU build: 7.4× faster at 500k × 1024, recall matched, in about a minute |
+| [29](demos/29-hybrid-api-live/) | `HybridLive` | **The Hybrid API, live**: cuFFT library tasks and Java kernels in one TaskGraph filter a noisy signal on a full-screen dashboard, with per-task profiler times, the PCIe copies, every frame checked, then a CUDA graph (1.6×) |
 | [28](demos/28-llm-writes-gpu-kernel/) § | `Harness` | **An LLM in Java writes a GPU kernel in Java**: jitLLM (Qwen3-4B) writes a `@Parallel` Mandelbrot method, TornadoVM compiles it to CUDA, it runs in 3.1 ms vs 1.2 s for the same method on one CPU thread, and the fractal is drawn in the terminal |
 | [27](demos/27-jvector-gpu-showcase/) ‡ | `JVectorShowcase` | **The JVector GPU showcase**, five acts on real ada-002 embeddings: build 8× at 100k (live race) and 28× at 1M, a better graph for search, compaction 20×, PQ 3.7× |
 

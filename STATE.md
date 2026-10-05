@@ -1277,3 +1277,19 @@ Deliverable: `demos/28-llm-writes-gpu-kernel/dashboard/` (`dashboard.py`, `Harne
     utilization.
   - The view switches to CUDA only for the first kernel TornadoVM prints; the zoom's task graph prints a second copy.
 - **Outside `scripts/run-all-demos.sh`** (interactive, needs jitLLM). The 69/69 contract is unchanged.
+
+## Batch 50 — Demo 29: the Hybrid API, live (2026-10-05)
+
+Deliverable: `demos/29-hybrid-api-live/` (`HybridLive.java`, `dashboard.py`, `run.sh`, `README.md`,
+`screenshots/`). All Observed; evidence is in `results/raw/50-hybrid-api-live/` (`MANIFEST.md`).
+
+- **The program:** one TaskGraph, `cuFFT forward → lowPass (Java) → cuFFT inverse → normalize (Java)`, on shared
+  device buffers. A low-pass cutoff (`IntArray`, `EVERY_EXECUTION`) sweeps from 1200 down to 5, one execution
+  per frame. Every execution is checked against the exact answer (the input is a sum of tones), then the graph runs
+  plain and with `withCUDAGraph()`.
+- **Results:** 110/110 correct, both ways (tornado, java @argfile); CUDA graph 62–63 → 38.9 µs per execution.
+  Median task GPU times forward=96.5 lowPass=75.8 inverse=53.0 normalize=39.6 µs; 32.8 KB in and 65.6 KB out per execution.
+- **The dashboard** (default mode) draws the pipeline with per-task profiler times, the PCIe copy sizes, the input,
+  the kept and removed spectrum, and the output live, and ends `PASSED`.
+- **Outside `scripts/run-all-demos.sh`:** the plain run is paced (about 11 s) and the default mode is interactive.
+  The 69/69 contract is unchanged.
