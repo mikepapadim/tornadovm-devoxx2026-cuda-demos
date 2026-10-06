@@ -60,48 +60,24 @@ public class TileLadder {
     // ================================================================ rung 1
 
     /**
-     * One warp per 16x16 output tile, two m16n8k16 calls per k-step, operands packed from
-     * global memory by the warp itself. Tensor cores, but no reuse across warps and one
-     * load in flight at a time. This is demo 22's rung 3, unchanged.
+     * One warp per 16x16 output tile, two m16n8k16 calls per k-step, each lane loading its
+     * fragment registers straight from global memory (KernelContext.mmaLoadA/B with a
+     * HalfFloatArray). Tensor cores with no shared memory and no barrier; reuse comes only from
+     * cache, helped by 128x4 work-groups that cover 4x4 output tiles. This is demo 22's rung 3.
      */
     public static void kcSimple(KernelContext ctx, HalfFloatArray a, HalfFloatArray b, FloatArray c, int n) {
-        int warpId = ctx.groupIdx;
-        int lane = ctx.localIdx;
-        int tilesPerRow = n / 16;
-        int tileRow = (warpId / tilesPerRow) * 16;
-        int tileCol = (warpId % tilesPerRow) * 16;
-
-        int[] aTile = ctx.allocateIntLocalArray(128);
-        int[] bTile0 = ctx.allocateIntLocalArray(64);
-        int[] bTile1 = ctx.allocateIntLocalArray(64);
+        // 2D launch (see the host code): x counts the warps down the rows of C, y the 16-column tiles.
+        int tileRow = (ctx.globalIdx / WARP) * 16;
+        int tileCol = ctx.globalIdy * 16;
         float[] accLeft = ctx.mmaFragment(0.0f);
         float[] accRight = ctx.mmaFragment(0.0f);
-
         for (int kBase = 0; kBase < n; kBase += 16) {
-            for (int idx = lane; idx < 128; idx += WARP) {
-                int elem = idx * 2;
-                int r = elem / 16;
-                int kk = elem % 16;
-                int g = (tileRow + r) * n + kBase + kk;
-                int lo = a.get(g).getHalfFloatValue() & 0xFFFF;
-                int hi = a.get(g + 1).getHalfFloatValue() & 0xFFFF;
-                aTile[r * 8 + kk / 2] = lo | (hi << 16);
-            }
-            for (int idx = lane; idx < 64; idx += WARP) {
-                int kRow = idx / 4;
-                int jPair = idx % 4;
-                int gl = (kBase + kRow) * n + tileCol + jPair * 2;
-                bTile0[kRow * 4 + jPair] = (b.get(gl).getHalfFloatValue() & 0xFFFF) | ((b.get(gl + 1).getHalfFloatValue() & 0xFFFF) << 16);
-                int gr = gl + 8;
-                bTile1[kRow * 4 + jPair] = (b.get(gr).getHalfFloatValue() & 0xFFFF) | ((b.get(gr + 1).getHalfFloatValue() & 0xFFFF) << 16);
-            }
-            ctx.localBarrier();
-            HalfFloat[] fragA = ctx.mmaLoadA(aTile, 16);
-            HalfFloat[] fragB0 = ctx.mmaLoadB(bTile0, 16);
+            // Fragments straight from global memory (TornadoVM PR #1195): no shared memory, no barrier.
+            HalfFloat[] fragA = ctx.mmaLoadA(a, tileRow, kBase, n);
+            HalfFloat[] fragB0 = ctx.mmaLoadB(b, kBase, tileCol, n);
             accLeft = ctx.mma(fragA, fragB0, accLeft, MMAShape.M16N8K16);
-            HalfFloat[] fragB1 = ctx.mmaLoadB(bTile1, 16);
+            HalfFloat[] fragB1 = ctx.mmaLoadB(b, kBase, tileCol + 8, n);
             accRight = ctx.mma(fragA, fragB1, accRight, MMAShape.M16N8K16);
-            ctx.localBarrier();
         }
         ctx.mmaStore(accLeft, c, tileRow, tileCol, n);
         ctx.mmaStore(accRight, c, tileRow, tileCol + 8, n);
@@ -447,8 +423,9 @@ public class TileLadder {
 
         // ---- rung 1
         System.out.println(labels[0]);
-        WorkerGrid1D wSimple = new WorkerGrid1D((n / 16) * (n / 16) * WARP);
-        wSimple.setLocalWork(WARP, 1, 1);
+        // 128x4 work-groups: 16 warps cover a 4x4 block of output tiles and share A and B in cache.
+        WorkerGrid2D wSimple = new WorkerGrid2D((n / 16) * WARP, n / 16);
+        wSimple.setLocalWork(4 * WARP, 4, 1);
         times[0] = time(graph("simple", a, b, out[0]) //
                 .task("t", TileLadder::kcSimple, new KernelContext(), a, b, out[0], n) //
                 .transferToHost(DataTransferMode.EVERY_EXECUTION, out[0]), new GridScheduler("simple.t", wSimple), executions);

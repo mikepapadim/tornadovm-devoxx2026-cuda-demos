@@ -26,7 +26,6 @@ import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.KernelContext;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
-import uk.ac.manchester.tornado.api.WorkerGrid1D;
 import uk.ac.manchester.tornado.api.WorkerGrid2D;
 import uk.ac.manchester.tornado.api.annotations.Parallel;
 import uk.ac.manchester.tornado.api.enums.DataTransferMode;
@@ -98,55 +97,30 @@ public class MatMulLadderFP16 {
      * {@code m16n8k16} produces 8 columns, the tile is two mma calls over two
      * 8-column panels, accumulating across the k dimension in FP32 fragments.
      *
+     * <p>The fragments are loaded straight from global memory, each lane reading its own
+     * registers, so the kernel has no shared memory and no barrier.</p>
+     *
      * <p>This is the rung the FP32 ladder cannot have: it emits a real
      * {@code mma.sync.aligned.m16n8k16.row.col.f32.f16.f16.f32}, verifiable with
      * {@code tornado --printKernel}.</p>
      */
     public static void kcMma(KernelContext ctx, HalfFloatArray a, HalfFloatArray b, FloatArray c, int n) {
-        int warpId = ctx.groupIdx;
-        int lane = ctx.localIdx;
-        int tilesPerRow = n / MMA_N;
-        int tileRow = (warpId / tilesPerRow) * MMA_M;
-        int tileCol = (warpId % tilesPerRow) * MMA_N;
-
-        int[] aTile = ctx.allocateIntLocalArray(MMA_M * MMA_K / 2);
-        int[] bTile0 = ctx.allocateIntLocalArray(MMA_K * 8 / 2);
-        int[] bTile1 = ctx.allocateIntLocalArray(MMA_K * 8 / 2);
+        // 2D launch (see the host code): x counts the warps down the rows of C, y the 16-column tiles.
+        int tileRow = (ctx.globalIdx / WARP) * MMA_M;
+        int tileCol = ctx.globalIdy * MMA_N;
 
         float[] accLeft = ctx.mmaFragment(0.0f);
         float[] accRight = ctx.mmaFragment(0.0f);
 
         for (int kBase = 0; kBase < n; kBase += MMA_K) {
-            // Pack two fp16 values per int32 word, cooperatively across the warp.
-            for (int idx = lane; idx < (MMA_M * MMA_K) / 2; idx += WARP) {
-                int elem = idx * 2;
-                int r = elem / MMA_K;
-                int kk = elem % MMA_K;
-                int g = (tileRow + r) * n + kBase + kk;
-                int lo = a.get(g).getHalfFloatValue() & 0xFFFF;
-                int hi = a.get(g + 1).getHalfFloatValue() & 0xFFFF;
-                aTile[r * (MMA_K / 2) + kk / 2] = lo | (hi << 16);
-            }
-            for (int idx = lane; idx < 64; idx += WARP) {
-                int kRow = idx / 4;
-                int jPair = idx % 4;
-                int jBase = jPair * 2;
-                int gl = (kBase + kRow) * n + tileCol + jBase;
-                bTile0[kRow * 4 + jPair] = (b.get(gl).getHalfFloatValue() & 0xFFFF) //
-                        | ((b.get(gl + 1).getHalfFloatValue() & 0xFFFF) << 16);
-                int gr = (kBase + kRow) * n + tileCol + 8 + jBase;
-                bTile1[kRow * 4 + jPair] = (b.get(gr).getHalfFloatValue() & 0xFFFF) //
-                        | ((b.get(gr + 1).getHalfFloatValue() & 0xFFFF) << 16);
-            }
-            ctx.localBarrier();
-
-            HalfFloat[] fragA = ctx.mmaLoadA(aTile, MMA_K);
-            HalfFloat[] fragB0 = ctx.mmaLoadB(bTile0, MMA_K);
+            // Each lane loads its own fragment registers straight from global memory: no
+            // shared-memory staging, no fp16 packing, no barrier (KernelContext.mmaLoadA/B with a
+            // HalfFloatArray, TornadoVM PR #1195).
+            HalfFloat[] fragA = ctx.mmaLoadA(a, tileRow, kBase, n);
+            HalfFloat[] fragB0 = ctx.mmaLoadB(b, kBase, tileCol, n);
             accLeft = ctx.mma(fragA, fragB0, accLeft, MMAShape.M16N8K16);
-            HalfFloat[] fragB1 = ctx.mmaLoadB(bTile1, MMA_K);
+            HalfFloat[] fragB1 = ctx.mmaLoadB(b, kBase, tileCol + 8, n);
             accRight = ctx.mma(fragA, fragB1, accRight, MMAShape.M16N8K16);
-
-            ctx.localBarrier();
         }
 
         ctx.mmaStore(accLeft, c, tileRow, tileCol, n);
@@ -286,9 +260,10 @@ public class MatMulLadderFP16 {
 
         // rung 3 — one warp per 16x16 tile
         System.out.println(labels[2]);
-        int warps = (n / MMA_M) * (n / MMA_N);
-        WorkerGrid1D wMma = new WorkerGrid1D(warps * WARP);
-        wMma.setLocalWork(WARP, 1, 1);
+        // 128x4 work-groups: the 16 warps of a group cover a 4x4 block of output tiles, so
+        // neighbouring warps read the same rows of A and columns of B and share them in cache.
+        WorkerGrid2D wMma = new WorkerGrid2D((n / MMA_M) * WARP, n / MMA_N);
+        wMma.setLocalWork(4 * WARP, 4, 1);
         times[2] = timeRung(new TaskGraph("mma") //
                 .transferToDevice(DataTransferMode.FIRST_EXECUTION, a, b) //
                 .task("t", MatMulLadderFP16::kcMma, new KernelContext(), a, b, cMma, n) //

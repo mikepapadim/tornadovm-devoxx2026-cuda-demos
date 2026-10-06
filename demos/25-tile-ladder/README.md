@@ -12,11 +12,18 @@ written three ways and measured in kernel time on one GPU:
 
 | # | Rung | What it is |
 |---|---|---|
-| 1 | `kcSimple` | KernelContext, one warp per 16×16 tile, operands packed from global memory each k-step (demo 22's rung 3) |
+| 1 | `kcSimple` | KernelContext, one warp per 16×16 tile, fragments loaded straight from global memory each k-step (demo 22's rung 3) |
 | 2 | `kcOptimised` | KernelContext, 128×128 block tile, 8 warps × 64×32 warp tiles, 16 register fragments per warp, `cp.async` double buffering |
 | 3–6 | `tile…` | TileContext, the same kernel at tile shapes 32×32×32, 64×64×64, 128×128×32, 128×128×64 |
 | 7 | `tile128x128x64Hinted` | rung 6 compiled with the CUDA Tile launch hint `occupancy=2` |
 | 8 | cuBLAS | `GemmEx` FP16→FP32, the vendor ceiling |
+
+> **Note.** The first rung (`kcSimple`) now loads its MMA fragments straight from global memory with
+> `KernelContext.mmaLoadA/mmaLoadB(HalfFloatArray, row, col, ld)` and runs in 128×4 work-groups
+> (16 warps covering 4×4 output tiles). That API arrives with TornadoVM PR
+> [#1195](https://github.com/beehive-lab/TornadoVM/pull/1195), so this demo needs a TornadoVM
+> that includes it. The measurements and counter analysis below were taken with the earlier
+> version, which packed fp16 pairs into shared memory and synchronised twice per k-step.
 
 Source: [`TileLadder.java`](TileLadder.java) · hand-written counterpart:
 [`TileLadder.cu`](TileLadder.cu).
