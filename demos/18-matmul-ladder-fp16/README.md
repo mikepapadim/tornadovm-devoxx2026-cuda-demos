@@ -7,10 +7,17 @@ rung FP32 cannot have: **tensor cores reached directly from Java**.
 |---|---|---|
 | 1 | naive `@Parallel` | one thread per output element |
 | 2 | `KernelContext` tiled | shared-memory tiles, FP32 accumulate |
-| 3 | **`KernelContext` MMA** | `ctx.mma` → a real `mma.sync.aligned.m16n8k16` |
+| 3 | **`KernelContext` MMA** | fragments loaded from global + `ctx.mma` → a real `mma.sync.aligned.m16n8k16` |
 | 4 | CUTLASS `hgemm` | library task, tensor cores |
 | 5 | cuBLAS `GemmEx` FP16 | FP16 in, FP16 out, FP32 accumulate |
 | 6 | cuBLAS `GemmEx` FP16→FP32 | the standard inference configuration |
+
+> **Note.** The MMA rung (`kcMma`) now loads its MMA fragments straight from global memory with
+> `KernelContext.mmaLoadA/mmaLoadB(HalfFloatArray, row, col, ld)` and runs in 128×4 work-groups
+> (16 warps covering 4×4 output tiles). That API arrives with TornadoVM PR
+> [#1195](https://github.com/beehive-lab/TornadoVM/pull/1195), so this demo needs a TornadoVM
+> that includes it. The measurements and counter analysis below were taken with the earlier
+> version, which packed fp16 pairs into shared memory and synchronised twice per k-step.
 
 Every rung computes the same `C = A * B` and is validated against a CPU
 reference **computed over the same FP16-rounded inputs**, so the comparison

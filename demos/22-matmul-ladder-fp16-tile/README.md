@@ -9,17 +9,24 @@ libraries below it.
 |---|---|---|
 | 1 | naive `@Parallel` | one thread per output element |
 | 2 | `KernelContext` tiled | shared-memory tiles, staged and barriered by hand |
-| 3 | `KernelContext` MMA | fragment packing + `ctx.mma` → `mma.sync.aligned.m16n8k16` |
+| 3 | `KernelContext` MMA | per-lane fragment loads + `ctx.mma` → `mma.sync.aligned.m16n8k16` |
 | 4 | **`TileContext`** | `tc.mma(a, b, acc)` → `ct::mma`; the tile compiler picks the HMMA |
 | 5 | CUTLASS `hgemm` | library task |
 | 6 | cuBLAS `GemmEx` FP16 | library task |
 | 7 | cuBLAS `GemmEx` FP16→FP32 | library task, the inference configuration |
 
 Rungs 3 and 4 are the comparison worth reading: same language, same hardware, same output.
-Rung 3 packs two fp16 values per `int`, stages shared memory, names a fixed `m16n8k16` shape
-and issues two `mma` calls per 16×16 tile. Rung 4 is nine lines and names no shape at all.
+Rung 3 loads each lane's fragment registers itself, names a fixed `m16n8k16` shape, picks the
+work-group layout by hand and issues two `mma` calls per 16×16 tile. Rung 4 is nine lines and names no shape at all.
 
 Every rung is validated against a CPU reference computed over the same FP16-rounded inputs.
+
+> **Note.** The MMA rung (rung 3, `kcMma`) now loads its MMA fragments straight from global memory with
+> `KernelContext.mmaLoadA/mmaLoadB(HalfFloatArray, row, col, ld)` and runs in 128×4 work-groups
+> (16 warps covering 4×4 output tiles). That API arrives with TornadoVM PR
+> [#1195](https://github.com/beehive-lab/TornadoVM/pull/1195), so this demo needs a TornadoVM
+> that includes it. The measurements and counter analysis below were taken with the earlier
+> version, which packed fp16 pairs into shared memory and synchronised twice per k-step.
 
 Source: [`MatMulLadderFP16Tile.java`](MatMulLadderFP16Tile.java).
 
