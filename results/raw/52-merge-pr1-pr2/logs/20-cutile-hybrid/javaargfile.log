@@ -1,0 +1,17 @@
+WARNING: module-info.class ignored in patch: /home/michalis/.sdkman/candidates/tornadovm/7.2.0-jdk22plus-cuda/share/java/jvmci/jvmci-21.0.2.jar
+n = 256, 20 executions, mode = both
+pipeline: KernelContext scale -> CUDA Tile gemm -> cuBLAS sgemv -> @Parallel biasRelu
+
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess (file:/home/michalis/.sdkman/candidates/tornadovm/7.2.0-jdk22plus-cuda/share/java/tornado/tornado-runtime-7.2.0.jar)
+WARNING: Please consider reporting this to the maintainers of class uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+   max error 0.0000 of max |value| 21.1709 (tolerance 0.2217)
+no CUDA graph       0.347 ms/execution   correct
+   max error 0.0000 of max |value| 21.1709 (tolerance 0.2217)
+withCUDAGraph()     0.077 ms/execution   correct
+
+CUDA graph replay: 0.347 ms -> 0.077 ms per execution, 4.51x faster
+0.270 ms of host dispatch saved per execution of this 4-stage graph
+The kernels are identical in both modes; what changes is how they are submitted,
+and the tile task captures and replays like every other task in the graph.

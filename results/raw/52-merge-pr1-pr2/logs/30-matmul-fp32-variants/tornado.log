@@ -1,0 +1,34 @@
+WARNING: module-info.class ignored in patch: /home/michalis/.sdkman/candidates/tornadovm/7.2.0-jdk22plus-cuda/share/java/jvmci/jvmci-21.0.2.jar
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess (file:/home/michalis/.sdkman/candidates/tornadovm/7.2.0-jdk22plus-cuda/share/java/tornado/tornado-runtime-7.2.0.jar)
+WARNING: Please consider reporting this to the maintainers of class uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+FP32 C = A * B, 256x256, 3 executions per rung, steady-state median wall clock (first excluded)
+  Wall clock includes host dispatch and the copy-out. For kernel time use nsys (README.md).
+
+1. one thread per output
+   one thread per output              PASSED (max abs err 1.43e-06, 0/65536 out of tol)
+2. shared-memory tiled 16x16
+   shared-memory tiled 16x16          PASSED (max abs err 1.43e-06, 0/65536 out of tol)
+3. register-tiled 64x64x16, 4x4
+   register-tiled 64x64x16, 4x4       PASSED (max abs err 1.43e-06, 0/65536 out of tol)
+4. TileContext 32x32x32
+   TileContext 32x32x32               PASSED (max abs err 3.81e-06, 0/65536 out of tol)
+5. TileContext 64x64x64
+   TileContext 64x64x64               PASSED (max abs err 3.81e-06, 0/65536 out of tol)
+6. TileContext 128x128x32
+   TileContext 128x128x32             PASSED (max abs err 3.81e-06, 0/65536 out of tol)
+7. TileContext 128x128x64
+   TileContext 128x128x64             PASSED (max abs err 3.81e-06, 0/65536 out of tol)
+
+=== Summary (steady-state median wall clock, this run / this GPU) ===
+rung                                median us    GFLOP/s
+1. one thread per output                  302        111
+2. shared-memory tiled 16x16              224        150
+3. register-tiled 64x64x16, 4x4           241        139
+4. TileContext 32x32x32                   238        141
+5. TileContext 64x64x64                   451         74
+6. TileContext 128x128x32                 458         73
+7. TileContext 128x128x64                 528         64
+
+All seven rungs produced the same, correct result

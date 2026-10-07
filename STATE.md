@@ -1307,3 +1307,16 @@ v7.2.0 = 87a465f, JDK 25.0.2). All Observed; evidence in `results/raw/51-tornado
 - The `7.2.0-jdk21-cuda` SDK runs on JDK 21 only and does not work in `java File.java` source mode; not used.
 - Headline numbers in README stay labelled 7.0.0: they were measured there and were not re-measured on 7.2.0.
 
+## Batch 52 — Merged PR #1 and PR #2 on TornadoVM 7.2.0 (2026-10-07)
+
+Both PRs by @kotselidis, merged after testing on the 7.2.0 profile. All Observed; evidence in
+`results/raw/52-merge-pr1-pr2/` (`run-all-demos.log`, `logs/`).
+
+- **PR #1** (demos 18, 22, 25: one-warp MMA rungs load fragments from global memory, #1195, 128x4 groups): compiles
+  and passes on 7.2.0; every rung PASSED with 0/65536 out of tolerance.
+- **PR #2** (demos 30, 31): the author had not compiled or run them; both pass here, both run paths. Demo 30: seven
+  rungs PASSED (max abs err 3.81e-06). Demo 31: 1D and 2D launches PASSED. `sdkman-7.2.0.env` sets
+  `TORNADO_HAS_MMA_GLOBAL_LOAD=1` (7.2.0 has #1195); the other profiles keep 0.
+- **`scripts/run-all-demos.sh`: 75 passed, 0 failed, 0 skipped.** `devoxx/demoTile.sh` and `demoHybrid.sh` pass.
+- The PRs' performance tables (RTX 5070 Ti, develop + #1194/#1195) were not re-measured here.
+

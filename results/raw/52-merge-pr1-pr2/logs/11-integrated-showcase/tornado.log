@@ -1,0 +1,116 @@
+WARNING: module-info.class ignored in patch: /home/michalis/.sdkman/candidates/tornadovm/7.2.0-jdk22plus-cuda/share/java/jvmci/jvmci-21.0.2.jar
+Integrated CUDA showcase: units=6 m=8 n=8 executions=20 mode=all
+Pipeline per unit: JIT scale -> cuBLAS sgemv -> JIT bias (demo 04's shape x 6 independent chains, one TaskGraph)
+
+=== BASELINE (single stream, no graph) ===
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess (file:/home/michalis/.sdkman/candidates/tornadovm/7.2.0-jdk22plus-cuda/share/java/tornado/tornado-runtime-7.2.0.jar)
+WARNING: Please consider reporting this to the maintainers of class uk.ac.manchester.tornado.runtime.TornadoVMConfigAccess
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+execution 0: correct, wall=223482 us
+execution 1: correct, wall=1194 us
+execution 2: correct, wall=1018 us
+execution 3: correct, wall=1041 us
+execution 4: correct, wall=876 us
+execution 5: correct, wall=881 us
+execution 6: correct, wall=905 us
+execution 7: correct, wall=779 us
+execution 8: correct, wall=725 us
+execution 9: correct, wall=732 us
+execution 10: correct, wall=1166 us
+execution 11: correct, wall=681 us
+execution 12: correct, wall=649 us
+execution 13: correct, wall=670 us
+execution 14: correct, wall=691 us
+execution 15: correct, wall=703 us
+execution 16: correct, wall=668 us
+execution 17: correct, wall=585 us
+execution 18: correct, wall=737 us
+execution 19: correct, wall=544 us
+BASELINE (single stream, no graph) first execution (JIT/capture): 223482 us
+BASELINE (single stream, no graph) steady-state median wall-clock (n=19): 737 us
+BASELINE (single stream, no graph): All executions correct
+
+=== CONCURRENT (withIntraPlanConcurrency) ===
+execution 0: correct, wall=58037 us
+execution 1: correct, wall=1503 us
+execution 2: correct, wall=1095 us
+execution 3: correct, wall=793 us
+execution 4: correct, wall=817 us
+execution 5: correct, wall=894 us
+execution 6: correct, wall=829 us
+execution 7: correct, wall=711 us
+execution 8: correct, wall=727 us
+execution 9: correct, wall=691 us
+execution 10: correct, wall=667 us
+execution 11: correct, wall=710 us
+execution 12: correct, wall=799 us
+execution 13: correct, wall=638 us
+execution 14: correct, wall=577 us
+execution 15: correct, wall=522 us
+execution 16: correct, wall=486 us
+execution 17: correct, wall=479 us
+execution 18: correct, wall=540 us
+execution 19: correct, wall=520 us
+CONCURRENT (withIntraPlanConcurrency) first execution (JIT/capture): 58037 us
+CONCURRENT (withIntraPlanConcurrency) steady-state median wall-clock (n=19): 711 us
+CONCURRENT (withIntraPlanConcurrency): All executions correct
+
+=== GRAPH (withCUDAGraph) ===
+execution 0: correct, wall=34984 us
+execution 1: correct, wall=115 us
+execution 2: correct, wall=86 us
+execution 3: correct, wall=83 us
+execution 4: correct, wall=81 us
+execution 5: correct, wall=80 us
+execution 6: correct, wall=82 us
+execution 7: correct, wall=82 us
+execution 8: correct, wall=93 us
+execution 9: correct, wall=75 us
+execution 10: correct, wall=74 us
+execution 11: correct, wall=75 us
+execution 12: correct, wall=72 us
+execution 13: correct, wall=74 us
+execution 14: correct, wall=74 us
+execution 15: correct, wall=72 us
+execution 16: correct, wall=74 us
+execution 17: correct, wall=73 us
+execution 18: correct, wall=75 us
+execution 19: correct, wall=72 us
+GRAPH (withCUDAGraph) first execution (JIT/capture): 34984 us
+GRAPH (withCUDAGraph) steady-state median wall-clock (n=19): 75 us
+GRAPH (withCUDAGraph): All executions correct
+
+=== COMBINED-EXPERIMENTAL (withCUDAGraph + withIntraPlanConcurrency) ===
+execution 0: correct, wall=30618 us
+execution 1: correct, wall=115 us
+execution 2: correct, wall=77 us
+execution 3: correct, wall=80 us
+execution 4: correct, wall=76 us
+execution 5: correct, wall=156 us
+execution 6: correct, wall=81 us
+execution 7: correct, wall=77 us
+execution 8: correct, wall=87 us
+execution 9: correct, wall=92 us
+execution 10: correct, wall=77 us
+execution 11: correct, wall=80 us
+execution 12: correct, wall=76 us
+execution 13: correct, wall=81 us
+execution 14: correct, wall=75 us
+execution 15: correct, wall=75 us
+execution 16: correct, wall=90 us
+execution 17: correct, wall=75 us
+execution 18: correct, wall=77 us
+execution 19: correct, wall=74 us
+COMBINED-EXPERIMENTAL (withCUDAGraph + withIntraPlanConcurrency) first execution (JIT/capture): 30618 us
+COMBINED-EXPERIMENTAL (withCUDAGraph + withIntraPlanConcurrency) steady-state median wall-clock (n=19): 80 us
+COMBINED-EXPERIMENTAL (withCUDAGraph + withIntraPlanConcurrency): All executions correct
+
+=== Summary (steady-state median us, this run/this GPU) ===
+baseline   : 737.0
+concurrent : 711.0 (1.04x vs baseline)
+graph      : 75.0 (9.83x vs baseline)
+combined   : 80.0 (9.21x vs baseline)
+
+=== BONUS: Tensor Core mma.sync single-tile GEMM (demo 08 kernel, reused) ===
+Tensor Core tile validation: PASSED (max abs err 0.00000, 0/128 cells out of tol)

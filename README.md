@@ -78,8 +78,8 @@ export TORNADO_SDK_PROFILE=develop && source scripts/setup-env.sh
 
 ## Demos
 
-**†** = CUDA Tile. Verified on TornadoVM 7.2.0, JDK 25, RTX 4090 (sm_89): **69/69** — every
-demo compiles and passes under both run paths (`results/raw/51-tornadovm-7.2.0-migration/run-all-demos.log`;
+**†** = CUDA Tile. Verified on TornadoVM 7.2.0, JDK 25, RTX 4090 (sm_89): **75/75** — every
+demo compiles and passes under both run paths (`results/raw/52-merge-pr1-pr2/run-all-demos.log`;
 7.0.0: `results/raw/45-tile-ladder/run-all-demos.log`).
 
 | # | Demo | What it shows |
