@@ -179,7 +179,7 @@ jitLLM is the latest `main` (`d875f083`, 2026-09-30). llama.cpp is the local bui
 
 | demo | uses |
 |---|---|
-| `demoHybrid.sh`, `demoTile.sh` | `../demos` (demos 04, 07, 20, 25) on the released TornadoVM 7.0.0 (SDKMAN, JDK 25) |
+| `demoHybrid.sh`, `demoTile.sh` | `../demos` (demos 04, 07, 20, 25) on the released TornadoVM 7.2.0 (SDKMAN, JDK 25) |
 | `demoJitllm.sh` | `./jitllm` (beehive-lab/jitllm `main`), built against its TornadoVM develop build (JDK 21); `~/llama.cpp-ref/build/bin/llama-bench` |
 | `demoShowcase.sh` | demo 27 of the demos repo, same SDK as demo 26; JVector jars from the **local, unpushed** branch `feat/gpu-build-pq-compaction` (`~/jvector-work/jvector`); data in `~/jvector-work/showcase-data` (symlinks: public ada-002 files, JVector's CPU-built 1M graph, 4 CPU-built segments) |
 | `demoJVector.sh` | demo 26 of the demos repo, on TornadoVM with `tornado-cuvs` (PR #1155, `~/TornadoVM-cuvs/dist/...`, JDK 25); cuVS in `~/.jvector-gpu/cuvs` |

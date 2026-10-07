@@ -7,7 +7,7 @@
 #                                                                             wrote for this prompt in rehearsal
 #   bash demos/28-llm-writes-gpu-kernel/run.sh dashboard                     the full-screen live version (~30 s): every
 #       component lit while it works, nvidia-smi showing both processes on the one GPU, a live zoom (dashboard/)
-# Needs: source scripts/setup-env.sh (TornadoVM 7.0.0 runs the kernel). Live generation also needs a built jitLLM:
+# Needs: source scripts/setup-env.sh (TornadoVM 7.2.0 runs the kernel). Live generation also needs a built jitLLM:
 #   JITLLM_DIR=<clone of beehive-lab/jitllm, built>  JITLLM_JAVA_HOME=<its JDK 21>  MODEL=<Qwen3-4B-f16.gguf>
 set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"

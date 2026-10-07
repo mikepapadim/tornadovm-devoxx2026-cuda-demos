@@ -1,0 +1,31 @@
+
+[1;35m==> 1/2  Threads, tiles, cuBLAS: one CUDA graph   (slide 18)[0m
+[0;36m    scale (@Parallel) -> gemm (TileContext, CUDA Tile) -> cublasSgemv -> biasRelu (JIT), captured once and replayed[0m
+[1;32m$[0m tornado --printBytecodes --jvm='-Dtornado.recover.bailout=False' --classpath . TileHybridPipeline 256 2 graph 2>&1 | grep -E 'EXECUTION_GRAPH|LAUNCH|withCUDAGraph' | sed -e 's/\x1b\[[0-9;]*m//g' -e 's/ on  \[NVIDIA.*//'
+bc:  EXECUTION_GRAPH_BEGIN_CAPTURE  graphId=0
+	bc:  LAUNCH  task hybrid.scale - scale
+	bc:  LAUNCH  task hybrid.gemm - gemm
+	bc:  LAUNCH  task - hybrid.project[cublasSgemv]
+	bc:  LAUNCH  task hybrid.biasRelu - biasRelu
+bc:  EXECUTION_GRAPH_END_CAPTURE  graphId=0
+bc:  EXECUTION_GRAPH_LAUNCH  graphId=0
+bc:  EXECUTION_GRAPH_LAUNCH  graphId=0
+bc:  EXECUTION_GRAPH_LAUNCH  graphId=0
+withCUDAGraph()     0.291 ms/execution   correct
+
+[1;35m==> 2/2  Ten lines of tiles vs a hand-tuned kernel: FP16 GEMM, n = 2048   (slide 19)[0m
+[0;36m    simple and hand-optimised KernelContext, four tile shapes, a launch hint, and cuBLAS; all checked for correctness[0m
+[0;36m    wall clock includes host dispatch; the slide's TFLOP/s are kernel time from nsys (see the demos repo, demo 25)[0m
+[1;32m$[0m tornado --jvm='-Dtornado.recover.bailout=False' --classpath . TileLadder 2048 10 2>&1 | sed -n '/=== Summary/,$p'
+=== Summary (steady-state median wall clock, this run / this GPU) ===
+rung                               nsys kernel name        median us    GFLOP/s
+1. KernelContext, simple           kcSimple                     2090       8220
+2. KernelContext, optimised        kcOptimised                  1174      14634
+3. TileContext 32x32x32            tile32x32x32                 1540      11156
+4. TileContext 64x64x64            tile64x64x64                 1281      13411
+5. TileContext 128x128x32          tile128x128x32               1380      12449
+6. TileContext 128x128x64          tile128x128x64               1388      12377
+7. TileContext 128x128x64 +hint    tile128x128x64Hinted         1394      12324
+8. cuBLAS GemmEx FP16->FP32        (cuBLAS-chosen)              1063      16162
+
+All rungs produced the same, correct result

@@ -9,7 +9,7 @@ use_tornadovm_7
 # a tile kernel that fails to compile would otherwise fall back to the CPU and still print "correct"
 BAILOUT="-Dtornado.recover.bailout=False"
 
-$FANCY banner "CUDA Tile from Java · TileContext" "TornadoVM 7.0.0 · RTX 4090 · no CPU fallback: a tile kernel that fails to compile fails the demo"
+$FANCY banner "CUDA Tile from Java · TileContext" "TornadoVM 7.2.0 · RTX 4090 · no CPU fallback: a tile kernel that fails to compile fails the demo"
 
 $FANCY act 1 "Threads, tiles, cuBLAS: one CUDA graph" "a KernelContext kernel, a TileContext GEMM, cublasSgemv and a @Parallel loop, captured once   (slide 18)"
 compile_demo 20-cutile-hybrid

@@ -1293,3 +1293,17 @@ Deliverable: `demos/29-hybrid-api-live/` (`HybridLive.java`, `dashboard.py`, `ru
   the kept and removed spectrum, and the output live, and ends `PASSED`.
 - **Outside `scripts/run-all-demos.sh`:** the plain run is paced (about 11 s) and the default mode is interactive.
   The 69/69 contract is unchanged.
+
+## Batch 51 — Migration to TornadoVM 7.2.0 (2026-10-07)
+
+Deliverable: the default SDK profile is now `sdkman-7.2.0` (`env/sdk/sdkman-7.2.0.env`, `7.2.0-jdk22plus-cuda`, tag
+v7.2.0 = 87a465f, JDK 25.0.2). All Observed; evidence in `results/raw/51-tornadovm-7.2.0-migration/` (`MANIFEST.md`).
+
+- **`scripts/run-all-demos.sh`: 69 passed, 0 failed, 0 skipped**, unchanged code.
+- **Demos 26-29**, both run paths: all `PASSED`. Demos 26/27 `lib/` rebuilt with `setup.sh` against the SDK's
+  tornado-api/tornado-cuvs 7.2.0 (7.1.0+ ships tornado-cuvs, so the separate PR #1155 build is no longer needed).
+- **`devoxx/`**: `CUVS_SDK` now defaults to the 7.2.0 SDK (was a 7.0.2-dev source build); `check.sh` 7/7 OK.
+- 7.2.0's `libtornado-cutlass.so` still links `libcudart.so.13` (ldd), so the CUDA 13 runtime pin stays.
+- The `7.2.0-jdk21-cuda` SDK runs on JDK 21 only and does not work in `java File.java` source mode; not used.
+- Headline numbers in README stay labelled 7.0.0: they were measured there and were not re-measured on 7.2.0.
+

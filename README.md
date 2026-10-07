@@ -1,6 +1,6 @@
 # TornadoVM on NVIDIA CUDA
 
-Java GPU kernels on TornadoVM's **CUDA backend**, pinned to the **TornadoVM 7.0.0**
+Java GPU kernels on TornadoVM's **CUDA backend**, pinned to the **TornadoVM 7.2.0**
 release, each paired with a hand-written CUDA C++ equivalent and measured against it.
 Write kernels in plain Java, drive CUDA graphs and streams from `TornadoExecutionPlan`,
 call cuBLAS/cuFFT/cuDNN/CUTLASS without JNI — and write **CUDA Tile** kernels that never
@@ -11,12 +11,12 @@ Compiler engineer? Start at [`docs/NVIDIA-BRIEF.md`](docs/NVIDIA-BRIEF.md).
 ## Quick start
 
 ```bash
-# JDK 22+ and the TornadoVM 7.0.0 CUDA SDK, from SDKMAN
+# JDK 22+ and the TornadoVM 7.2.0 CUDA SDK, from SDKMAN
 curl -s "https://get.sdkman.io" | bash && source "$HOME/.sdkman/bin/sdkman-init.sh"
 sdk install java 25.0.2-open
-sdk install tornadovm 7.0.0-jdk22plus-cuda
+sdk install tornadovm 7.2.0-jdk22plus-cuda
 
-# CUDA 13 userspace toolkit: the CUDA Tile path and 7.0.0's CUTLASS bridge need it
+# CUDA 13 userspace toolkit: the CUDA Tile path and 7.2.0's CUTLASS bridge need it
 pip install --user nvidia-cuda-nvcc 'cuda-tile[tileiras]' nvidia-cuda-cccl
 
 git clone https://github.com/mikepapadim/tornadovm-devoxx2026-cuda-demos
@@ -40,9 +40,9 @@ committed because its flags are absolute-path and JDK-specific.
 
 ### Things that will bite you
 
-- **Use the `jdk22plus` SDK, not `jdk21`.** `7.0.0-jdk21-cuda` is compiled with preview
-  features and runs on JDK 21 only.
-- **7.0.0's CUTLASS bridge links CUDA 13** (`libcudart.so.13`). On a CUDA 12 box, demos
+- **Use the `jdk22plus` SDK, not `jdk21`.** `7.2.0-jdk21-cuda` is compiled with preview
+  features and runs on JDK 21 only (and not in `java File.java` source mode).
+- **7.2.0's CUTLASS bridge links CUDA 13** (`libcudart.so.13`). On a CUDA 12 box, demos
   that use a CUTLASS task abort at it unless a CUDA 13 runtime is on `LD_LIBRARY_PATH` —
   `setup-env.sh` adds the pip wheel's and warns if it is missing.
 - **Run tile demos with `-Dtornado.recover.bailout=False`** (the runner does). Every
@@ -57,7 +57,7 @@ committed because its flags are absolute-path and JDK-specific.
 One line in `env/versions.env` picks the TornadoVM the demos run against:
 
 ```
-TORNADO_SDK_PROFILE=sdkman-7.0.0
+TORNADO_SDK_PROFILE=sdkman-7.2.0
 ```
 
 It names a file in [`env/sdk/`](env/sdk/) that pins the SDK and declares what it can do.
@@ -66,7 +66,8 @@ without the tile API.
 
 | Profile | SDK | Tile API |
 | --- | --- | --- |
-| **`sdkman-7.0.0`** (default) | released, `sdk install tornadovm 7.0.0-jdk22plus-cuda` | yes |
+| **`sdkman-7.2.0`** (default) | released, `sdk install tornadovm 7.2.0-jdk22plus-cuda` (ships `tornado-cuvs`) | yes |
+| `sdkman-7.0.0` | released, `sdk install tornadovm 7.0.0-jdk22plus-cuda` | yes |
 | `develop` | source build of upstream `develop` in `vendor/tornadovm` | yes |
 
 To switch for one shell, **export** first (`VAR=x source …` does not persist):
@@ -77,8 +78,9 @@ export TORNADO_SDK_PROFILE=develop && source scripts/setup-env.sh
 
 ## Demos
 
-**†** = CUDA Tile. Verified on TornadoVM 7.0.0, JDK 25, RTX 4090 (sm_89): **69/69** — every
-demo compiles and passes under both run paths (`results/raw/45-tile-ladder/run-all-demos.log`).
+**†** = CUDA Tile. Verified on TornadoVM 7.2.0, JDK 25, RTX 4090 (sm_89): **69/69** — every
+demo compiles and passes under both run paths (`results/raw/51-tornadovm-7.2.0-migration/run-all-demos.log`;
+7.0.0: `results/raw/45-tile-ladder/run-all-demos.log`).
 
 | # | Demo | What it shows |
 |---|------|---------------|
@@ -110,8 +112,8 @@ demo compiles and passes under both run paths (`results/raw/45-tile-ladder/run-a
 | [28](demos/28-llm-writes-gpu-kernel/) § | `Harness` | **An LLM in Java writes a GPU kernel in Java**: jitLLM (Qwen3-4B) writes a `@Parallel` Mandelbrot method, TornadoVM compiles it to CUDA, it runs in 3.1 ms vs 1.2 s for the same method on one CPU thread, and the fractal is drawn in the terminal |
 | [27](demos/27-jvector-gpu-showcase/) ‡ | `JVectorShowcase` | **The JVector GPU showcase**, five acts on real ada-002 embeddings: build 8× at 100k (live race) and 28× at 1M, a better graph for search, compaction 20×, PQ 3.7× |
 
-**‡** = needs a TornadoVM SDK with `tornado-cuvs` (PR #1155) and its own `setup.sh`; not part of
-`run-all-demos.sh`. **§** = the kernel runs on 7.0.0 (`--reference` needs nothing else); live generation needs
+**‡** = needs a TornadoVM SDK with `tornado-cuvs` (7.1.0+, so the pinned 7.2.0) and its own `setup.sh`; not part of
+`run-all-demos.sh`. **§** = the kernel runs on 7.2.0 (`--reference` needs nothing else); live generation needs
 [jitLLM](https://github.com/beehive-lab/jitllm) and a 7.5 GB model; not part of `run-all-demos.sh`.
 
 Each demo's README has its build/run commands, expected output, profiling recipe and a

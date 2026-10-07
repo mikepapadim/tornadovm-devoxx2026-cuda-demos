@@ -1,0 +1,95 @@
+
+    [1;36m❯[0m [1mWrite the kernel static void mandelbrot(int width, int height, int maxIterations, IntArray out). For 
+      every pixel (x, y) map x to the real axis from -2.2 to 1.0 and y to the imaginary axis from -1.2 to 
+      1.2, iterate z = z*z + c with floats until |z| > 2 or maxIterations, and store the iteration count at 
+      out[y * width + x]. Use two nested @Parallel loops, y outer and x inner.[0m
+
+
+    [1mthe kernel Qwen3-4B wrote for this prompt in rehearsal (--reference)[0m
+      1 │ static void mandelbrot(int width, int height, int maxIterations, IntArray out) {
+      2 │     for (@Parallel int y = 0; y < height; y++) {
+      3 │         for (@Parallel int x = 0; x < width; x++) {
+      4 │             float real = -2.2f + (x / (float) width) * 3.2f;
+      5 │             float imag = -1.2f + (y / (float) height) * 2.4f;
+      6 │             float zReal = 0.0f, zImag = 0.0f;
+      7 │             int iter = 0;
+      8 │             while (iter < maxIterations) {
+      9 │                 float zReal2 = zReal * zReal - zImag * zImag + real;
+     10 │                 float zImag2 = 2 * zReal * zImag + imag;
+     11 │                 zReal = zReal2;
+     12 │                 zImag = zImag2;
+     13 │                 if (zReal * zReal + zImag * zImag > 4.0f) {
+     14 │                     break;
+     15 │                 }
+     16 │                 iter++;
+     17 │             }
+     18 │             out.set(y * width + x, iter);
+     19 │         }
+     20 │     }
+     21 │ }
+
+
+    [1;36m⠿[0m running on the GPU (TornadoVM) and on one CPU thread ...
+
+    ...which TornadoVM JIT-compiled to CUDA  (first 14 lines, --printKernel)
+    ┊ extern "C" __global__ void mandelbrot(long long *_kernel_context, unsigned char *_constant_region, unsign...
+    ┊ {
+    ┊   unsigned long long ul_0, ul_31; 
+    ┊   int i_1, i_2, i_3, i_4, i_5, i_6, i_7, i_10, i_25, i_26, i_27, i_32, i_33; 
+    ┊   float f_8, f_9, f_11, f_12, f_13, f_14, f_15, f_16, f_17, f_18, f_19, f_20, f_21, f_22, f_23, f_24; 
+    ┊   long long l_28, l_29, l_30; 
+    ┊ 
+    ┊   // BLOCK 0
+    ┊   ul_0  =  (unsigned long long) arg3;
+    ┊   i_1  =  (gridDim.x*blockDim.x);
+    ┊   i_2  =  (gridDim.y*blockDim.y);
+    ┊   i_3  =  (blockIdx.x*blockDim.x+threadIdx.x);
+    ┊   i_4  =  (blockIdx.y*blockDim.y+threadIdx.y);
+    ┊   // BLOCK 1 MERGES [0 11 ]
+
+                                                                                                                  
+                                                                                                                  
+                                                                                                                  
+                                                                                                                  
+                                                                                                                  
+                                                                           .#                                     
+                                                                        ..####                                    
+                                                                        :###### .                                 
+                                                                        .######                                   
+                                                            -  .   # #-##########: .#                             
+                                                             ### #####################= .### .                    
+                                                             .#############################:                      
+                                                         .#.##############################.                       
+                                                         @################################## :                    
+                                      . .                #####################################                    
+                                       .## =##:.#       #####################################                     
+                                       =###########:   ######################################                     
+                                     :###############..######################################                     
+                                 ..#.#######################################################                      
+           ##############################################################################                         
+                                 .::.#######################################################                      
+                                    .-###############-%######################################                     
+                                       :###########-   ######################################                     
+                                       .## ###:.# .    :#####################################                     
+                                                         #####################################                    
+                                                         .################################## .                    
+                                                         .#.##############################:                       
+                                                             .#############################.                      
+                                                            .### #####################. .###                      
+                                                               .   # =:##########=  #                             
+                                                                         ######                                   
+                                                                        =######                                   
+                                                                        ..####                                    
+                                                                           .-                                     
+                                                                                                                  
+                                                                                                                  
+                                                                                                                  
+                                                                                                                  
+
+    4096 × 3072 pixels, up to 256 iterations each
+    same method, Java, 1 CPU thread    ██████████████████████████████████████████████   1,193.4 ms
+    same method, GPU via TornadoVM     █                                                    3.1 ms ★
+
+    99.79% of 12,582,912 pixels identical to the CPU run  (the rest: float rounding at the set's edge; the GPU fuses multiply-adds)
+
+LlmGpuKernel: PASSED -- the generated kernel ran on the GPU and matches the CPU on >= 99% of pixels

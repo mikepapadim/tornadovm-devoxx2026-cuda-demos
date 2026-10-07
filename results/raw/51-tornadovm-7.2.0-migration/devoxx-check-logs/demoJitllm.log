@@ -1,0 +1,22 @@
+
+[1;35m==> Generate with Llama-3.2-1B-Instruct-f16.gguf on the GPU, pure Java[0m
+[1;32m$[0m ./jitllm --gpu --cuda-graphs --model '/home/michalis/models/Llama-3.2-1B-Instruct-f16.gguf' --max-new-tokens 120 --prompt 'In two sentences: why run LLM inference in pure Java on a GPU?' 2>&1 | grep -v WARNING
+Running Large Language Models (LLMs) inference in pure Java on a GPU can be beneficial for several reasons, including improved performance, reduced latency, and increased scalability. By leveraging the parallel processing capabilities of GPUs, Java developers can take advantage of the massive parallelism inherent in LLMs, leading to significant speedups and improved overall system performance.
+
+==== Performance Metrics ====
+achieved tok/s: 186.96. Tokens: 96, seconds: 0.51
+
+[1;35m==> jitLLM, prefill on NVIDIA libraries: Qwen3-0.6B-F16.gguf, 512-token prompt, batch 512   (slide 22)[0m
+[0;36m    --with-native-libraries: cuBLAS GEMMs for the prompt batch, Java kernels for everything else[0m
+[1;32m$[0m ./jitllm bench --gpu --model '/home/michalis/models/Qwen3-0.6B-F16.gguf' --pp 512 --tg 0 --with-prefill-decode --batch-prefill-size 512 --with-native-libraries 2>&1 | grep -E '^\[bench\] [A-Z]'
+[bench] Qwen3-0.6B-F16               pp512 b512     64517.95 ± 2117.85 t/s (median 65063.13)
+[0;36m    decode: one token at a time, Java kernels, replayed as a CUDA graph[0m
+[1;32m$[0m ./jitllm bench --gpu --cuda-graphs --model '/home/michalis/models/Qwen3-0.6B-F16.gguf' --pp 0 --tg 128 2>&1 | grep -E '^\[bench\] [A-Z]'
+[bench] Qwen3-0.6B-F16               tg128            399.72 ± 4.63 t/s (median 401.49)
+
+[1;35m==> llama.cpp, same GPU, same GGUF, same batch size[0m
+[1;32m$[0m '/home/michalis/llama.cpp-ref/build/bin/llama-bench' -m '/home/michalis/models/Qwen3-0.6B-F16.gguf' -p 512 -n 128 -b 512 -ngl 99 2>/dev/null | grep -E 'model|---|pp512|tg128'
+| model                          |       size |     params | backend    | ngl | n_batch |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | ------: | --------------: | -------------------: |
+| qwen3 0.6B F16                 |   1.11 GiB |   596.05 M | CUDA       |  99 |     512 |           pp512 |   64467.13 ± 9608.85 |
+| qwen3 0.6B F16                 |   1.11 GiB |   596.05 M | CUDA       |  99 |     512 |           tg128 |        515.04 ± 0.60 |

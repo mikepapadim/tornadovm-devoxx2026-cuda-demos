@@ -1,0 +1,26 @@
+
+[1;35m==> 1/2  JIT -> cuBLAS sgemv -> JIT, one task graph, shared device buffers   (slide 15)[0m
+[0;36m    scale (Java kernel) -> CuBlas::cublasSgemv (NVIDIA) -> bias (Java kernel); no host round trip in between[0m
+[1;32m$[0m tornado --enableProfiler console --classpath . CuBlasSgemvHybrid 8 8 3 2>&1 | awk -f '/home/michalis/tornadovm-devoxx2026-cuda-demos/devoxx/tasks.awk'
+      CuBlasSgemvHybrid.bias     CUDA  kernel   28.3 us
+      cublasSgemv                CUDA  kernel 34894.2 us
+      CuBlasSgemvHybrid.scale    CUDA  kernel  313.2 us
+iteration 0: correct output[0]=157.0 expected[0]=157.0
+      CuBlasSgemvHybrid.bias     CUDA  kernel   25.4 us
+      cublasSgemv                CUDA  kernel   60.1 us
+      CuBlasSgemvHybrid.scale    CUDA  kernel   39.0 us
+iteration 1: correct output[0]=157.0 expected[0]=157.0
+      CuBlasSgemvHybrid.bias     CUDA  kernel   19.7 us
+      cublasSgemv                CUDA  kernel   38.6 us
+      CuBlasSgemvHybrid.scale    CUDA  kernel   22.8 us
+iteration 2: correct output[0]=157.0 expected[0]=157.0
+All iterations correct
+
+[1;35m==> 2/2  The same kind of graph, captured once as a CUDA graph and replayed   (slide 16)[0m
+[0;36m    plan.withCUDAGraph(): first run captures, every later run is one cuGraphLaunch[0m
+[1;32m$[0m tornado --classpath . CudaGraphBenefit 4096 6 50 both 2>&1 | grep -E 'steady-state|speedup|All executions'
+NOGRAPH (plain execute) steady-state median wall-clock (excl. first execution, n=49): 271 us
+NOGRAPH (plain execute): All executions correct
+GRAPH (withCUDAGraph) steady-state median wall-clock (excl. first execution, n=49): 35 us
+GRAPH (withCUDAGraph): All executions correct
+steady-state median: nograph=271.9 us, graph=35.2 us, speedup=7.72x

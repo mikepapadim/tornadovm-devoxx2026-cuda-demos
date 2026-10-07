@@ -7,7 +7,7 @@ source "$(dirname "$0")/env.sh"
 source "$DEMO_ROOT/fancy.sh"
 use_tornadovm_7
 
-$FANCY banner "Hybrid API · Java kernels + NVIDIA libraries, one task graph" "TornadoVM 7.0.0 · RTX 4090 · every result checked against the CPU"
+$FANCY banner "Hybrid API · Java kernels + NVIDIA libraries, one task graph" "TornadoVM 7.2.0 · RTX 4090 · every result checked against the CPU"
 
 $FANCY act 1 "Java → cuBLAS → Java" "two Java kernels JIT-compiled to CUDA, cublasSgemv in between, sharing device buffers   (slide 15)"
 compile_demo 04-cublas-hybrid
