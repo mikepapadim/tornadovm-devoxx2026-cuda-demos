@@ -37,6 +37,7 @@ have_requirement() {
   case "$1" in
     "")   return 0 ;;
     tile) [ "${TORNADO_HAS_TILE_API:-0}" = "1" ] ;;
+    mma-global) [ "${TORNADO_HAS_MMA_GLOBAL_LOAD:-0}" = "1" ] ;;
     *)    return 1 ;;
   esac
 }
@@ -105,6 +106,8 @@ done <<'DEMOS'
 23-cutile-row-scan:CuTileRowScan:4096 1000 20:tile
 24-cutile-histogram:CuTileHistogram:1048576 256 20:tile
 25-tile-ladder:TileLadder:256 3:tile
+30-matmul-fp32-variants:MatMulFP32Variants:256 3:tile
+31-mma-global-fragment-loads:MmaGlobalLoads:256 3:mma-global
 DEMOS
 
 echo

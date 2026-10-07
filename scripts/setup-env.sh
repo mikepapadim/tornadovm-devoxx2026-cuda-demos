@@ -77,6 +77,8 @@ export TORNADO_ARGFILE="$TORNADOVM_HOME/tornado-argfile"
 
 # Capability flags, exported for run-all-demos.sh and any demo wrapper.
 export TORNADO_HAS_TILE_API="${TORNADO_HAS_TILE_API:-0}"
+# KernelContext.mmaLoadA/B from a global HalfFloatArray (TornadoVM PR #1195); demo 31 needs it.
+export TORNADO_HAS_MMA_GLOBAL_LOAD="${TORNADO_HAS_MMA_GLOBAL_LOAD:-0}"
 export TORNADO_MIN_CUDA_TOOLKIT="${TORNADO_MIN_CUDA_TOOLKIT:-0}"
 export TORNADO_NVCC="$(eval echo "${TORNADO_NVCC:-}")"
 export TORNADO_JAVAC_FLAGS="${TORNADO_JAVAC_FLAGS:-}"
