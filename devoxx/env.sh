@@ -4,13 +4,9 @@
 DEMO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Where things live on this machine
-DEMOS_REPO="${DEMOS_REPO:-$(cd "$DEMO_ROOT/.." && pwd)}"   # this repo: the TornadoVM 7.2.0 demos (Hybrid API, CUDA Tile, JVector)
+DEMOS_REPO="${DEMOS_REPO:-$(cd "$DEMO_ROOT/.." && pwd)}"   # this repo: the TornadoVM 7.2.0 demos (Hybrid API, CUDA Tile)
 JITLLM_DIR="${JITLLM_DIR:-$DEMO_ROOT/jitllm}"                       # latest jitLLM (main), cloned and built by setup.sh
-CUVS_SDK="${CUVS_SDK:-$HOME/.sdkman/candidates/tornadovm/7.2.0-jdk22plus-cuda}"  # TornadoVM 7.2.0 (released; ships tornado-cuvs)
 LLAMA_BENCH="${LLAMA_BENCH:-$HOME/llama.cpp-ref/build/bin/llama-bench}"
-ADA_100K="${ADA_100K:-$HOME/jvector-work/datasets/public/ada_002_100k_base_99287.fvecs}"
-SHOWCASE_DATA="${SHOWCASE_DATA:-$HOME/jvector-work/showcase-data}"     # demo 27: ada-002 100k + 1M, JVector's CPU graph, 4 segments
-JVECTOR_LOCAL="${JVECTOR_LOCAL:-$HOME/jvector-work/jvector}"           # JVector clone with feat/gpu-build-pq-compaction (not pushed)
 BUILD="$DEMO_ROOT/build"
 
 # Models (see models.sh for everything on this machine)
@@ -51,10 +47,3 @@ use_jitllm() {
     eval "$(cd "$JITLLM_DIR" && scripts/tornadovm-dev.sh env 2>/dev/null)"
 }
 
-# TornadoVM 7.2.0 (ships tornado-cuvs) for JVector + cuVS (JDK 25)
-use_cuvs_sdk() {
-    export TORNADOVM_HOME="$CUVS_SDK"
-    export JAVA_HOME="$HOME/.sdkman/candidates/java/25.0.2-open"
-    export PATH="$TORNADOVM_HOME/bin:$JAVA_HOME/bin:$PATH"
-    [ -f "$TORNADOVM_HOME/tornado-argfile" ] || tornado --generate-argfile >/dev/null 2>&1
-}

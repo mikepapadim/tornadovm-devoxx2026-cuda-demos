@@ -1192,48 +1192,6 @@ kernel time under nsys, 3 runs, spread ≤ 0.9%, every rung validated on the ful
   `cp.async`, an A-side swizzle and deeper pipelines are the candidates the API lacks.
 - Re-tune demo 25 on sm_120: every tuned choice here (shape, tiling, hint) is sm_89-specific.
 
-## Batch 46 — Demo 26: a JVector index built on the GPU (2026-10-01)
-
-Deliverable: `demos/26-jvector-gpu-index/` (`JVectorGpuIndex.java`, `setup.sh`, `run.sh`, `README.md`). All Observed,
-evidence in `results/raw/46-jvector-gpu-index/` (`MANIFEST.md`):
-
-- The same JVector graph (M=32, beam 100, alpha 1.2, hierarchy, cosine) is built with the GPU accelerator from the
-  JVector `jvector-gpu` module (cuVS NN-Descent + a TornadoVM `ctx.mma` pruning kernel) and with JVector's CPU builder.
-  Both are searched against exact neighbors of 200 held-out queries; `PASSED` requires the GPU recall@10 to be at least
-  the CPU's minus 0.01.
-- 500k × 1024 synthetic (default): GPU 6.4–6.5 s vs CPU 47.6–48.2 s (7.4×), about 59 s end to end, PASSED via both
-  the `tornado` launcher and `java @argfile`. Real ada002 99k × 1536 (`--fvecs`): 2.56 s vs 15.83 s (6.2×), recall
-  0.9940 vs 0.9905.
-- Runs on a source-built TornadoVM with PR #1155 (`tornado-cuvs`), not the default `sdkman-7.0.0` profile, so it is
-  outside `scripts/run-all-demos.sh` (like demos 09/10); the 69/69 contract is unchanged.
-- Found while building it: the `tornado` launcher swallows program arguments starting with `--` (TornadoVM #1150);
-  `run.sh` passes them with `--params`.
-
-
-## Batch 47 — Demo 27: the JVector GPU showcase (2026-10-04)
-
-Deliverable: `demos/27-jvector-gpu-showcase/` (`JVectorShowcase.java`, `setup.sh`, `prepare.sh`, `run.sh`, `README.md`).
-All Observed; evidence is in `results/raw/47-jvector-gpu-showcase/` (`MANIFEST.md`).
-
-- **What it is:** a five-act stage show on real ada-002 embeddings, with live progress bars, bar charts and a
-  scoreboard. Each act ends with a quality check, and the run prints `PASSED` only if all of them hold.
-  - Race: 100k, CPU vs GPU, both live. 15.8 → 1.9–2.0 s.
-  - Scale: 1M GPU build, live, 9.5 s. The CPU bar is the measured 267.4 s.
-  - Search: JVector's CPU-built 1M graph vs the GPU graph. The GPU graph is ahead on recall and p50 at every beam.
-  - Compaction: 4 segments merged with `GpuCompaction`, live, 14.8 s. The CPU bar is the measured 294.6 s.
-  - PQ: CPU and GPU both live, 13.5 → 3.6 s. Codes match JVector's up to float ties.
-- **PASSED both ways** (`tornado` launcher and `java @argfile`), about 85 s end to end.
-- **Outside `scripts/run-all-demos.sh`**, like demo 26: it needs an SDK with `tornado-cuvs`, the JVector branch
-  `feat/gpu-build-pq-compaction`, and about 13 GB of public datasets. The 69/69 contract is unchanged.
-- **Found while building it:**
-  - A graph loaded with `OnHeapGraphIndex.load` is searched through JVector's concurrent view until
-    `setAllMutationsCompleted()` is called: about 3× slower than the frozen view of a freshly built graph. The demo
-    marks the loaded graph complete so the comparison is fair.
-  - GPU PQ encoding differs from JVector's on exact float ties: 23 of 188.7M codes in an earlier check, all with
-    relative distance difference ≤ 1.5e-7. The check accepts ties and nothing else.
-- **Demo 26's `setup.sh`** gained `JVECTOR_LIB` (output directory). Demo 27's setup reuses it; demo 26's default
-  behaviour is unchanged.
-
 ## Batch 48 — Demo 28: an LLM in Java writes a GPU kernel in Java (2026-10-04)
 
 Deliverable: `demos/28-llm-writes-gpu-kernel/` (`run.sh`, `Harness.template`, `render.py`, the prompts,
@@ -1300,9 +1258,8 @@ Deliverable: the default SDK profile is now `sdkman-7.2.0` (`env/sdk/sdkman-7.2.
 v7.2.0 = 87a465f, JDK 25.0.2). All Observed; evidence in `results/raw/51-tornadovm-7.2.0-migration/` (`MANIFEST.md`).
 
 - **`scripts/run-all-demos.sh`: 69 passed, 0 failed, 0 skipped**, unchanged code.
-- **Demos 26-29**, both run paths: all `PASSED`. Demos 26/27 `lib/` rebuilt with `setup.sh` against the SDK's
-  tornado-api/tornado-cuvs 7.2.0 (7.1.0+ ships tornado-cuvs, so the separate PR #1155 build is no longer needed).
-- **`devoxx/`**: `CUVS_SDK` now defaults to the 7.2.0 SDK (was a 7.0.2-dev source build); `check.sh` 7/7 OK.
+- **Demos 28-29**, both run paths: all `PASSED`.
+- **`devoxx/`**: `check.sh` OK.
 - 7.2.0's `libtornado-cutlass.so` still links `libcudart.so.13` (ldd), so the CUDA 13 runtime pin stays.
 - The `7.2.0-jdk21-cuda` SDK runs on JDK 21 only and does not work in `java File.java` source mode; not used.
 - Headline numbers in README stay labelled 7.0.0: they were measured there and were not re-measured on 7.2.0.

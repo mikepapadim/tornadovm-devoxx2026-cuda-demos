@@ -10,7 +10,6 @@ real output of each demo (the logs the scripts capture). Standard library only. 
     fancy.py tile-ladder LOG           demo 25: the FP16 GEMM ladder
     fancy.py llm-chat LOG              jitLLM generation: tokens per second
     fancy.py llm-bench PP TG LLAMA     jitLLM prefill/decode vs llama.cpp
-    fancy.py jvector LOG               demo 26: GPU vs CPU JVector build
     fancy.py stream                    stdin -> terminal as tokens arrive: drops <think></think> and ``` fences
     fancy.py code FILE                 a Java source with line numbers and syntax colors
     fancy.py cuda LOG [LINES]          the start of the CUDA kernel TornadoVM generated (from --printKernel)
@@ -258,40 +257,6 @@ def llm_bench(pp_log, tg_log, llama_log):
     record("jitLLM vs llama.cpp, decode", f"{jt:,.0f} vs {lt:,.0f} t/s  {jt / lt:.2f}x", True, "bench: all four numbers measured")
 
 
-def jvector(log):
-    text = read(log)
-    gpu = re.search(r"\[GPU\] built in\s+([0-9.]+) s", text)
-    cpu = re.search(r"\[CPU\] built in\s+([0-9.]+) s", text)
-    recall = re.search(r"recall@10\s+\|\s+([0-9.]+)\s+\|\s+([0-9.]+)", text)
-    size = re.search(r"index of ([0-9,]+ x \d+) vectors, (.+)", text)
-    trace = re.search(r"\): (rows .+?), total", text)
-    if not (gpu and cpu and recall):
-        print(paint(RED, "    the demo did not finish (see the log)"))
-        record("JVector index build", "missing", False, "jvector: PASSED")
-        return
-    g, c = float(gpu.group(1)), float(cpu.group(1))
-    if trace:
-        phases = [(name, float(sec)) for name, sec in re.findall(r"([a-z ]+) ([0-9.]+) s", trace.group(1))]
-        total = sum(s for _, s in phases) or 1
-        palette = [BLUE, CYAN, MAGENTA, YELLOW, GREEN]
-        bar = "".join(paint(palette[i % 5], "█" * max(1, round(s / total * 60))) for i, (_, s) in enumerate(phases))
-        legend = "   ".join(paint(palette[i % 5], "■ ") + f"{n.strip()} {s:.1f} s" for i, (n, s) in enumerate(phases))
-        print("    " + paint(BOLD, "where the GPU build's time goes"))
-        print("    " + bar)
-        print("    " + legend)
-        print(paint(DIM, "    candidates = NVIDIA cuVS NN-Descent · prune = a Java tensor-core kernel, JIT-compiled by TornadoVM"))
-        print()
-    bars(f"graph build, {size.group(1) if size else ''}", [("JVector, 32 CPU threads", c, YELLOW), ("GPU: TornadoVM + cuVS", g, GREEN)], "s")
-    big(f"{c / g:.1f}x faster · recall@10 JVector {recall.group(1)}, GPU {recall.group(2)}")
-    ok = "PASSED" in text
-    record("JVector index build", f"{c:.1f} s → {g:.1f} s  {c / g:.1f}x", ok, "jvector: GPU recall matches JVector's")
-
-
-JAVA_KEYWORDS = set("""abstract boolean break byte case catch char class continue default do double else extends final
-    finally float for if implements import int long new package private protected public return short static super
-    switch this throw throws try void while var true false null""".split())
-
-
 def highlight_java(line):
     """Keywords, annotations, numbers, strings and comments in color."""
     if line.strip().startswith("//"):
@@ -419,7 +384,7 @@ def main(argv):
     command, args = argv[1], argv[2:]
     handlers = {"banner": banner, "act": act, "hybrid-tasks": hybrid_tasks, "hybrid-graph": hybrid_graph,
                 "tile-pipeline": tile_pipeline, "tile-ladder": tile_ladder, "llm-chat": llm_chat,
-                "llm-bench": llm_bench, "jvector": jvector, "scoreboard": scoreboard, "stream": stream, "code": code,
+                "llm-bench": llm_bench, "scoreboard": scoreboard, "stream": stream, "code": code,
                 "cuda": cuda, "fractal": fractal}
     handlers[command](*args)
     return 0

@@ -10,8 +10,6 @@ bash check.sh            # before the talk: runs everything once, prints OK/FAIL
 bash demoHybrid.sh       # slides 14-16  Java kernel -> cuBLAS -> Java kernel in one task graph; CUDA graph replay   (~3 s)
 bash demoTile.sh         # slides 17-19  threads + CUDA Tile + cuBLAS in one CUDA graph; the tile GEMM ladder      (~6 s)
 bash demoJitllm.sh       # live demo 1   jitLLM generates on the GPU, then jitLLM vs llama.cpp                      (~20 s)
-bash demoJVector.sh      # live demo 3   a JVector index built on the GPU (cuVS) vs JVector's CPU build              (~20 s)
-bash demoShowcase.sh     # JVector showcase: 5 acts, live race + 1M + search + compaction + PQ, scoreboard        (~1.5 min)
 ```
 
 Each script prints the command before running it and waits for **Enter** between steps (`NO_PAUSE=1` to skip).
@@ -24,20 +22,18 @@ bash fancyHybrid.sh      # Java -> cuBLAS -> Java pipeline, kernel time per task
 bash fancyTile.sh        # threads + tiles + cuBLAS inside one CUDA graph; the FP16 GEMM ladder as a bar chart      (~20 s)
 bash fancyJitllm.sh      # chat · the LLM writes a GPU kernel, TornadoVM runs it, a fractal · vs llama.cpp  [chat|code|bench] (~35 s)
 bash fancyJitllmLive.sh  # full-screen live dashboard: the Java LLM writes a kernel, it runs on the SAME GPU, every part lit  (~30 s)
-bash fancyJVector.sh     # GPU time breakdown + build bars + recall               [ada|big|quick]                     (~20 s)
-bash demoShowcase.sh     # the 5-act JVector showcase (already fancy)                                                 (~1.5 min)
 ```
 
 ## How to run the fancy demos
 
-**1. Once per machine** (needs the network; clones and builds jitLLM, sets up the JVector demo):
+**1. Once per machine** (needs the network; clones and builds jitLLM):
 
 ```bash
 cd tornadovm-devoxx2026-cuda-demos/devoxx
 bash setup.sh            # re-run any time to update jitLLM to the latest main
 ```
 
-Paths to the TornadoVM SDKs, the demos repo, llama.cpp, the models and the JVector data are all in `env.sh`; each one
+Paths to the TornadoVM SDKs, the demos repo, llama.cpp and the models are all in `env.sh`; each one
 can be overridden with an environment variable of the same name (e.g. `DEMOS_REPO=... bash fancyHybrid.sh`).
 
 **2. Before the talk:**
@@ -61,9 +57,6 @@ only) renders everything.
 | `bash fancyJitllm.sh` | all three acts: `chat`, `code` (the LLM writes a GPU kernel), `bench` (vs llama.cpp) | ~35 s–1.5 min |
 | `bash fancyJitllm.sh chat` / `code` / `bench` | one act only | |
 | `bash fancyJitllmLive.sh` | full-screen live dashboard (see below); `[enter]` leaves it | ~30 s |
-| `bash fancyJVector.sh` | GPU vs JVector CPU index build on ada-002 (`ada`, default) | ~20 s |
-| `bash fancyJVector.sh quick` / `big` | 100k × 768 synthetic (~13 s) / 500k × 1024 (~1 min) | |
-| `bash demoShowcase.sh` | the 5-act JVector showcase (`race` `scale` `search` `compact` `pq`) | ~1.5 min |
 
 Each ends with a scoreboard that says `PASSED` only if every check behind it held (see the table further down).
 
@@ -86,8 +79,6 @@ If a step fails, its spinner turns into a red `✘` with the path of its log.
 | `demoHybrid.sh` | | Per task: the Java kernels (`scale`, `bias`) and `cublasSgemv` all on CUDA, every iteration `correct`. The first iteration's cuBLAS time is its one-time initialisation. Then `withCUDAGraph()`: about 9× faster steady state (≈310 → 35 µs). |
 | `demoTile.sh` | | The capture: `@Parallel` scale, a `TileContext` GEMM, `cublasSgemv` and a Java `biasRelu` between `BEGIN_CAPTURE` and `END_CAPTURE`, then replays. Then the ladder: tile shape alone takes the tile GEMM from 2.1 to 1.2 ms, and one launch hint passes the hand-optimised kernel. Wall clock includes dispatch; slide 19's TFLOP/s are kernel time from nsys. |
 | `demoJitllm.sh` | `chat`, `bench` | Generation in pure Java on the GPU (~190 tok/s, Llama-3.2-1B F16). Then Qwen3-0.6B F16: prefill with cuBLAS (`--with-native-libraries`), decode with Java kernels replayed as a CUDA graph, and llama.cpp on the same GPU and GGUF. |
-| `demoShowcase.sh` | acts `race` `scale` `search` `compact` `pq` (default: all) | **The fancy one.** Colored acts with live progress bars and bar charts, then a scoreboard. (1) a live race on 100k ada-002: JVector's CPU bar fills for ~15 s, the GPU finishes in 2 s (8×), same recall; (2) 1M on the GPU in ~9.5 s with a phase bar (*candidates* = cuVS, *prune* = Java tensor-core kernel) vs JVector's measured 267 s (28×); (3) the same search on JVector's CPU-built and the GPU-built 1M graph: the GPU graph wins on recall and latency at every beam; (4) compaction of 4 JVector segments in ~15 s vs the compactor's measured 295 s (20×); (5) PQ of 1M, both live, 13.7 → 3.6 s, JVector's codes. Ends `PASSED` only if every quality check holds. |
-| `demoJVector.sh` | `ada` (default), `big`, `quick` | GPU build 2.6 s vs JVector 15.5 s (6×) on real OpenAI ada-002 embeddings, recall@10 equal or higher, `PASSED`. `big` (500k × 1024, ~1 min) shows 7–8×. |
 
 Other models: `bash models.sh` lists every GGUF on the machine, about 30, among them Qwen3-1.7B F16
 (`~/jcon/models/Qwen3-1.7B-f16.gguf`, the slide's second prefill model), Qwen3-4B/8B F16, Llama-3.2-1B/3B,
@@ -146,7 +137,6 @@ a temp directory printed at the end. `[enter]` leaves the dashboard; `NO_PAUSE=1
 | `fancyHybrid.sh` | 1. the `scale ▶ cublasSgemv ▶ bias` pipeline, and every iteration's kernel time per task. Iteration 0 is labelled as cuBLAS initialisation (~38 ms). 2. capture ▶ cuGraphLaunch, then plain vs graph bars: 307–313 → 35–36 µs, 8.5–8.8× | every iteration correct; every execution correct |
 | `fancyTile.sh` | 1. the four captured tasks (KernelContext, CUDA Tile, cuBLAS, @Parallel) drawn inside one CUDA-graph frame, with the launch count. 2. the 8-rung ladder colored by kind, the tile-shape gain (~1.7–1.8×), and whether the hinted tile kernel beats the hand-tuned one | 4 tasks in the captured graph; every rung correct |
 | `fancyJitllm.sh` | 1. **Chat:** the prompt, the tokens streaming live, then the tok/s (~180–190). 2. **The model writes a GPU kernel:** Qwen3-4B F16, run by jitLLM on the GPU at ~67 tok/s, writes a Mandelbrot kernel in Java (`@Parallel` loops), shown streaming and then syntax-highlighted. A harness (`codegen/Harness.java`) compiles it, TornadoVM JIT-compiles it to CUDA (the first lines are shown, from `--printKernel`) and runs it on 4096 × 3072 pixels. The *same* method then runs as plain Java on one CPU thread, and the fractal is drawn in the terminal: 3.1 ms vs ~1,180 ms, 99.79% of pixels identical (the rest is float rounding at the set's edge: the GPU fuses multiply-adds). 3. **Bench:** three spinners, then prefill and decode bars with each side's ± | tokens generated (twice); the kernel compiles, runs and matches the CPU on ≥ 99% of pixels; all four bench numbers measured |
-| `fancyJVector.sh` | demo 26: the GPU phase breakdown (cuVS candidates vs the Java prune kernel), the build bars and recall | the demo's own PASSED (GPU recall matches JVector's) |
 
 The numbers are this run's, not constants: the scoreboard shows what was measured. Two of them vary between runs,
 and the fancy output shows that honestly.
@@ -170,8 +160,6 @@ and the fancy output shows that honestly.
 | Tile ladder, n = 2048 (wall clock) | KernelContext optimised 1176 µs · TileContext 128×128×64 + hint 1123 µs · cuBLAS 1060 µs |
 | jitLLM Qwen3-0.6B F16, prefill pp512 b512 | jitLLM 64,818–65,340 t/s · llama.cpp 60,923–64,545 t/s (± up to 9k between its runs) |
 | jitLLM Qwen3-0.6B F16, decode tg128 | jitLLM 399 t/s (CUDA graphs) · llama.cpp 515 t/s |
-| JVector ada-002 99k × 1536 | GPU 2.57 s vs CPU 15.45 s (6.0×), recall@10 0.9950 vs 0.9900 |
-| Showcase (2026-10-04), both ways PASSED | race 100k 15.8 → 1.9–2.0 s (8×) · 1M build 9.5 s vs 267.4 s (28×) · compaction 14.8 s vs 294.6 s (20×) · PQ 13.5 → 3.6 s (3.7×) · ~85 s end to end |
 
 jitLLM is the latest `main` (`d875f083`, 2026-09-30). llama.cpp is the local build `f172be756`.
 
@@ -181,20 +169,13 @@ jitLLM is the latest `main` (`d875f083`, 2026-09-30). llama.cpp is the local bui
 |---|---|
 | `demoHybrid.sh`, `demoTile.sh` | `../demos` (demos 04, 07, 20, 25) on the released TornadoVM 7.2.0 (SDKMAN, JDK 25) |
 | `demoJitllm.sh` | `./jitllm` (beehive-lab/jitllm `main`), built against its TornadoVM develop build (JDK 21); `~/llama.cpp-ref/build/bin/llama-bench` |
-| `demoShowcase.sh` | demo 27 of the demos repo, same SDK as demo 26; JVector jars from the **local, unpushed** branch `feat/gpu-build-pq-compaction` (`~/jvector-work/jvector`); data in `~/jvector-work/showcase-data` (symlinks: public ada-002 files, JVector's CPU-built 1M graph, 4 CPU-built segments) |
-| `demoJVector.sh` | demo 26 of the demos repo, on TornadoVM with `tornado-cuvs` (PR #1155, `~/TornadoVM-cuvs/dist/...`, JDK 25); cuVS in `~/.jvector-gpu/cuvs` |
 
 `fancy.sh` (spinner, logs) and `fancy.py` (rendering, standard-library Python 3) are shared by the fancy scripts;
-each run keeps its raw logs in a temp directory (`FANCY_LOGS=<dir>` to choose it). All paths are in `env.sh`. `bash setup.sh` (network) updates jitLLM to the latest `main`, rebuilds it, and sets up
-the JVector demo.
+each run keeps its raw logs in a temp directory (`FANCY_LOGS=<dir>` to choose it). All paths are in `env.sh`. `bash setup.sh` (network) updates jitLLM to the latest `main` and rebuilds it.
 
 ## If something fails on stage
 
 * **`check.sh` says FAIL:** open the log it names; most failures are a missing environment (`env.sh` paths).
 * **jitLLM is slow on the first run:** the first run JIT-compiles the kernels. Run `bash demoJitllm.sh chat` once
   before the talk.
-* **JVector:** `bash demoJVector.sh quick` takes about 13 s.
-* **Showcase:** run one act at a time (`bash demoShowcase.sh race`, about 20 s, needs nothing prepared). If the 1M acts
-  are too slow, the first 1M act pays a ~2 s data load; acts 3–5 reuse it. Keep `nvidia-smi` free of other jobs:
-  act 2's 9.5 s assumes an idle GPU.
 * **GPU busy:** check `nvidia-smi` for stray Java processes from an interrupted demo.

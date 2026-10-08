@@ -11,8 +11,6 @@ check() { # name, command, success pattern
 check demoHybrid  "bash demoHybrid.sh"        "All iterations correct"
 check demoTile    "bash demoTile.sh"          "All rungs produced the same, correct result"
 check demoJitllm  "bash demoJitllm.sh"        "pp512"
-check demoJVector "bash demoJVector.sh quick" "PASSED"
-check demoShowcase "bash demoShowcase.sh race" "PASSED"
 check fancyJitllmCode "bash fancyJitllm.sh code" "PASSED"
 check fancyJitllmLive "bash fancyJitllmLive.sh" "LiveDashboard: PASSED"
 echo "logs: $log"

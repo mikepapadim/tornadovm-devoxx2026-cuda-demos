@@ -1,9 +1,0 @@
-name, driver_version, memory.total [MiB]
-NVIDIA GeForce RTX 4090, 610.57.04, 24564 MiB
-openjdk version "25.0.2" 2026-01-20
-OpenJDK Runtime Environment (build 25.0.2+10-69)
-OpenJDK 64-Bit Server VM (build 25.0.2+10-69, mixed mode, sharing)
-Model name:                           13th Gen Intel(R) Core(TM) i9-13900K
-TornadoVM: /home/michalis/TornadoVM-cuvs/dist/tornadovm-7.0.2-jdk22plus-dev-cuda-linux-amd64/tornadovm-7.0.2-jdk22plus-dev-cuda
-e7f71db jvector-gpu: overlap host work with the GPU (rows without zero-fill, upper layers during install)
-17424e265 [cuvs] CuVS.isAvailable()
